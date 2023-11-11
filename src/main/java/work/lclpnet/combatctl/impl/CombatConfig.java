@@ -36,6 +36,7 @@ public class CombatConfig {
         if (this.attackCooldown == attackCooldown) return;
 
         this.attackCooldown = attackCooldown;
+        abilities.attackCooldown = attackCooldown;
 
         if (listening) {
             onSync();
