@@ -24,6 +24,7 @@ public class CombatConfig {
     private boolean attackCooldown = true;
     private boolean modernHitSounds = true;
     private boolean modernHitParticle = true;
+    private boolean sweepAttack = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -68,6 +69,14 @@ public class CombatConfig {
 
     public void setModernHitParticle(boolean modernHitParticle) {
         this.modernHitParticle = modernHitParticle;
+    }
+
+    public boolean isSweepAttack() {
+        return sweepAttack;
+    }
+
+    public void setSweepAttack(boolean sweepAttack) {
+        this.sweepAttack = sweepAttack;
     }
 
     public void edit(Consumer<CombatConfig> action) {

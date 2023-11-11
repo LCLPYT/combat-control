@@ -1,6 +1,8 @@
 package work.lclpnet.combatctl.mixin;
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -8,11 +10,14 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
@@ -50,7 +55,7 @@ public class PlayerEntityMixin {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
-        return config.isModernHitSounds();
+        return config.isModernHitSounds() || (config.isSweepAttack() && sound == SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP);
     }
 
     @SuppressWarnings("ConstantValue")
@@ -80,8 +85,21 @@ public class PlayerEntityMixin {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
-        if (!config.isModernHitParticle()) {
+        if (!config.isModernHitParticle() && !config.isSweepAttack()) {
             ci.cancel();
         }
+    }
+
+    @SuppressWarnings("ConstantValue")
+    @ModifyVariable(method = "attack", at = @At("LOAD"), ordinal = 3, slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;spawnSweepAttackParticles()V")))
+    public boolean combatControl$modifySweepAttack(boolean original, Entity target) {
+        if (!((Object) this instanceof ServerPlayerEntity player)) return original;
+
+        CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
+
+        if (config.isSweepAttack()) return original;
+
+        // only trigger sweeping edge when the player has the sweeping edge enchantment on their weapon
+        return original && EnchantmentHelper.getSweepingMultiplier(player) > 0.0F;
     }
 }
