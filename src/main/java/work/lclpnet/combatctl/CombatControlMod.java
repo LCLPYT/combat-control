@@ -1,9 +1,11 @@
 package work.lclpnet.combatctl;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.combatctl.impl.CombatControlImpl;
 
 public class CombatControlMod implements ModInitializer {
 
@@ -12,6 +14,10 @@ public class CombatControlMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		CombatControlImpl control = CombatControlImpl.getInstance();
+
+		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> control.copyData(oldPlayer, newPlayer));
+
 		LOGGER.info("Initialized.");
 	}
 

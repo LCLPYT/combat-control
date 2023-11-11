@@ -63,6 +63,12 @@ public class CombatControlImpl implements CombatControl {
         return config.get(detail);
     }
 
+    public void copyData(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer) {
+        CombatDetailConfig config = ((CombatControlPlayer) oldPlayer).combatControl$getConfig();
+
+        ((CombatControlPlayer) newPlayer).combatControl$setConfig(config);
+    }
+
     public static CombatControlImpl getInstance() {
         return Holder.instance;
     }
