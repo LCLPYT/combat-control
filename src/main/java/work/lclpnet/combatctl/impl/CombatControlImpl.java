@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatDetail;
 import work.lclpnet.combatctl.api.CombatStyle;
+import work.lclpnet.combatctl.config.CombatControlConfig;
 import work.lclpnet.combatctl.type.CombatControlPlayer;
 
 @ApiStatus.Internal
@@ -67,6 +68,10 @@ public class CombatControlImpl implements CombatControl {
         CombatDetailConfig config = ((CombatControlPlayer) oldPlayer).combatControl$getConfig();
 
         ((CombatControlPlayer) newPlayer).combatControl$setConfig(config);
+    }
+
+    public void update(CombatControlConfig config) {
+        setDefaultStyle(config.combatStyle);
     }
 
     public static CombatControlImpl getInstance() {
