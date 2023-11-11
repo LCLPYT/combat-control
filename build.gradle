@@ -56,6 +56,8 @@ dependencies {
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0")))
+
     include(implementation 'org.json:json:20230227')
     include(implementation('work.lclpnet:json-config4j:1.0.0'))
 }

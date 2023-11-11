@@ -22,6 +22,7 @@ public class CombatConfig {
     private boolean autoUpdate = true;
     private boolean dirty = false;
     private boolean attackCooldown = true;
+    private boolean modernHitSounds = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -50,6 +51,14 @@ public class CombatConfig {
         double value = attackCooldown ? EntityAttributes.GENERIC_ATTACK_SPEED.getDefaultValue() : 1024;
 
         attackSpeed.setBaseValue(value);
+    }
+
+    public boolean isModernHitSounds() {
+        return modernHitSounds;
+    }
+
+    public void setModernHitSounds(boolean modernHitSounds) {
+        this.modernHitSounds = modernHitSounds;
     }
 
     public void edit(Consumer<CombatConfig> action) {

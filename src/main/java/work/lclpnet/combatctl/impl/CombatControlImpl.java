@@ -57,7 +57,10 @@ public class CombatControlImpl implements CombatControl {
     private void applyStyle(CombatStyle style, CombatConfig config) {
         boolean modern = style == CombatStyle.MODERN;
 
-        config.edit(cfg -> config.setAttackCooldown(modern));
+        config.edit(cfg -> {
+            config.setAttackCooldown(modern);
+            config.setModernHitSounds(modern);
+        });
     }
 
     @Override
