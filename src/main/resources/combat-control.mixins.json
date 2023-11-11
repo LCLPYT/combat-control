@@ -2,7 +2,9 @@
 	"required": true,
 	"package": "work.lclpnet.combatctl.mixin",
 	"compatibilityLevel": "JAVA_17",
-	"mixins": [],
+	"mixins": [
+		"ServerPlayerEntityMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}

@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"work.lclpnet.combatctl.CombatControl"
+			"work.lclpnet.combatctl.CombatControlMod"
 		],
 		"client": [
-			"work.lclpnet.combatctl.CombatControlClient"
+			"work.lclpnet.combatctl.CombatControlClientMod"
 		]
 	},
 	"mixins": [
-		"testmod.mixins.json",
+		"combat-control.mixins.json",
 		{
-			"config": "testmod.client.mixins.json",
+			"config": "combat-control.client.mixins.json",
 			"environment": "client"
 		}
 	],
