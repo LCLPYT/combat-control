@@ -2,12 +2,15 @@ package work.lclpnet.combatctl;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.config.ConfigManager;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
+import work.lclpnet.combatctl.type.CombatControlServer;
 
 import java.nio.file.Path;
 
@@ -18,20 +21,28 @@ public class CombatControlMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		CombatControlImpl control = CombatControlImpl.getInstance();
+		ConfigManager configManager = loadConfig();
 
-		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> control.copyData(oldPlayer, newPlayer));
+		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+			CombatControl control = new CombatControlImpl(server, configManager);
+			((CombatControlServer) server).combatControl$set(control);
+		});
 
-		loadConfig(control);
+		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
+			CombatControl control = CombatControl.get(newPlayer.getServer());
+			control.copyData(oldPlayer, newPlayer);
+		});
 
 		LOGGER.info("Initialized.");
 	}
 
-	private void loadConfig(CombatControlImpl control) {
+	private ConfigManager loadConfig() {
 		Path configPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID).resolve("config.json");
 		ConfigManager configManager = new ConfigManager(configPath, LOGGER);
 
-		configManager.init().thenRun(() -> control.update(configManager.getConfig()));
+		configManager.init().join();
+
+		return configManager;
 	}
 
 	/**
@@ -41,16 +52,5 @@ public class CombatControlMod implements ModInitializer {
 	 */
 	public static Identifier identifier(String path) {
 		return new Identifier(MOD_ID, path);
-	}
-
-	/**
-	 * Creates an identifier namespaced with the identifier of the mod.
-	 * Uses string {@link java.util.Formatter} to format the given path with the given substitutes.
-	 * @param format The path with formatting identifiers like '%s'.
-	 * @param substitutes The substitutes passed to the formatter.
-	 * @return A formatted identifier of this mod with the given path.
-	 */
-	public static Identifier identifier(String format, Object... substitutes) {
-		return identifier(String.format(format, substitutes));
 	}
 }

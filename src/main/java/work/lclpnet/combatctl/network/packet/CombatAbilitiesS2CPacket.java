@@ -13,8 +13,8 @@ public class CombatAbilitiesS2CPacket implements FabricPacket {
 
     private final CombatAbilities abilities;
 
-    public CombatAbilitiesS2CPacket() {
-        abilities = new CombatAbilities();
+    public CombatAbilitiesS2CPacket(CombatAbilities abilities) {
+        this.abilities = abilities;
     }
 
     public CombatAbilitiesS2CPacket(PacketByteBuf buf) {

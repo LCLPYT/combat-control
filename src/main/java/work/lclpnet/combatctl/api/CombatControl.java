@@ -1,24 +1,23 @@
 package work.lclpnet.combatctl.api;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import org.jetbrains.annotations.NotNull;
-import work.lclpnet.combatctl.impl.CombatControlImpl;
+import work.lclpnet.combatctl.impl.CombatConfig;
+import work.lclpnet.combatctl.type.CombatControlServer;
 
 public interface CombatControl {
 
-    void setDefaultStyle(CombatStyle style);
+    void setStyle(CombatStyle style);
 
-    <T extends Enum<T>> void setDefaultDetail(CombatDetail<T> detail, @NotNull T value);
+    CombatStyle getStyle();
 
-    <T extends Enum<T>> T getDefaultDetail(CombatDetail<T> detail);
+    void setStyle(ServerPlayerEntity player, CombatStyle style);
 
-    void setStyle(ServerPlayerEntity player, @NotNull CombatStyle style);
+    CombatConfig getConfig(ServerPlayerEntity player);
 
-    <T extends Enum<T>> void setDetail(ServerPlayerEntity player, CombatDetail<T> detail, @NotNull T value);
+    void copyData(ServerPlayerEntity source, ServerPlayerEntity target);
 
-    <T extends Enum<T>> T getDetail(ServerPlayerEntity player,  CombatDetail<T> detail);
-
-    static CombatControl getInstance() {
-        return CombatControlImpl.getInstance();
+    static CombatControl get(MinecraftServer server) {
+        return ((CombatControlServer) server).combatControl$get();
     }
 }

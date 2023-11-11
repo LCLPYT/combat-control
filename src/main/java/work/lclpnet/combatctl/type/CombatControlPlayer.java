@@ -1,12 +1,12 @@
 package work.lclpnet.combatctl.type;
 
 import org.jetbrains.annotations.Nullable;
-import work.lclpnet.combatctl.impl.CombatDetailConfig;
+import work.lclpnet.combatctl.impl.CombatConfig;
 
 public interface CombatControlPlayer {
 
-    void combatControl$setConfig(CombatDetailConfig config);
+    void combatControl$setConfig(CombatConfig config);
 
     @Nullable
-    CombatDetailConfig combatControl$getConfig();
+    CombatConfig combatControl$getConfig();
 }
