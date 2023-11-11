@@ -60,6 +60,7 @@ public class CombatControlImpl implements CombatControl {
         config.edit(cfg -> {
             config.setAttackCooldown(modern);
             config.setModernHitSounds(modern);
+            config.setModernHitParticle(modern);
         });
     }
 

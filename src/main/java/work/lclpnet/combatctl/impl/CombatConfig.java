@@ -23,6 +23,7 @@ public class CombatConfig {
     private boolean dirty = false;
     private boolean attackCooldown = true;
     private boolean modernHitSounds = true;
+    private boolean modernHitParticle = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -59,6 +60,14 @@ public class CombatConfig {
 
     public void setModernHitSounds(boolean modernHitSounds) {
         this.modernHitSounds = modernHitSounds;
+    }
+
+    public boolean isModernHitParticle() {
+        return modernHitParticle;
+    }
+
+    public void setModernHitParticle(boolean modernHitParticle) {
+        this.modernHitParticle = modernHitParticle;
     }
 
     public void edit(Consumer<CombatConfig> action) {
