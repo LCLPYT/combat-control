@@ -1,6 +1,6 @@
 package work.lclpnet.combatctl.impl;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectAVLTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,7 +26,7 @@ public class CombatDetailConfig {
         Objects.requireNonNull(detail, "Detail must not be null");
         Objects.requireNonNull(value, "Value must not be null");
 
-        var copy = new Object2ObjectAVLTreeMap<>(details);
+        var copy = new Object2ObjectOpenHashMap<>(details);
         copy.put(detail, value);
 
         return new CombatDetailConfig(copy);
@@ -43,9 +43,10 @@ public class CombatDetailConfig {
     }
 
     private static CombatDetailConfig createConfig(CombatStyle style) {
-        Map<CombatDetail<?>, Object> details = new Object2ObjectAVLTreeMap<>();
+        var allDetails = CombatDetails.getDetails();
+        var details = new Object2ObjectOpenHashMap<CombatDetail<?>, Object>(allDetails.size());
 
-        for (CombatDetail<?> detail : CombatDetails.getDetails()) {
+        for (var detail : allDetails) {
             details.put(detail, detail.getValue(style));
         }
 
