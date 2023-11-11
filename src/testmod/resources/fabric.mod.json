@@ -1,0 +1,20 @@
+{
+	"schemaVersion": 1,
+	"id": "combat-control-test",
+	"version": "${version}",
+	"name": "combat-control-test",
+	"description": "[Test Mod] Player-based combat control mod that aims brings back 1.8 combat to newer versions",
+	"authors": [
+		"LCLP"
+	],
+	"license": "MPL-2.0",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"work.lclpnet.combatctl.CombatControlTest"
+		]
+	},
+	"depends": {
+		"combat-control": "*"
+	}
+}

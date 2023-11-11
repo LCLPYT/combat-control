@@ -30,6 +30,25 @@ loom {
     }
 }
 
+sourceSets {
+    testmod {
+        compileClasspath += main.compileClasspath + main.getOutput() + client.compileClasspath + client.getOutput()
+        runtimeClasspath += main.runtimeClasspath + main.getOutput() + client.runtimeClasspath + client.getOutput()
+    }
+}
+
+loom {
+    runs {
+        named('server') {
+            source 'testmod'
+        }
+
+        named('client') {
+            source 'testmod'
+        }
+    }
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -38,10 +57,10 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
-processResources {
-	inputs.property "version", project.version
+[processResources, processTestmodResources].each {
+	it.inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
+	it.filesMatching("fabric.mod.json") {
 		expand "version": project.version
 	}
 }
