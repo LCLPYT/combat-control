@@ -30,8 +30,12 @@ public abstract class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel = 20;
 
-    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
-    public void tick(PlayerEntity player, CallbackInfo callback) {
+    @Inject(
+            method = "update",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void combatControl$tick(PlayerEntity player, CallbackInfo callback) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);

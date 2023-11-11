@@ -63,6 +63,7 @@ public class CombatControlImpl implements CombatControl {
             config.setModernHitParticle(modern);
             config.setSweepAttack(modern);
             config.setModernRegeneration(modern);
+            config.setModernNotchApple(modern);
         });
     }
 

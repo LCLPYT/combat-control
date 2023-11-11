@@ -26,6 +26,7 @@ public class CombatConfig {
     private boolean modernHitParticle = true;
     private boolean sweepAttack = true;
     private boolean modernRegeneration = true;
+    private boolean modernNotchApple = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -86,6 +87,14 @@ public class CombatConfig {
 
     public void setModernRegeneration(boolean modernRegeneration) {
         this.modernRegeneration = modernRegeneration;
+    }
+
+    public boolean isModernNotchApple() {
+        return modernNotchApple;
+    }
+
+    public void setModernNotchApple(boolean modernNotchApple) {
+        this.modernNotchApple = modernNotchApple;
     }
 
     public void edit(Consumer<CombatConfig> action) {
