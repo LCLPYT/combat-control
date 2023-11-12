@@ -28,6 +28,7 @@ public class GlobalCombatControlImpl implements GlobalCombatControl {
 
         config.setModernDamageValues(modern);
         config.setModernSharpness(modern);
+        config.setLargerHitboxes(!modern);
     }
 
     public void update(CombatControlConfig config) {

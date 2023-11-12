@@ -4,6 +4,7 @@ public class CombatGlobalConfig {
 
     private boolean modernDamageValues = true;
     private boolean modernSharpness = true;
+    private boolean largerHitboxes = false;
 
     public boolean isModernDamageValues() {
         return modernDamageValues;
@@ -19,5 +20,13 @@ public class CombatGlobalConfig {
 
     public void setModernSharpness(boolean modernSharpness) {
         this.modernSharpness = modernSharpness;
+    }
+
+    public boolean isLargerHitboxes() {
+        return largerHitboxes;
+    }
+
+    public void setLargerHitboxes(boolean largerHitboxes) {
+        this.largerHitboxes = largerHitboxes;
     }
 }
