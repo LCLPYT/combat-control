@@ -28,6 +28,7 @@ public class CombatConfig {
     private boolean modernRegeneration = true;
     private boolean modernNotchApple = true;
     private boolean preventWeakAttackKnockBack = true;
+    private boolean preventFishingRodKnockBack = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -104,6 +105,14 @@ public class CombatConfig {
 
     public void setPreventWeakAttackKnockBack(boolean preventWeakAttackKnockBack) {
         this.preventWeakAttackKnockBack = preventWeakAttackKnockBack;
+    }
+
+    public boolean isPreventFishingRodKnockBack() {
+        return preventFishingRodKnockBack;
+    }
+
+    public void setPreventFishingRodKnockBack(boolean preventFishingRodKnockBack) {
+        this.preventFishingRodKnockBack = preventFishingRodKnockBack;
     }
 
     public void edit(Consumer<CombatConfig> action) {

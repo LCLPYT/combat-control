@@ -7,8 +7,10 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -17,7 +19,9 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -29,6 +33,8 @@ import work.lclpnet.combatctl.impl.CombatConfig;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
+
+    @Shadow @Final public PlayerScreenHandler playerScreenHandler;
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -131,9 +137,11 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
-        if (config.isPreventWeakAttackKnockBack()) return;
+        // check if weak attacks are enabled or if fishing rod knock back is enabled
+        if (config.isPreventWeakAttackKnockBack()
+            && (config.isPreventFishingRodKnockBack() || !(source.getSource() instanceof FishingBobberEntity))) return;
 
-        if (amount == 0.0F && getWorld().getDifficulty() != Difficulty.PEACEFUL) {
+        if (Math.abs(amount) < 1e-9f && getWorld().getDifficulty() != Difficulty.PEACEFUL) {
             callback.setReturnValue(super.damage(source, amount));
         }
     }

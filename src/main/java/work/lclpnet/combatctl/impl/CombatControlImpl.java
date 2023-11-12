@@ -65,6 +65,7 @@ public class CombatControlImpl implements CombatControl {
             config.setModernRegeneration(modern);
             config.setModernNotchApple(modern);
             config.setPreventWeakAttackKnockBack(modern);
+            config.setPreventFishingRodKnockBack(modern);
         });
     }
 
