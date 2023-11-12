@@ -1,3 +1,5 @@
+import work.lclpnet.build.task.GithubDeploymentTask
+
 plugins {
 	id 'fabric-loom' version '1.3-SNAPSHOT'
 	id 'maven-publish'
@@ -86,6 +88,24 @@ java {
 	it.from("LICENSE.md") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}
+}
+
+def env = System.getenv()
+
+tasks.register("github", GithubDeploymentTask) {
+    dependsOn tasks.remapJar
+
+    config {
+        token = env.get("GITHUB_TOKEN")
+        repository = env.get("GITHUB_REPOSITORY")
+    }
+
+    release {
+        title = "[$project.minecraft_version] $project.name $project.version"
+        tag = buildUtils.latestTag()
+    }
+
+    assets.add(tasks.remapJar.archiveFile.get())
 }
 
 // configure the maven publication
