@@ -69,6 +69,8 @@ public class CombatControlImpl implements CombatControl {
             config.setStrongerKnockBackInAir(!modern);
             config.setPreventSprintCriticalHits(modern);
             config.setPreventAttackSprinting(modern);
+            config.setFishingRodLaunch(!modern);
+            config.setModernFishingRodDurability(modern);
         });
     }
 

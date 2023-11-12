@@ -32,6 +32,8 @@ public class CombatConfig {
     private boolean strongerKnockBackInAir = false;
     private boolean preventSprintCriticalHits = true;
     private boolean preventAttackSprinting = true;
+    private boolean fishingRodLaunch = false;
+    private boolean modernFishingRodDurability = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -140,6 +142,22 @@ public class CombatConfig {
 
     public void setPreventAttackSprinting(boolean preventAttackSprinting) {
         this.preventAttackSprinting = preventAttackSprinting;
+    }
+
+    public boolean isFishingRodLaunch() {
+        return fishingRodLaunch;
+    }
+
+    public void setFishingRodLaunch(boolean fishingRodLaunch) {
+        this.fishingRodLaunch = fishingRodLaunch;
+    }
+
+    public boolean isModernFishingRodDurability() {
+        return modernFishingRodDurability;
+    }
+
+    public void setModernFishingRodDurability(boolean modernFishingRodDurability) {
+        this.modernFishingRodDurability = modernFishingRodDurability;
     }
 
     public void edit(Consumer<CombatConfig> action) {
