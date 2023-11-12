@@ -26,7 +26,10 @@ public abstract class InGameHudMixin {
     @Nullable
     private static AttackIndicator attackIndicator = null;
 
-    @Inject(method = "renderCrosshair", at = @At("HEAD"))
+    @Inject(
+            method = "renderCrosshair",
+            at = @At("HEAD")
+    )
     public void combatControl$beforeRenderCrossHair(DrawContext context, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
@@ -38,8 +41,38 @@ public abstract class InGameHudMixin {
         }
     }
 
-    @Inject(method = "renderCrosshair", at = @At("TAIL"))
+    @Inject(
+            method = "renderCrosshair",
+            at = @At("TAIL")
+    )
     public void combatControl$afterRenderCrossHair(DrawContext context, CallbackInfo ci) {
+        // functionality from GoldenAgeCombat
+        if (attackIndicator != null) {
+            client.options.getAttackIndicator().setValue(attackIndicator);
+            attackIndicator = null;
+        }
+    }
+
+    @Inject(
+            method = "renderHotbar",
+            at = @At("HEAD")
+    )
+    public void combatControl$beforeRenderHotBar(float tickDelta, DrawContext context, CallbackInfo ci) {
+        if (combatAbilities.attackCooldown) return;
+
+        // functionality from GoldenAgeCombat
+        if (attackIndicator == null) {
+            var option = client.options.getAttackIndicator();
+            attackIndicator = option.getValue();
+            option.setValue(AttackIndicator.OFF);
+        }
+    }
+
+    @Inject(
+            method = "renderHotbar",
+            at = @At("TAIL")
+    )
+    public void combatControl$afterRenderHotBar(float tickDelta, DrawContext context, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             client.options.getAttackIndicator().setValue(attackIndicator);
