@@ -14,16 +14,20 @@ import work.lclpnet.combatctl.type.CombatControlPlayer;
 public class CombatControlImpl implements CombatControl {
 
     private final MinecraftServer server;
+    private final GlobalCombatControlImpl globalCombatControl;
     private CombatStyle defaultStyle;
 
     public CombatControlImpl(MinecraftServer server, ConfigAccess configAccess) {
         this.server = server;
+        this.globalCombatControl = GlobalCombatControlImpl.get();
         this.defaultStyle = configAccess.getConfig().combatStyle;
     }
 
     @Override
     public void setStyle(CombatStyle style) {
         defaultStyle = style;
+
+        globalCombatControl.setStyle(style);
 
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
             setStyle(player, style);
