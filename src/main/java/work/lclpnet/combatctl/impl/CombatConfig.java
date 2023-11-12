@@ -30,6 +30,8 @@ public class CombatConfig {
     private boolean preventWeakAttackKnockBack = true;
     private boolean preventFishingRodKnockBack = true;
     private boolean strongerKnockBackInAir = false;
+    private boolean preventSprintCriticalHits = true;
+    private boolean preventAttackSprinting = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -122,6 +124,22 @@ public class CombatConfig {
 
     public void setStrongerKnockBackInAir(boolean strongerKnockBackInAir) {
         this.strongerKnockBackInAir = strongerKnockBackInAir;
+    }
+
+    public boolean isPreventSprintCriticalHits() {
+        return preventSprintCriticalHits;
+    }
+
+    public void setPreventSprintCriticalHits(boolean preventSprintCriticalHits) {
+        this.preventSprintCriticalHits = preventSprintCriticalHits;
+    }
+
+    public boolean isPreventAttackSprinting() {
+        return preventAttackSprinting;
+    }
+
+    public void setPreventAttackSprinting(boolean preventAttackSprinting) {
+        this.preventAttackSprinting = preventAttackSprinting;
     }
 
     public void edit(Consumer<CombatConfig> action) {
