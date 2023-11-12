@@ -29,6 +29,7 @@ public class CombatConfig {
     private boolean modernNotchApple = true;
     private boolean preventWeakAttackKnockBack = true;
     private boolean preventFishingRodKnockBack = true;
+    private boolean strongerKnockBackInAir = false;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -113,6 +114,14 @@ public class CombatConfig {
 
     public void setPreventFishingRodKnockBack(boolean preventFishingRodKnockBack) {
         this.preventFishingRodKnockBack = preventFishingRodKnockBack;
+    }
+
+    public boolean isStrongerKnockBackInAir() {
+        return strongerKnockBackInAir;
+    }
+
+    public void setStrongerKnockBackInAir(boolean strongerKnockBackInAir) {
+        this.strongerKnockBackInAir = strongerKnockBackInAir;
     }
 
     public void edit(Consumer<CombatConfig> action) {
