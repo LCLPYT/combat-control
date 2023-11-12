@@ -27,6 +27,7 @@ public class CombatConfig {
     private boolean sweepAttack = true;
     private boolean modernRegeneration = true;
     private boolean modernNotchApple = true;
+    private boolean preventWeakAttackKnockBack = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -95,6 +96,14 @@ public class CombatConfig {
 
     public void setModernNotchApple(boolean modernNotchApple) {
         this.modernNotchApple = modernNotchApple;
+    }
+
+    public boolean isPreventWeakAttackKnockBack() {
+        return preventWeakAttackKnockBack;
+    }
+
+    public void setPreventWeakAttackKnockBack(boolean preventWeakAttackKnockBack) {
+        this.preventWeakAttackKnockBack = preventWeakAttackKnockBack;
     }
 
     public void edit(Consumer<CombatConfig> action) {
