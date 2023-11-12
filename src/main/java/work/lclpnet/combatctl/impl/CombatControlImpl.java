@@ -76,6 +76,7 @@ public class CombatControlImpl implements CombatControl {
             config.setFishingRodLaunch(!modern);
             config.setModernFishingRodDurability(modern);
             config.setAttackWhileUsing(!modern);
+            config.setModernItemDurability(modern);
         });
     }
 

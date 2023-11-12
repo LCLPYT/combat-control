@@ -33,6 +33,7 @@ public class CombatConfig {
     private boolean fishingRodLaunch = false;
     private boolean modernFishingRodDurability = true;
     private boolean attackWhileUsing = false;
+    private boolean modernItemDurability = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -170,6 +171,14 @@ public class CombatConfig {
         abilities.attackWhileUsing = attackWhileUsing;
 
         onSync();
+    }
+
+    public boolean isModernItemDurability() {
+        return modernItemDurability;
+    }
+
+    public void setModernItemDurability(boolean modernItemDurability) {
+        this.modernItemDurability = modernItemDurability;
     }
 
     public void edit(Consumer<CombatConfig> action) {

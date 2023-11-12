@@ -10,8 +10,10 @@
     "ItemAccessor",
     "LivingEntityMixin",
     "MinecraftServerMixin",
+    "MiningToolItemMixin",
     "PlayerEntityMixin",
-    "ServerPlayerEntityMixin"
+    "ServerPlayerEntityMixin",
+    "SwordItemMixin"
   ],
   "injectors": {
     "defaultRequire": 1
