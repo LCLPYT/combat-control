@@ -32,6 +32,7 @@ public class CombatConfig {
     private boolean preventAttackSprinting = true;
     private boolean fishingRodLaunch = false;
     private boolean modernFishingRodDurability = true;
+    private boolean attackWhileUsing = false;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -156,6 +157,19 @@ public class CombatConfig {
 
     public void setModernFishingRodDurability(boolean modernFishingRodDurability) {
         this.modernFishingRodDurability = modernFishingRodDurability;
+    }
+
+    public boolean isAttackWhileUsing() {
+        return attackWhileUsing;
+    }
+
+    public void setAttackWhileUsing(boolean attackWhileUsing) {
+        if (this.attackWhileUsing == attackWhileUsing) return;
+
+        this.attackWhileUsing = attackWhileUsing;
+        abilities.attackWhileUsing = attackWhileUsing;
+
+        onSync();
     }
 
     public void edit(Consumer<CombatConfig> action) {

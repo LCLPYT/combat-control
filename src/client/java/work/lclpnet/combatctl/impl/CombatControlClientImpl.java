@@ -14,7 +14,7 @@ public class CombatControlClientImpl implements CombatControlClient {
         return abilities;
     }
 
-    public static CombatControlClientImpl getInstance() {
+    public static CombatControlClientImpl get() {
         return Holder.instance;
     }
 

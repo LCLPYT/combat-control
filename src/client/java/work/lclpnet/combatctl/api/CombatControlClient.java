@@ -7,7 +7,7 @@ public interface CombatControlClient {
 
     CombatAbilities getAbilities();
 
-    static CombatControlClient getInstance() {
-        return CombatControlClientImpl.getInstance();
+    static CombatControlClient get() {
+        return CombatControlClientImpl.get();
     }
 }
