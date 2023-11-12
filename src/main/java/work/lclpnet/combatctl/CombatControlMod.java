@@ -1,6 +1,7 @@
 package work.lclpnet.combatctl;
 
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.item.v1.ModifyItemAttributeModifiersCallback;
@@ -9,6 +10,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.combatctl.api.CombatControl;
+import work.lclpnet.combatctl.cmd.CombatCommand;
 import work.lclpnet.combatctl.config.ConfigManager;
 import work.lclpnet.combatctl.impl.AttackAttributeHandler;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
@@ -26,7 +28,8 @@ public class CombatControlMod implements ModInitializer {
 	public void onInitialize() {
 		ConfigManager configManager = loadConfig();
 
-		GlobalCombatControlImpl.get().update(configManager.getConfig());
+		GlobalCombatControlImpl combatControl = GlobalCombatControlImpl.get();
+		combatControl.update(configManager.getConfig());
 
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
 			CombatControl control = new CombatControlImpl(server, configManager);
@@ -39,6 +42,9 @@ public class CombatControlMod implements ModInitializer {
 		});
 
 		ModifyItemAttributeModifiersCallback.EVENT.register(AttackAttributeHandler::onItemAttributeModifiers);
+
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment)
+				-> new CombatCommand().register(dispatcher));
 
 		LOGGER.info("Initialized.");
 	}
