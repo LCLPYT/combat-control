@@ -35,6 +35,7 @@ public class CombatConfig {
     private boolean attackWhileUsing = false;
     private boolean modernItemDurability = true;
     private boolean slowFishingRodMotion = true;
+    private boolean modernFishingRodSounds = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -188,6 +189,14 @@ public class CombatConfig {
 
     public void setSlowFishingRodMotion(boolean slowFishingRodMotion) {
         this.slowFishingRodMotion = slowFishingRodMotion;
+    }
+
+    public boolean isModernFishingRodSounds() {
+        return modernFishingRodSounds;
+    }
+
+    public void setModernFishingRodSounds(boolean modernFishingRodSounds) {
+        this.modernFishingRodSounds = modernFishingRodSounds;
     }
 
     public void edit(Consumer<CombatConfig> action) {

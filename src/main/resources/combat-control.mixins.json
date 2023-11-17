@@ -6,6 +6,7 @@
     "DamageEnchantmentMixin",
     "EntityMixin",
     "FishingBobberEntityMixin",
+    "FishingRodItemMixin",
     "HungerManagerMixin",
     "ItemAccessor",
     "LivingEntityMixin",
