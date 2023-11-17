@@ -100,7 +100,7 @@ public abstract class FishingBobberEntityMixin {
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
 
         if (config.isSlowFishingRodMotion()) {
-            original.call();
+            original.call(instance, velocity);
             return;
         }
 
