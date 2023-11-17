@@ -68,11 +68,11 @@ public class CombatControlImpl implements CombatControl {
             config.setSweepAttack(modern);
             config.setModernRegeneration(modern);
             config.setModernNotchApple(modern);
-            config.setPreventWeakAttackKnockBack(modern);
-            config.setPreventFishingRodKnockBack(modern);
-            config.setStrongerKnockBackInAir(!modern);
-            config.setPreventSprintCriticalHits(modern);
-            config.setPreventAttackSprinting(modern);
+            config.setNoWeakAttackKnockBack(modern);
+            config.setNoFishingRodKnockBack(modern);
+            config.setStrongKnockBackInAir(!modern);
+            config.setNoSprintCriticalHits(modern);
+            config.setNoAttackSprinting(modern);
             config.setFishingRodLaunch(!modern);
             config.setModernFishingRodDurability(modern);
             config.setAttackWhileUsing(!modern);

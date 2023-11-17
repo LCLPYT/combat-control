@@ -25,11 +25,11 @@ public class CombatConfig {
     private boolean sweepAttack = true;
     private boolean modernRegeneration = true;
     private boolean modernNotchApple = true;
-    private boolean preventWeakAttackKnockBack = true;
-    private boolean preventFishingRodKnockBack = true;
-    private boolean strongerKnockBackInAir = false;
-    private boolean preventSprintCriticalHits = true;
-    private boolean preventAttackSprinting = true;
+    private boolean noWeakAttackKnockBack = true;
+    private boolean noFishingRodKnockBack = true;
+    private boolean strongKnockBackInAir = false;
+    private boolean noSprintCriticalHits = true;
+    private boolean noAttackSprinting = true;
     private boolean fishingRodLaunch = false;
     private boolean modernFishingRodDurability = true;
     private boolean attackWhileUsing = false;
@@ -104,44 +104,44 @@ public class CombatConfig {
         this.modernNotchApple = modernNotchApple;
     }
 
-    public boolean isPreventWeakAttackKnockBack() {
-        return preventWeakAttackKnockBack;
+    public boolean isNoWeakAttackKnockBack() {
+        return noWeakAttackKnockBack;
     }
 
-    public void setPreventWeakAttackKnockBack(boolean preventWeakAttackKnockBack) {
-        this.preventWeakAttackKnockBack = preventWeakAttackKnockBack;
+    public void setNoWeakAttackKnockBack(boolean noWeakAttackKnockBack) {
+        this.noWeakAttackKnockBack = noWeakAttackKnockBack;
     }
 
-    public boolean isPreventFishingRodKnockBack() {
-        return preventFishingRodKnockBack;
+    public boolean isNoFishingRodKnockBack() {
+        return noFishingRodKnockBack;
     }
 
-    public void setPreventFishingRodKnockBack(boolean preventFishingRodKnockBack) {
-        this.preventFishingRodKnockBack = preventFishingRodKnockBack;
+    public void setNoFishingRodKnockBack(boolean noFishingRodKnockBack) {
+        this.noFishingRodKnockBack = noFishingRodKnockBack;
     }
 
-    public boolean isStrongerKnockBackInAir() {
-        return strongerKnockBackInAir;
+    public boolean isStrongKnockBackInAir() {
+        return strongKnockBackInAir;
     }
 
-    public void setStrongerKnockBackInAir(boolean strongerKnockBackInAir) {
-        this.strongerKnockBackInAir = strongerKnockBackInAir;
+    public void setStrongKnockBackInAir(boolean strongKnockBackInAir) {
+        this.strongKnockBackInAir = strongKnockBackInAir;
     }
 
-    public boolean isPreventSprintCriticalHits() {
-        return preventSprintCriticalHits;
+    public boolean isNoSprintCriticalHits() {
+        return noSprintCriticalHits;
     }
 
-    public void setPreventSprintCriticalHits(boolean preventSprintCriticalHits) {
-        this.preventSprintCriticalHits = preventSprintCriticalHits;
+    public void setNoSprintCriticalHits(boolean noSprintCriticalHits) {
+        this.noSprintCriticalHits = noSprintCriticalHits;
     }
 
-    public boolean isPreventAttackSprinting() {
-        return preventAttackSprinting;
+    public boolean isNoAttackSprinting() {
+        return noAttackSprinting;
     }
 
-    public void setPreventAttackSprinting(boolean preventAttackSprinting) {
-        this.preventAttackSprinting = preventAttackSprinting;
+    public void setNoAttackSprinting(boolean noAttackSprinting) {
+        this.noAttackSprinting = noAttackSprinting;
     }
 
     public boolean isFishingRodLaunch() {

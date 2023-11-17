@@ -7,10 +7,13 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
+import work.lclpnet.combatctl.compat.CompatManager;
+import work.lclpnet.combatctl.compat.HungerCompat;
 import work.lclpnet.combatctl.impl.CombatConfig;
 
 /**
@@ -30,6 +33,9 @@ public abstract class HungerManagerMixin {
     @Shadow
     private int prevFoodLevel = 20;
 
+    @Unique
+    private final HungerCompat hungerCompat = CompatManager.get().getHungerCompat();
+
     @Inject(
             method = "update",
             at = @At("HEAD"),
@@ -45,11 +51,24 @@ public abstract class HungerManagerMixin {
         Difficulty difficulty = player.getWorld().getDifficulty();
         this.prevFoodLevel = this.foodLevel;
         if (this.exhaustion > 4.0F) {
-            this.exhaustion -= 4.0F;
+            float newExhaustion = this.exhaustion - 4.0F;
+
+            if (!hungerCompat.onExhaustionChange(player, this.exhaustion, newExhaustion)) {
+                this.exhaustion = newExhaustion;
+            }
+
             if (this.saturationLevel > 0.0F) {
-                this.saturationLevel = Math.max(this.saturationLevel - 1.0F, 0.0F);
+                float newSaturationLevel = Math.max(this.saturationLevel - 1.0F, 0.0F);
+
+                if (!hungerCompat.onSaturationChange(player, this.saturationLevel, newSaturationLevel)) {
+                    this.saturationLevel = newSaturationLevel;
+                }
             } else if (difficulty != Difficulty.PEACEFUL) {
-                this.foodLevel = Math.max(this.foodLevel - 1, 0);
+                int newFoodLevel = Math.max(this.foodLevel - 1, 0);
+
+                if (!hungerCompat.onHungerLevelChange(player, this.foodLevel, newFoodLevel)) {
+                    this.foodLevel = newFoodLevel;
+                }
             }
         }
         boolean flag = player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);

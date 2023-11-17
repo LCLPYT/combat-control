@@ -57,6 +57,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
 
     include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0")))
 

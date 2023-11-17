@@ -58,7 +58,7 @@ public abstract class LivingEntityMixin {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
-        if (!config.isStrongerKnockBackInAir()) return;
+        if (!config.isStrongKnockBackInAir()) return;
 
         // knock back functionality from GoldenAgeCombat, but only players are affected
         if (player.isOnGround() && !player.isTouchingWater()) {

@@ -30,7 +30,7 @@ public abstract class FishingBobberEntityMixin {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
 
-        if (config.isPreventFishingRodKnockBack()) return;
+        if (config.isNoFishingRodKnockBack()) return;
 
         // for players, this is a weak attack; handled in PlayerEntityMixin#combatControl$onWeakDamage()
         FishingBobberEntity self = (FishingBobberEntity) (Object) this;

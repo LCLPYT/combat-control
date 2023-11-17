@@ -137,8 +137,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         // check if weak attacks are enabled or if fishing rod knock back is enabled
-        if (config.isPreventWeakAttackKnockBack()
-            && (config.isPreventFishingRodKnockBack() || !(source.getSource() instanceof FishingBobberEntity))) return;
+        if (config.isNoWeakAttackKnockBack()
+            && (config.isNoFishingRodKnockBack() || !(source.getSource() instanceof FishingBobberEntity))) return;
 
         if (Math.abs(amount) < 1e-9f && getWorld().getDifficulty() != Difficulty.PEACEFUL) {
             callback.setReturnValue(super.damage(source, amount));
@@ -168,7 +168,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // allow landing critical hits when sprint jumping like before 1.9 and in combat test snapshots
         // the injection point is fine despite being inside a few conditions as the same conditions must apply for critical hits
-        if (config.isPreventSprintCriticalHits()) return;
+        if (config.isNoSprintCriticalHits()) return;
 
         // this disables sprinting, no need to call the dedicated method as it also updates the attribute modifier which is unnecessary since we reset the value anyway
         this.setFlag(3, false);
@@ -204,7 +204,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         // don't disable sprinting when attacking a target
         // this is mainly nice to have since you always stop to swim when attacking creatures underwater
-        if (!config.isPreventAttackSprinting()) {
+        if (!config.isNoAttackSprinting()) {
             if (this.sprintDuringAttack) this.setSprinting(true);
         }
 
