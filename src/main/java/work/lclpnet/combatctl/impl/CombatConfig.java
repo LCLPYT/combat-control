@@ -34,6 +34,7 @@ public class CombatConfig {
     private boolean modernFishingRodDurability = true;
     private boolean attackWhileUsing = false;
     private boolean modernItemDurability = true;
+    private boolean slowFishingRodMotion = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -179,6 +180,14 @@ public class CombatConfig {
 
     public void setModernItemDurability(boolean modernItemDurability) {
         this.modernItemDurability = modernItemDurability;
+    }
+
+    public boolean isSlowFishingRodMotion() {
+        return slowFishingRodMotion;
+    }
+
+    public void setSlowFishingRodMotion(boolean slowFishingRodMotion) {
+        this.slowFishingRodMotion = slowFishingRodMotion;
     }
 
     public void edit(Consumer<CombatConfig> action) {
