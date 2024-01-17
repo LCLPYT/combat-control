@@ -8,7 +8,10 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.*;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.PlainTextContent;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableTextContent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -134,7 +137,7 @@ public final class AttributeTooltipHelper {
         for (int i = 0; i < lines.size(); i++) {
             if (lines.get(i).getContent() instanceof TranslatableTextContent contents && contents.getKey().startsWith("item.modifiers.")) {
                 // attributes have a blank line above, we try to include that
-                if (--i >= 0 && lines.get(i).getContent() == TextContent.EMPTY) {
+                if (--i >= 0 && lines.get(i).getContent() == PlainTextContent.EMPTY) {
                     return i;
                 } else {
                     return ++i;
@@ -157,7 +160,7 @@ public final class AttributeTooltipHelper {
             TranslatableTextContent translatableComponent = null;
             if (component.getContent() instanceof TranslatableTextContent translatableComponent1) {
                 translatableComponent = translatableComponent1;
-            } else if (component.getContent() instanceof LiteralTextContent textComponent && textComponent.string().equals(" ")) {
+            } else if (component.getContent() instanceof PlainTextContent textComponent && textComponent.string().equals(" ")) {
                 if (!component.getSiblings().isEmpty() && component.getSiblings().get(0).getContent() instanceof TranslatableTextContent translatableComponent1) {
                     translatableComponent = translatableComponent1;
                 }

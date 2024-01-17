@@ -49,7 +49,7 @@ repositories {
 Now you can define the following mod dependency:
 ```groovy
 dependencies {
-    modImplementation "work.lclpnet.mods:combat-control:1.0.0+1.20.1"
+    modImplementation "work.lclpnet.mods:combat-control:1.2.0+1.20.4"
 }
 ```
 
