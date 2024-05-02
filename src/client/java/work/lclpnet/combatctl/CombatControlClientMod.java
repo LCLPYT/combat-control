@@ -1,10 +1,9 @@
 package work.lclpnet.combatctl;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.entity.attribute.EntityAttributes;
 import work.lclpnet.combatctl.api.CombatControlClient;
-import work.lclpnet.combatctl.impl.AttributeTooltipHelper;
+import work.lclpnet.combatctl.event.AttributeModifierTooltipCallback;
 import work.lclpnet.combatctl.network.CombatAbilities;
 import work.lclpnet.combatctl.network.CombatControlClientNetworking;
 
@@ -22,10 +21,10 @@ public class CombatControlClientMod implements ClientModInitializer {
 	private static void registerEvents(CombatControlClient control) {
 		CombatAbilities abilities = control.getAbilities();
 
-		ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
-			if (abilities.attackCooldown) return;
+		AttributeModifierTooltipCallback.EVENT.register((stack, player, attribute, modifier) -> {
+			if (abilities.attackCooldown) return true;
 
-			lines.removeIf(text -> AttributeTooltipHelper.matchesAttributeComponent(text, EntityAttributes.GENERIC_ATTACK_SPEED, null));
+			return attribute != EntityAttributes.GENERIC_ATTACK_SPEED;
 		});
 	}
 }

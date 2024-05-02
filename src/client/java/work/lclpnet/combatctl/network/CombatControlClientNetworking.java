@@ -15,10 +15,10 @@ public class CombatControlClientNetworking {
     }
 
     public void init() {
-        ClientPlayNetworking.registerGlobalReceiver(CombatAbilitiesS2CPacket.TYPE, this::onAbilitiesUpdate);
+        ClientPlayNetworking.registerGlobalReceiver(CombatAbilitiesS2CPacket.ID, this::onAbilitiesUpdate);
     }
 
-    private void onAbilitiesUpdate(CombatAbilitiesS2CPacket packet, ClientPlayerEntity player, PacketSender responseSender) {
-        control.getAbilities().copy(packet.getAbilities());
+    private void onAbilitiesUpdate(CombatAbilitiesS2CPacket payload, ClientPlayNetworking.Context context) {
+        control.getAbilities().copy(payload.abilities());
     }
 }

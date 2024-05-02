@@ -4,7 +4,6 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.item.v1.ModifyItemAttributeModifiersCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -12,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.cmd.CombatCommand;
 import work.lclpnet.combatctl.config.ConfigManager;
-import work.lclpnet.combatctl.impl.AttackAttributeHandler;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
 import work.lclpnet.combatctl.impl.GlobalCombatControlImpl;
+import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
 import java.nio.file.Path;
@@ -41,10 +40,10 @@ public class CombatControlMod implements ModInitializer {
 			control.copyData(oldPlayer, newPlayer);
 		});
 
-		ModifyItemAttributeModifiersCallback.EVENT.register(AttackAttributeHandler::onItemAttributeModifiers);
-
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment)
 				-> new CombatCommand().register(dispatcher));
+
+		CombatControlNetworking.init();
 
 		LOGGER.info("Initialized.");
 	}

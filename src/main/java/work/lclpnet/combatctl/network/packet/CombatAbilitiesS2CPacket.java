@@ -1,37 +1,21 @@
 package work.lclpnet.combatctl.network.packet;
 
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import work.lclpnet.combatctl.CombatControlMod;
 import work.lclpnet.combatctl.network.CombatAbilities;
 
-public class CombatAbilitiesS2CPacket implements FabricPacket {
+public record CombatAbilitiesS2CPacket(CombatAbilities abilities) implements CustomPayload {
 
-    public static final PacketType<CombatAbilitiesS2CPacket> TYPE =
-            PacketType.create(CombatControlMod.identifier("abilities"), CombatAbilitiesS2CPacket::new);
+    public static final Id<CombatAbilitiesS2CPacket> ID = new Id<>(CombatControlMod.identifier("abilities"));
 
-    private final CombatAbilities abilities;
-
-    public CombatAbilitiesS2CPacket(CombatAbilities abilities) {
-        this.abilities = abilities;
-    }
-
-    public CombatAbilitiesS2CPacket(PacketByteBuf buf) {
-        this.abilities = new CombatAbilities(buf);
-    }
+    public static final PacketCodec<PacketByteBuf, CombatAbilitiesS2CPacket> CODEC = PacketCodec.tuple(
+            CombatAbilities.PACKET_CODEC, CombatAbilitiesS2CPacket::abilities,
+            CombatAbilitiesS2CPacket::new);
 
     @Override
-    public void write(PacketByteBuf buf) {
-        abilities.write(buf);
-    }
-
-    @Override
-    public PacketType<?> getType() {
-        return TYPE;
-    }
-
-    public CombatAbilities getAbilities() {
-        return abilities;
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }

@@ -30,7 +30,7 @@ public abstract class InGameHudMixin {
             method = "renderCrosshair",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderCrossHair(DrawContext context, CallbackInfo ci) {
+    public void combatControl$beforeRenderCrossHair(DrawContext context, float tickDelta, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
@@ -45,7 +45,7 @@ public abstract class InGameHudMixin {
             method = "renderCrosshair",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderCrossHair(DrawContext context, CallbackInfo ci) {
+    public void combatControl$afterRenderCrossHair(DrawContext context, float tickDelta, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             client.options.getAttackIndicator().setValue(attackIndicator);
@@ -57,7 +57,7 @@ public abstract class InGameHudMixin {
             method = "renderHotbar",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderHotBar(float tickDelta, DrawContext context, CallbackInfo ci) {
+    public void combatControl$beforeRenderHotBar(DrawContext context, float tickDelta, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
@@ -72,7 +72,7 @@ public abstract class InGameHudMixin {
             method = "renderHotbar",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderHotBar(float tickDelta, DrawContext context, CallbackInfo ci) {
+    public void combatControl$afterRenderHotBar(DrawContext context, float tickDelta, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             client.options.getAttackIndicator().setValue(attackIndicator);

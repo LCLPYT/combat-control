@@ -1,5 +1,6 @@
 package work.lclpnet.combatctl.impl;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -61,7 +62,7 @@ public class CombatConfig {
         EntityAttributeInstance attackSpeed = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
         if (attackSpeed == null) return;
 
-        double value = attackCooldown ? EntityAttributes.GENERIC_ATTACK_SPEED.getDefaultValue() : 1024;
+        double value = attackCooldown ? EntityAttributes.GENERIC_ATTACK_SPEED.value().getDefaultValue() : 1024;
 
         attackSpeed.setBaseValue(value);
     }
@@ -225,6 +226,6 @@ public class CombatConfig {
         if (!listening) return;
 
         var packet = new CombatAbilitiesS2CPacket(abilities);
-        CombatControlNetworking.send(player, packet);
+        ServerPlayNetworking.send(player, packet);
     }
 }

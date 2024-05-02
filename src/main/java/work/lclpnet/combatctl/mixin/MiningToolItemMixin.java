@@ -28,9 +28,7 @@ public class MiningToolItemMixin {
 
         if (config.isModernItemDurability()) return;
 
-        stack.damage(1, attacker, (livingEntity) -> {
-            livingEntity.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND);
-        });
+        stack.damage(1, attacker, EquipmentSlot.MAINHAND);
 
         cir.setReturnValue(true);
     }
