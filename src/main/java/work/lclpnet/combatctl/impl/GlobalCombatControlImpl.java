@@ -27,7 +27,6 @@ public class GlobalCombatControlImpl implements GlobalCombatControl {
         boolean modern = style == CombatStyle.MODERN;
 
         config.setModernDamageValues(modern);
-        config.setModernSharpness(modern);
         config.setLargerHitboxes(!modern);
     }
 

@@ -4,6 +4,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.AttackIndicator;
+import net.minecraft.client.render.RenderTickCounter;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,7 +31,7 @@ public abstract class InGameHudMixin {
             method = "renderCrosshair",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderCrossHair(DrawContext context, float tickDelta, CallbackInfo ci) {
+    public void combatControl$beforeRenderCrossHair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
@@ -45,7 +46,7 @@ public abstract class InGameHudMixin {
             method = "renderCrosshair",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderCrossHair(DrawContext context, float tickDelta, CallbackInfo ci) {
+    public void combatControl$afterRenderCrossHair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             client.options.getAttackIndicator().setValue(attackIndicator);
@@ -57,7 +58,7 @@ public abstract class InGameHudMixin {
             method = "renderHotbar",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderHotBar(DrawContext context, float tickDelta, CallbackInfo ci) {
+    public void combatControl$beforeRenderHotBar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
@@ -72,7 +73,7 @@ public abstract class InGameHudMixin {
             method = "renderHotbar",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderHotBar(DrawContext context, float tickDelta, CallbackInfo ci) {
+    public void combatControl$afterRenderHotBar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             client.options.getAttackIndicator().setValue(attackIndicator);

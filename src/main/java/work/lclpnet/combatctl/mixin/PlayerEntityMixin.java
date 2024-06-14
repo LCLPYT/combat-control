@@ -1,10 +1,10 @@
 package work.lclpnet.combatctl.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
@@ -29,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.impl.CombatConfig;
 
+@SuppressWarnings("UnreachableCode")
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
 
@@ -68,7 +69,16 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
-        return config.isModernHitSounds() || (config.isSweepAttack() && sound == SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP);
+        if (config.isModernHitSounds()) {
+            return true;
+        }
+
+        if (sound != SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP) {
+            return false;
+        }
+
+        // trigger sweep attack sound if enabled or when the player has the sweeping edge enchantment on their weapon
+        return config.isSweepAttack() || player.getAttributeValue(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO) > 0.0F;
     }
 
     @SuppressWarnings("ConstantValue")
@@ -98,9 +108,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
-        if (!config.isModernHitParticle() && !config.isSweepAttack()) {
-            ci.cancel();
+        // trigger sweep attack particle if enabled or when the player has the sweeping edge enchantment on their weapon
+        if (config.isSweepAttack() || player.getAttributeValue(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO) > 0.0F) {
+            return;
         }
+
+        ci.cancel();
     }
 
     @SuppressWarnings("ConstantValue")
@@ -112,8 +125,8 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         if (config.isSweepAttack()) return original;
 
-        // only trigger sweeping edge when the player has the sweeping edge enchantment on their weapon
-        return original && EnchantmentHelper.getSweepingMultiplier(player) > 0.0F;
+        // trigger sweep attack if enabled or when the player has the sweeping edge enchantment on their weapon
+        return original && player.getAttributeValue(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO) > 0.0F;
     }
 
     @SuppressWarnings("ConstantValue")

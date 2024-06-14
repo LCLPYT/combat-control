@@ -41,7 +41,7 @@ public class ItemInHandHandler {
                 ((HeldItemRendererAccessor) itemRenderer).combatControl$callApplySwingOffset(poseStack, humanoidArm, swingProgress);
             }
             case EAT, DRINK -> {
-                ((HeldItemRendererAccessor) itemRenderer).combatControl$callApplyEatOrDrinkTransformation(poseStack, partialTick, humanoidArm, stack);
+                ((HeldItemRendererAccessor) itemRenderer).combatControl$callApplyEatOrDrinkTransformation(poseStack, partialTick, humanoidArm, stack, player);
                 ((HeldItemRendererAccessor) itemRenderer).combatControl$callApplyEquipOffset(poseStack, humanoidArm, equipProgress);
                 ((HeldItemRendererAccessor) itemRenderer).combatControl$callApplySwingOffset(poseStack, humanoidArm, swingProgress);
             }
@@ -73,7 +73,7 @@ public class ItemInHandHandler {
         poseStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-13.935F));
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(direction * 35.3F));
         poseStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(direction * -9.785F));
-        float f8 = stack.getMaxUseTime() - (player.getItemUseTimeLeft() - partialTick + 1.0F);
+        float f8 = stack.getMaxUseTime(player) - (player.getItemUseTimeLeft() - partialTick + 1.0F);
         float f12 = f8 / 20.0F;
         f12 = (f12 * f12 + f12 * 2.0F) / 3.0F;
         if (f12 > 1.0F) {
@@ -96,7 +96,7 @@ public class ItemInHandHandler {
         poseStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-55.0F));
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(direction * 35.3F));
         poseStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(direction * -9.785F));
-        float f7 = stack.getMaxUseTime() - (player.getItemUseTimeLeft() - partialTick + 1.0F);
+        float f7 = stack.getMaxUseTime(player) - (player.getItemUseTimeLeft() - partialTick + 1.0F);
         float f11 = f7 / 10.0F;
         if (f11 > 1.0F) {
             f11 = 1.0F;
@@ -118,8 +118,8 @@ public class ItemInHandHandler {
         poseStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-11.935F));
         poseStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(direction * 65.3F));
         poseStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(direction * -9.785F));
-        float f9 = stack.getMaxUseTime() - (player.getItemUseTimeLeft() - partialTick + 1.0F);
-        float f13 = f9 / CrossbowItem.getPullTime(stack);
+        float f9 = stack.getMaxUseTime(player) - (player.getItemUseTimeLeft() - partialTick + 1.0F);
+        float f13 = f9 / CrossbowItem.getPullTime(stack, player);
         if (f13 > 1.0F) {
             f13 = 1.0F;
         }

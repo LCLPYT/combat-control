@@ -79,6 +79,7 @@ public class CombatControlImpl implements CombatControl {
             config.setModernItemDurability(modern);
             config.setSlowFishingRodMotion(modern);
             config.setModernFishingRodSounds(modern);
+            config.setModernSharpness(modern);
         });
     }
 

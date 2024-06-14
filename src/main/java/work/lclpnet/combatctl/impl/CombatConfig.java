@@ -37,6 +37,7 @@ public class CombatConfig {
     private boolean modernItemDurability = true;
     private boolean slowFishingRodMotion = true;
     private boolean modernFishingRodSounds = true;
+    private boolean modernSharpness = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -198,6 +199,14 @@ public class CombatConfig {
 
     public void setModernFishingRodSounds(boolean modernFishingRodSounds) {
         this.modernFishingRodSounds = modernFishingRodSounds;
+    }
+
+    public boolean isModernSharpness() {
+        return modernSharpness;
+    }
+
+    public void setModernSharpness(boolean modernSharpness) {
+        this.modernSharpness = modernSharpness;
     }
 
     public void edit(Consumer<CombatConfig> action) {
