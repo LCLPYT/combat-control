@@ -60,10 +60,10 @@ public class CombatConfig {
         }
 
         // for player who don't have the mod, adjust the attack speed value so that they know there is no cooldown
-        EntityAttributeInstance attackSpeed = player.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_SPEED);
+        EntityAttributeInstance attackSpeed = player.getAttributeInstance(EntityAttributes.ATTACK_SPEED);
         if (attackSpeed == null) return;
 
-        double value = attackCooldown ? EntityAttributes.GENERIC_ATTACK_SPEED.value().getDefaultValue() : 1024;
+        double value = attackCooldown ? EntityAttributes.ATTACK_SPEED.value().getDefaultValue() : 1024;
 
         attackSpeed.setBaseValue(value);
     }

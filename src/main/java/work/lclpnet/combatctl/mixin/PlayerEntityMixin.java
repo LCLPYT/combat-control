@@ -1,6 +1,8 @@
 package work.lclpnet.combatctl.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -19,7 +21,6 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -32,9 +33,6 @@ import work.lclpnet.combatctl.impl.CombatConfig;
 @SuppressWarnings("UnreachableCode")
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
-
-    @Unique
-    private boolean sprintDuringAttack;
 
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
@@ -78,7 +76,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         // trigger sweep attack sound if enabled or when the player has the sweeping edge enchantment on their weapon
-        return config.isSweepAttack() || player.getAttributeValue(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO) > 0.0F;
+        return config.isSweepAttack() || player.getAttributeValue(EntityAttributes.SWEEPING_DAMAGE_RATIO) > 0.0F;
     }
 
     @SuppressWarnings("ConstantValue")
@@ -109,7 +107,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         // trigger sweep attack particle if enabled or when the player has the sweeping edge enchantment on their weapon
-        if (config.isSweepAttack() || player.getAttributeValue(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO) > 0.0F) {
+        if (config.isSweepAttack() || player.getAttributeValue(EntityAttributes.SWEEPING_DAMAGE_RATIO) > 0.0F) {
             return;
         }
 
@@ -126,7 +124,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (config.isSweepAttack()) return original;
 
         // trigger sweep attack if enabled or when the player has the sweeping edge enchantment on their weapon
-        return original && player.getAttributeValue(EntityAttributes.PLAYER_SWEEPING_DAMAGE_RATIO) > 0.0F;
+        return original && player.getAttributeValue(EntityAttributes.SWEEPING_DAMAGE_RATIO) > 0.0F;
     }
 
     @SuppressWarnings("ConstantValue")
@@ -144,7 +142,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             ),
             cancellable = true
     )
-    public void combatControl$onWeakDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+    public void combatControl$onWeakDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
@@ -154,14 +152,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             && (config.isNoFishingRodKnockBack() || !(source.getSource() instanceof FishingBobberEntity))) return;
 
         if (Math.abs(amount) < 1e-9f && getWorld().getDifficulty() != Difficulty.PEACEFUL) {
-            callback.setReturnValue(super.damage(source, amount));
+            callback.setReturnValue(super.damage(world, source, amount));
         }
     }
 
     // combatControl$initialAttackSprintState is taken from GoldenAgeCombat
     @Inject(method = "attack", at = @At("HEAD"))
-    public void combatControl$initialAttackSprintState(Entity target, CallbackInfo callback) {
-        this.sprintDuringAttack = this.isSprinting();
+    public void combatControl$initialAttackSprintState(Entity target, CallbackInfo callback, @Share("sprintDuringAttack") LocalBooleanRef sprintDuringAttack) {
+        sprintDuringAttack.set(this.isSprinting());
     }
 
     // combatControl$onCriticalHit is taken from GoldenAgeCombat
@@ -188,16 +186,22 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     }
 
     // combatControl$resetAttackSprintState is taken from GoldenAgeCombat
-    @Inject(
+    @ModifyVariable(
             method = "attack",
             at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/entity/player/PlayerEntity;horizontalSpeed:F"
-            )
+                    value = "STORE",
+                    ordinal = 0
+            ),
+            index = 11  // inject after first ISTORE 11 instruction (LVT index 11 is boolean bl4) = after line 1212 in version 1.21.4
     )
-    public void combatControl$resetAttackSprintState(Entity target, CallbackInfo callback) {
+    public boolean combatControl$resetAttackSprintState(boolean b, @Share("sprintDuringAttack") LocalBooleanRef sprintDuringAttack) {
         // reset to original sprinting value for rest of attack method
-        if (this.sprintDuringAttack) this.setFlag(3, true);
+        // this injection should be shortly after the !isSprinting check, but must not be conditional
+        if (sprintDuringAttack.get()) {
+            this.setFlag(3, true);
+        }
+
+        return b;  // we never modify the variable, this injection is used as a means to reset the sprinting state ASAP
     }
 
     // combatControl$handleAttackSprinting is taken from GoldenAgeCombat
@@ -210,17 +214,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     shift = At.Shift.AFTER
             )
     )
-    public void combatControl$handleAttackSprinting(Entity target, CallbackInfo callback) {
+    public void combatControl$handleAttackSprinting(Entity target, CallbackInfo callback, @Share("sprintDuringAttack") LocalBooleanRef sprintDuringAttack) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         // don't disable sprinting when attacking a target
         // this is mainly nice to have since you always stop to swim when attacking creatures underwater
-        if (!config.isNoAttackSprinting()) {
-            if (this.sprintDuringAttack) this.setSprinting(true);
+        if (!config.isNoAttackSprinting() && sprintDuringAttack.get()) {
+            this.setSprinting(true);
         }
-
-        this.sprintDuringAttack = false;
     }
 }

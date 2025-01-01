@@ -4,13 +4,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.FishingRodItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +31,7 @@ public class FishingRodItemMixin {
             at = @At("HEAD")
     )
     public void combatControl$beforeUse(World world, PlayerEntity user, Hand hand,
-                                        CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+                                        CallbackInfoReturnable<ActionResult> cir) {
         this.lastUser = user;
     }
 

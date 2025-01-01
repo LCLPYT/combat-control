@@ -1,6 +1,6 @@
 package work.lclpnet.combatctl.mixin;
 
-import net.minecraft.component.ComponentMapImpl;
+import net.minecraft.component.MergedComponentMap;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,10 +22,10 @@ import java.util.function.Consumer;
 public class ItemStackMixin {
 
     @Inject(
-            method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/ComponentMapImpl;)V",
+            method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V",
             at = @At("TAIL")
     )
-    public void combatControl$applyAttributeModifiers(ItemConvertible item, int count, ComponentMapImpl components, CallbackInfo ci) {
+    public void combatControl$applyAttributeModifiers(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
         ItemStack self = (ItemStack) (Object) this;
 
         AttackAttributeHandler.modifyAttackDamageAttribute(self);

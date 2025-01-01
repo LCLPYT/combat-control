@@ -62,7 +62,7 @@ public abstract class LivingEntityMixin {
 
         // knock back functionality from GoldenAgeCombat, but only players are affected
         if (player.isOnGround() && !player.isTouchingWater()) {
-            knockBackStrength = strength * (1.0 - player.getAttributeValue(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE));
+            knockBackStrength = strength * (1.0 - player.getAttributeValue(EntityAttributes.KNOCKBACK_RESISTANCE));
 
             final Vec3d deltaMovement = player.getVelocity();
             player.setVelocity(deltaMovement.x, Math.min(0.4, deltaMovement.y / 2.0D + strength), deltaMovement.x);

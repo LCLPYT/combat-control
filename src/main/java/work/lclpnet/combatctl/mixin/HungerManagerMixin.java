@@ -1,8 +1,8 @@
 package work.lclpnet.combatctl.mixin;
 
 import net.minecraft.entity.player.HungerManager;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,8 +30,6 @@ public abstract class HungerManagerMixin {
     private float exhaustion;
     @Shadow
     private int foodTickTimer;
-    @Shadow
-    private int prevFoodLevel = 20;
 
     @Unique
     private final HungerCompat hungerCompat = CompatManager.get().getHungerCompat();
@@ -41,7 +39,7 @@ public abstract class HungerManagerMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    public void combatControl$tick(PlayerEntity player, CallbackInfo callback) {
+    public void combatControl$tick(ServerPlayerEntity player, CallbackInfo callback) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
 
         CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
@@ -49,7 +47,6 @@ public abstract class HungerManagerMixin {
         if (config.isModernRegeneration()) return;
 
         Difficulty difficulty = player.getWorld().getDifficulty();
-        this.prevFoodLevel = this.foodLevel;
         if (this.exhaustion > 4.0F) {
             float newExhaustion = this.exhaustion - 4.0F;
 
@@ -71,7 +68,8 @@ public abstract class HungerManagerMixin {
                 }
             }
         }
-        boolean flag = player.getWorld().getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
+        ServerWorld world = player.getServerWorld();
+        boolean flag = world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (flag && this.foodLevel >= 18 && player.canFoodHeal()) {
             ++this.foodTickTimer;
             if (this.foodTickTimer >= 80) {
@@ -83,7 +81,7 @@ public abstract class HungerManagerMixin {
             ++this.foodTickTimer;
             if (this.foodTickTimer >= 80) {
                 if (player.getHealth() > 10.0F || difficulty == Difficulty.HARD || player.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
-                    player.damage(player.getDamageSources().starve(), 1.0F);
+                    player.damage(world, player.getDamageSources().starve(), 1.0F);
                 }
                 this.foodTickTimer = 0;
             }

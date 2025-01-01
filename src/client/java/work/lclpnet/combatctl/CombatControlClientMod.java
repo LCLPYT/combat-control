@@ -24,7 +24,7 @@ public class CombatControlClientMod implements ClientModInitializer {
 		AttributeModifierTooltipCallback.EVENT.register((stack, player, attribute, modifier) -> {
 			if (abilities.attackCooldown) return true;
 
-			return attribute != EntityAttributes.GENERIC_ATTACK_SPEED;
+			return attribute != EntityAttributes.ATTACK_SPEED;
 		});
 	}
 }

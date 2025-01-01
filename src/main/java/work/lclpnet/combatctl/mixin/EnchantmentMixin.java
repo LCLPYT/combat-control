@@ -69,7 +69,7 @@ public class EnchantmentMixin {
         }
 
         // filter for sharpness enchantment
-        var registry = world.getRegistryManager().get(RegistryKeys.ENCHANTMENT);
+        var registry = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
         Enchantment self = (Enchantment) (Object) this;
 
         if (registry.get(Enchantments.SHARPNESS) != self) {

@@ -1,7 +1,7 @@
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
-	id 'fabric-loom' version '1.6-SNAPSHOT'
+	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.7.0'
 }
@@ -59,9 +59,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
 
-    include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.2.0")))
-
-    include(implementation 'org.json:json:20230227')
+    include(implementation 'org.json:json:20240303')
     include(implementation('work.lclpnet:json-config4j:1.0.0'))
 }
 
