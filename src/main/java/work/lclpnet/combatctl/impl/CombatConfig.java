@@ -20,23 +20,44 @@ public class CombatConfig {
     private final CombatAbilities abilities = new CombatAbilities();
     private boolean autoUpdate = true;
     private boolean dirty = false;
+
+    /** Whether attack cooldown is enabled */
     private boolean attackCooldown = true;
+    /** Will play modern combat hit sounds. If disabled, it just plays the classic hit sound */
     private boolean modernHitSounds = true;
+    /** Whether modern pvp particles such as damage indicators are displayed */
     private boolean modernHitParticle = true;
+    /** Whether sweep attacks are enabled. Even if disabled, the sweeping edge enchantment will still perform a sweep attack */
     private boolean sweepAttack = true;
+    /** Enables fast regeneration as seen in modern Minecraft. If disabled, health regenerates every 4 seconds with at least 18 food. Full saturation also no longer regenerates health quickly. */
     private boolean modernRegeneration = true;
+    /** Modern notch apple gives regeneration 2 and absorption 4. Disabling this gives regeneration 5 and absorption 1 instead, as it used to */
     private boolean modernNotchApple = true;
+    /** If enabled, prevents knockback from attacks with zero damage (e.g. snowball hit) */
     private boolean noWeakAttackKnockBack = true;
+    /** If enabled, fishing rod hits will not apply knockback */
     private boolean noFishingRodKnockBack = true;
+    /** If disabled, entities attacked in the air will take more knockback */
     private boolean strongKnockBackInAir = false;
+    /** If enabled, critical hits will not be possible while sprinting */
     private boolean noSprintCriticalHits = true;
+    /** If enabled, attacking will stop sprinting */
     private boolean noAttackSprinting = true;
+    /** If enabled, fishing rod pulls will apply a slight upwards boost */
     private boolean fishingRodLaunch = false;
+    /** If enabled, hooking an entity will cause 5 damage to a fishing rod. Otherwise, only 3 damage are applied to the rod. */
     private boolean modernFishingRodDurability = true;
+    /** Whether attack is allowed while using an item (e.g. aiming a bow or eating food) */
     private boolean attackWhileUsing = false;
+    /** Whether the arm swing animation should render properly while using an item, should definitely be enabled when <code>attackWhileUsing=true</code> */
+    private boolean renderSwingArmWhileUsing = false;
+    /** If enabled, attacking will damage the held item by 2, otherwise only by 1 */
     private boolean modernItemDurability = true;
+    /** If enabled, the fishing rod will move slower, as seen in 1.9+ versions */
     private boolean slowFishingRodMotion = true;
+    /** If enabled, plays the modern fishing rod reeling sounds */
     private boolean modernFishingRodSounds = true;
+    /** If enabled, the sharpness enchantment adds 0.5 damage per level. If disabled, it is 1.25 damage per level */
     private boolean modernSharpness = true;
 
     public CombatConfig(ServerPlayerEntity player) {
@@ -173,6 +194,19 @@ public class CombatConfig {
 
         this.attackWhileUsing = attackWhileUsing;
         abilities.attackWhileUsing = attackWhileUsing;
+
+        onSync();
+    }
+
+    public boolean isRenderSwingArmWhileUsing() {
+        return renderSwingArmWhileUsing;
+    }
+
+    public void setRenderSwingArmWhileUsing(boolean renderSwingArmWhileUsing) {
+        if (this.renderSwingArmWhileUsing == renderSwingArmWhileUsing) return;
+
+        this.renderSwingArmWhileUsing = renderSwingArmWhileUsing;
+        abilities.renderArmSwingWhileUsing = renderSwingArmWhileUsing;
 
         onSync();
     }

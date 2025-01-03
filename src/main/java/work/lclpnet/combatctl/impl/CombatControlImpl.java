@@ -75,7 +75,8 @@ public class CombatControlImpl implements CombatControl {
             config.setNoAttackSprinting(modern);
             config.setFishingRodLaunch(!modern);
             config.setModernFishingRodDurability(modern);
-            config.setAttackWhileUsing(!modern);
+            config.setAttackWhileUsing(false);  // isn't enabled in vanilla 1.8.9, therefore opt-in
+            config.setRenderSwingArmWhileUsing(!modern);
             config.setModernItemDurability(modern);
             config.setSlowFishingRodMotion(modern);
             config.setModernFishingRodSounds(modern);
