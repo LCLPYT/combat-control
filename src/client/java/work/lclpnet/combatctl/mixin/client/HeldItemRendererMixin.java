@@ -2,6 +2,7 @@ package work.lclpnet.combatctl.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -11,6 +12,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,6 +24,8 @@ import work.lclpnet.combatctl.api.CombatControlClient;
 public abstract class HeldItemRendererMixin {
 
     @Shadow protected abstract void applySwingOffset(MatrixStack matrices, Arm arm, float swingProgress);
+
+    @Shadow @Final private MinecraftClient client;
 
     @Inject(
             method = "renderFirstPersonItem",
@@ -54,5 +58,18 @@ public abstract class HeldItemRendererMixin {
         }
 
         return 1;
+    }
+
+    @Inject(
+            method = "resetEquipProgress",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    public void combatControl$onResetEquipProgress(Hand hand, CallbackInfo ci) {
+        if (CombatControlClient.get().getAbilities().noReequipWhenUsing
+                && client.player != null && client.player.isUsingItem()
+                && client.player.getActiveHand() == hand) {
+            ci.cancel();
+        }
     }
 }

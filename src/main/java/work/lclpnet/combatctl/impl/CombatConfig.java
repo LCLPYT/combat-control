@@ -59,6 +59,8 @@ public class CombatConfig {
     private boolean modernFishingRodSounds = true;
     /** If enabled, the sharpness enchantment adds 0.5 damage per level. If disabled, it is 1.25 damage per level */
     private boolean modernSharpness = true;
+    /** Skip equip animation when using items (e.g. shield) */
+    private boolean noReequipWhenUsing = false;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -241,6 +243,19 @@ public class CombatConfig {
 
     public void setModernSharpness(boolean modernSharpness) {
         this.modernSharpness = modernSharpness;
+    }
+
+    public boolean isNoReequipWhenUsing() {
+        return noReequipWhenUsing;
+    }
+
+    public void setNoReequipWhenUsing(boolean noReequipWhenUsing) {
+        if (this.noReequipWhenUsing == noReequipWhenUsing) return;
+
+        this.noReequipWhenUsing = noReequipWhenUsing;
+        abilities.noReequipWhenUsing = noReequipWhenUsing;
+
+        onSync();
     }
 
     public void edit(Consumer<CombatConfig> action) {
