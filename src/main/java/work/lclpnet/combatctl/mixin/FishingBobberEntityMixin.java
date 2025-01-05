@@ -1,5 +1,6 @@
 package work.lclpnet.combatctl.mixin;
 
+import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.entity.Entity;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -33,16 +35,15 @@ public abstract class FishingBobberEntityMixin {
             at = @At("TAIL")
     )
     protected void combatControl$onHitEntity(EntityHitResult entityHitResult, CallbackInfo callback) {
-        PlayerEntity player = getPlayerOwner();
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
+        if (!(getPlayerOwner() instanceof ServerPlayerEntity player)) return;
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
+        CombatConfig config = combatConfig();
 
-        if (config.isNoFishingRodKnockBack()) return;
+        if (config == null || config.isNoFishingRodKnockBack()) return;
 
         // for players, this is a weak attack; handled in PlayerEntityMixin#combatControl$onWeakDamage()
         FishingBobberEntity self = (FishingBobberEntity) (Object) this;
-        entityHitResult.getEntity().damage(serverPlayer.getServerWorld(), serverPlayer.getDamageSources().thrown(self, this.getPlayerOwner()), 0.0F);
+        entityHitResult.getEntity().damage(player.getServerWorld(), player.getDamageSources().thrown(self, this.getPlayerOwner()), 0.0F);
     }
 
     // combatControl$pullHookedEntity is taken from GoldenAgeCombat
@@ -52,12 +53,10 @@ public abstract class FishingBobberEntityMixin {
             cancellable = true
     )
     protected void combatControl$pullHookedEntity(Entity entity, CallbackInfo callback) {
+        CombatConfig config = combatConfig();
         PlayerEntity player = getPlayerOwner();
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
-
-        if (!config.isFishingRodLaunch()) return;
+        if (player == null || config == null || !config.isFishingRodLaunch()) return;
 
         FishingBobberEntity self = (FishingBobberEntity) (Object) this;
 
@@ -76,12 +75,9 @@ public abstract class FishingBobberEntityMixin {
             cancellable = true
     )
     public void combatControl$retrieve(ItemStack stack, CallbackInfoReturnable<Integer> callback) {
-        PlayerEntity player = getPlayerOwner();
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
+        CombatConfig config = combatConfig();
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
-
-        if (config.isModernFishingRodDurability()) return;
+        if (config == null || config.isModernFishingRodDurability()) return;
 
         if (callback.getReturnValueI() == 5) callback.setReturnValue(3);
     }
@@ -94,10 +90,9 @@ public abstract class FishingBobberEntityMixin {
             )
     )
     public void combatControl$setVelocity(FishingBobberEntity instance, Vec3d velocity, Operation<Void> original) {
-        PlayerEntity player = getPlayerOwner();
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
+        CombatConfig config = combatConfig();
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
+        if (config == null) return;
 
         if (config.isSlowFishingRodMotion()) {
             original.call(instance, velocity);
@@ -130,12 +125,9 @@ public abstract class FishingBobberEntityMixin {
             at = @At("TAIL")
     )
     public void combatControl$postConstruct(PlayerEntity thrower, World world, int luckOfTheSeaLevel, int lureLevel, CallbackInfo ci) {
-        PlayerEntity player = getPlayerOwner();
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
+        CombatConfig config = combatConfig();
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
-
-        if (config.isSlowFishingRodMotion()) return;
+        if (config == null || config.isSlowFishingRodMotion()) return;
 
         FishingBobberEntity self = (FishingBobberEntity) (Object) this;
         Vec3d vel = self.getVelocity();
@@ -150,5 +142,36 @@ public abstract class FishingBobberEntityMixin {
         float pitch = (float)(MathHelper.atan2(vy, len2d) * 180.0D / Math.PI);
         self.setPitch(pitch);
         self.prevPitch = pitch;
+    }
+
+    @WrapWithCondition(
+            method = "use",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/projectile/FishingBobberEntity;pullHookedEntity(Lnet/minecraft/entity/Entity;)V"
+            )
+    )
+    public boolean combatControl$wrapPullHookedEntity(FishingBobberEntity instance, Entity entity) {
+        CombatConfig config = combatConfig();
+        return config == null || config.isFishingRodPull();
+    }
+
+    @WrapWithCondition(
+            method = "use",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/World;sendEntityStatus(Lnet/minecraft/entity/Entity;B)V"
+            )
+    )
+    public boolean combatControl$wrapSendPulledStatus(World instance, Entity entity, byte status) {
+        CombatConfig config = combatConfig();
+        return config == null || config.isFishingRodPull();
+    }
+
+    @Unique @Nullable
+    private CombatConfig combatConfig() {
+        if (!(getPlayerOwner() instanceof ServerPlayerEntity player)) return null;
+
+        return CombatControl.get(player.getServer()).getConfig(player);
     }
 }

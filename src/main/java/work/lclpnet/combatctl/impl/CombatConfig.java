@@ -11,7 +11,7 @@ import work.lclpnet.combatctl.network.packet.CombatAbilitiesS2CPacket;
 import java.util.function.Consumer;
 
 /**
- * An immutable configuration for combat details.
+ * A configuration for combat details.
  */
 public class CombatConfig {
 
@@ -47,7 +47,7 @@ public class CombatConfig {
     private boolean fishingRodLaunch = false;
     /** If enabled, hooking an entity will cause 5 damage to a fishing rod. Otherwise, only 3 damage are applied to the rod. */
     private boolean modernFishingRodDurability = true;
-    /** Whether attack is allowed while using an item (e.g. aiming a bow or eating food) */
+    /** Whether attack is allowed while using an item (e.g. aiming a bow or eating food) used to be possible in 1.7.10 and before */
     private boolean attackWhileUsing = false;
     /** Whether the arm swing animation should render properly while using an item, should definitely be enabled when <code>attackWhileUsing=true</code> */
     private boolean renderSwingArmWhileUsing = false;
@@ -61,6 +61,8 @@ public class CombatConfig {
     private boolean modernSharpness = true;
     /** Skip equip animation when using items (e.g. shield) */
     private boolean noReequipWhenUsing = false;
+    /** Whether reeling in an entity pulls it towards the player. Many PVP servers disabled this, however it was always enabled in vanilla */
+    private boolean fishingRodPull = true;
 
     public CombatConfig(ServerPlayerEntity player) {
         this.player = player;
@@ -256,6 +258,14 @@ public class CombatConfig {
         abilities.noReequipWhenUsing = noReequipWhenUsing;
 
         onSync();
+    }
+
+    public boolean isFishingRodPull() {
+        return fishingRodPull;
+    }
+
+    public void setFishingRodPull(boolean fishingRodPull) {
+        this.fishingRodPull = fishingRodPull;
     }
 
     public void edit(Consumer<CombatConfig> action) {
