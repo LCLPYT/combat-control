@@ -4,6 +4,7 @@ plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.7.0'
+    id 'io.freefair.lombok' version '8.11'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')  // will be empty, if the file is missing
