@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.compat.CompatManager;
 import work.lclpnet.combatctl.compat.HungerCompat;
-import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 
 /**
  * @implNote Mixin copied from GoldenAgeCombat and adapted to yarn mappings
@@ -42,7 +42,7 @@ public abstract class HungerManagerMixin {
     public void combatControl$tick(ServerPlayerEntity player, CallbackInfo callback) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
+        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
 
         if (config.isModernRegeneration()) return;
 

@@ -9,9 +9,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.ApiStatus;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
-import work.lclpnet.combatctl.config.CombatConfig;
 import work.lclpnet.combatctl.config.CombatControlConfig;
 import work.lclpnet.combatctl.config.ConfigAccess;
+import work.lclpnet.combatctl.config.PlayerConfig;
 import work.lclpnet.combatctl.network.CombatAbilities;
 import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.network.packet.CombatAbilitiesS2CPacket;
@@ -40,9 +40,9 @@ public class CombatControlImpl implements CombatControl {
     }
 
     @Override
-    public CombatConfig getConfig(ServerPlayerEntity player) {
+    public PlayerConfig getConfig(ServerPlayerEntity player) {
         var ccPlayer = (CombatControlPlayer) player;
-        CombatConfig config = ccPlayer.combatControl$getConfig();
+        PlayerConfig config = ccPlayer.combatControl$getConfig();
 
         if (config == null) {
             config = this.defaultConfig.player.clone();
@@ -53,7 +53,7 @@ public class CombatControlImpl implements CombatControl {
     }
 
     @Override
-    public void configure(ServerPlayerEntity player, Consumer<CombatConfig> action) {
+    public void configure(ServerPlayerEntity player, Consumer<PlayerConfig> action) {
         action.accept(getConfig(player));
         update(player);
     }
@@ -70,6 +70,7 @@ public class CombatControlImpl implements CombatControl {
         return abilities;
     }
 
+    @Override
     public void update(ServerPlayerEntity player) {
         if (CombatControlNetworking.isListening(player)) {
             updateModdedPlayer(player);
@@ -79,7 +80,7 @@ public class CombatControlImpl implements CombatControl {
     }
 
     private void updateVanillaPlayer(ServerPlayerEntity player) {
-        CombatConfig config = getConfig(player);
+        PlayerConfig config = getConfig(player);
 
         // adjust the attack speed for vanilla players so that they know there is no cooldown
         EntityAttributeInstance attackSpeed = player.getAttributeInstance(EntityAttributes.ATTACK_SPEED);
@@ -91,7 +92,7 @@ public class CombatControlImpl implements CombatControl {
     }
 
     private void updateModdedPlayer(ServerPlayerEntity player) {
-        CombatConfig config = getConfig(player);
+        PlayerConfig config = getConfig(player);
         CombatAbilities abilities = getAbilities(player);
         boolean changed = false;
 
@@ -133,7 +134,7 @@ public class CombatControlImpl implements CombatControl {
 
     @Override
     public void copyData(ServerPlayerEntity source, ServerPlayerEntity target) {
-        CombatConfig config = ((CombatControlPlayer) source).combatControl$getConfig();
+        PlayerConfig config = ((CombatControlPlayer) source).combatControl$getConfig();
 
         ((CombatControlPlayer) target).combatControl$setConfig(config);
 

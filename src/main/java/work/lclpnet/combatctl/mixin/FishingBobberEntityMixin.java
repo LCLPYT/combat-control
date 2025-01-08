@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 
 @Mixin(FishingBobberEntity.class)
 public abstract class FishingBobberEntityMixin {
@@ -37,7 +37,7 @@ public abstract class FishingBobberEntityMixin {
     protected void combatControl$onHitEntity(EntityHitResult entityHitResult, CallbackInfo callback) {
         if (!(getPlayerOwner() instanceof ServerPlayerEntity player)) return;
 
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
 
         if (config == null || config.isNoFishingRodKnockBack()) return;
 
@@ -53,7 +53,7 @@ public abstract class FishingBobberEntityMixin {
             cancellable = true
     )
     protected void combatControl$pullHookedEntity(Entity entity, CallbackInfo callback) {
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
         PlayerEntity player = getPlayerOwner();
 
         if (player == null || config == null || !config.isFishingRodLaunch()) return;
@@ -75,7 +75,7 @@ public abstract class FishingBobberEntityMixin {
             cancellable = true
     )
     public void combatControl$retrieve(ItemStack stack, CallbackInfoReturnable<Integer> callback) {
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
 
         if (config == null || config.isModernFishingRodDurability()) return;
 
@@ -90,7 +90,7 @@ public abstract class FishingBobberEntityMixin {
             )
     )
     public void combatControl$setVelocity(FishingBobberEntity instance, Vec3d velocity, Operation<Void> original) {
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
 
         if (config == null) return;
 
@@ -125,7 +125,7 @@ public abstract class FishingBobberEntityMixin {
             at = @At("TAIL")
     )
     public void combatControl$postConstruct(PlayerEntity thrower, World world, int luckOfTheSeaLevel, int lureLevel, CallbackInfo ci) {
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
 
         if (config == null || config.isSlowFishingRodMotion()) return;
 
@@ -152,7 +152,7 @@ public abstract class FishingBobberEntityMixin {
             )
     )
     public boolean combatControl$wrapPullHookedEntity(FishingBobberEntity instance, Entity entity) {
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
         return config == null || config.isFishingRodPull();
     }
 
@@ -164,12 +164,12 @@ public abstract class FishingBobberEntityMixin {
             )
     )
     public boolean combatControl$wrapSendPulledStatus(World instance, Entity entity, byte status) {
-        CombatConfig config = combatConfig();
+        PlayerConfig config = combatConfig();
         return config == null || config.isFishingRodPull();
     }
 
     @Unique @Nullable
-    private CombatConfig combatConfig() {
+    private PlayerConfig combatConfig() {
         if (!(getPlayerOwner() instanceof ServerPlayerEntity player)) return null;
 
         return CombatControl.get(player.getServer()).getConfig(player);

@@ -10,7 +10,7 @@ import lombok.Setter;
  * However, the config can be adjusted for each player individually.
  */
 @Getter @Setter
-public class CombatConfig implements Cloneable {
+public class PlayerConfig implements Cloneable {
 
     @SerdeComment("Whether attack cooldown is enabled")
     private boolean attackCooldown = true;
@@ -78,9 +78,9 @@ public class CombatConfig implements Cloneable {
     /* ----- */
 
     @Override
-    public CombatConfig clone() {
+    public PlayerConfig clone() {
         try {
-            return (CombatConfig) super.clone();  // shallow-copy
+            return (PlayerConfig) super.clone();  // shallow-copy
         } catch (CloneNotSupportedException e) {
             throw new RuntimeException("Clone failed", e);
         }

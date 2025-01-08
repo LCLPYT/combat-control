@@ -1,8 +1,8 @@
 package work.lclpnet.combatctl.impl;
 
 import work.lclpnet.combatctl.api.CombatStyle;
-import work.lclpnet.combatctl.config.CombatConfig;
-import work.lclpnet.combatctl.config.CombatGlobalConfig;
+import work.lclpnet.combatctl.config.GlobalConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 
 public class CombatStyles {
 
@@ -11,7 +11,7 @@ public class CombatStyles {
     private record ModernStyle(boolean modern) implements CombatStyle {
 
         @Override
-        public void configure(CombatConfig player) {
+        public void configure(PlayerConfig player) {
             player.setAttackCooldown(modern);
             player.setModernHitSounds(modern);
             player.setModernHitParticle(modern);
@@ -36,7 +36,7 @@ public class CombatStyles {
         }
 
         @Override
-        public void configure(CombatGlobalConfig global) {
+        public void configure(GlobalConfig global) {
             global.setModernDamageValues(modern);
             global.setLargerHitboxes(!modern);
         }

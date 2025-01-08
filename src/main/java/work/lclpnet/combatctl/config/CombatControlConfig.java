@@ -7,9 +7,9 @@ public class CombatControlConfig {
 
     @SerdeComment("Default player configuration")
     @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
-    public final CombatConfig player = new CombatConfig();
+    public final PlayerConfig player = new PlayerConfig();
 
     @SerdeComment("Global configuration that doesn't involve specific players")
     @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
-    public final CombatGlobalConfig global = new CombatGlobalConfig();
+    public final GlobalConfig global = new GlobalConfig();
 }

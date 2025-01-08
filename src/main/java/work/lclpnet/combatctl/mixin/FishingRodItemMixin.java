@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 
 @Mixin(FishingRodItem.class)
 public class FishingRodItemMixin {
@@ -35,7 +35,7 @@ public class FishingRodItemMixin {
             return;
         }
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         if (config.isModernFishingRodSounds()) {
             original.call(world, except, x, y, z, sound, category, volume, pitch);

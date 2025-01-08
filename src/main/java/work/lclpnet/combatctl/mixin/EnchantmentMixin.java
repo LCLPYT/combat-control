@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +62,7 @@ public class EnchantmentMixin {
         }
 
         // filter user with old sharpness
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         if (config.isModernSharpness()) {
             return original.call(instance, type);

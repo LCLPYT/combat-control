@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -39,7 +39,7 @@ public abstract class LivingEntityMixin {
     protected void combatControl$completeUsingItem(CallbackInfo ci) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         if (config.isModernNotchApple() || !activeItemStack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) return;
 
@@ -56,7 +56,7 @@ public abstract class LivingEntityMixin {
     public void combatControl$beforeKnockBack(double strength, double ratioX, double ratioZ, CallbackInfo callback) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         if (!config.isStrongKnockBackInAir()) return;
 

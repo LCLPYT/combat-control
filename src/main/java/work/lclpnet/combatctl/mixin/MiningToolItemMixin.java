@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.PlayerConfig;
 import work.lclpnet.combatctl.type.ToolMaterialCapture;
 
 @Mixin(MiningToolItem.class)
@@ -50,7 +50,7 @@ public class MiningToolItemMixin implements ToolMaterialCapture {
     public void combatControl$postHit(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
         if (!(attacker instanceof ServerPlayerEntity player)) return;
 
-        CombatConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
 
         if (config.isModernItemDurability()) return;
 
