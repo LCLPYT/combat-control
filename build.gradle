@@ -60,8 +60,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
 
-    include(implementation 'org.json:json:20240303')
-    include(implementation('work.lclpnet:json-config4j:1.0.0'))
+    include(implementation('com.electronwill.night-config:toml:3.8.1'))
 }
 
 [processResources, processTestmodResources].each {

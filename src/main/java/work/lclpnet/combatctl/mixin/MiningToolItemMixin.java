@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.impl.CombatConfig;
+import work.lclpnet.combatctl.config.CombatConfig;
 import work.lclpnet.combatctl.type.ToolMaterialCapture;
 
 @Mixin(MiningToolItem.class)

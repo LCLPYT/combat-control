@@ -11,6 +11,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
+import work.lclpnet.combatctl.impl.CombatStyles;
 
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
@@ -20,33 +21,33 @@ public class CombatCommand {
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("combat")
                 .requires(s -> s.hasPermissionLevel(2))
-                .then(literal("old")
-                        .executes(this::setOldCombat)
+                .then(literal("classic")
+                        .executes(this::setClassicCombat)
                         .then(argument("targets", EntityArgumentType.players())
-                                .executes(this::setOldCombatFor)))
+                                .executes(this::setClassicCombatFor)))
                 .then(literal("modern")
                         .executes(this::setModernCombat)
                         .then(argument("targets", EntityArgumentType.players())
                                 .executes(this::setModernCombatFor))));
     }
 
-    private int setOldCombat(CommandContext<ServerCommandSource> ctx) {
-        setGlobal(ctx, CombatStyle.OLD, "old (1.8)");
+    private int setClassicCombat(CommandContext<ServerCommandSource> ctx) {
+        setGlobal(ctx, CombatStyles.CLASSIC, "classic (<=1.8)");
         return 1;
     }
 
-    private int setOldCombatFor(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        setMulti(ctx, CombatStyle.OLD, "old (1.8)");
+    private int setClassicCombatFor(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        setMulti(ctx, CombatStyles.CLASSIC, "classic (<=1.8)");
         return 1;
     }
 
     private int setModernCombat(CommandContext<ServerCommandSource> ctx) {
-        setGlobal(ctx, CombatStyle.MODERN, "modern (1.9+)");
+        setGlobal(ctx, CombatStyles.MODERN, "modern (1.9+)");
         return 1;
     }
 
     private int setModernCombatFor(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        setMulti(ctx, CombatStyle.MODERN, "modern (1.9+)");
+        setMulti(ctx, CombatStyles.MODERN, "modern (1.9+)");
         return 1;
     }
 
@@ -73,7 +74,7 @@ public class CombatCommand {
         if (count == 1) {
             msg = Text.literal("Changed the combat system to the %s system for ".formatted(name))
                     .formatted(Formatting.GREEN)
-                    .append(Text.literal(targets.iterator().next().getDisplayName().getString())
+                    .append(Text.literal(targets.iterator().next().getNameForScoreboard())
                             .formatted(Formatting.YELLOW));
         } else {
             msg = Text.literal("Changed the combat system to the %s system for ".formatted(name))

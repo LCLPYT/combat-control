@@ -1,7 +1,9 @@
 package work.lclpnet.combatctl.compat;
 
+import lombok.Getter;
 import org.jetbrains.annotations.ApiStatus;
 
+@Getter
 @ApiStatus.Internal
 public class CompatManager {
 
@@ -9,10 +11,6 @@ public class CompatManager {
 
     private CompatManager() {
         this.hungerCompat = createHungerCompat();
-    }
-
-    public HungerCompat getHungerCompat() {
-        return hungerCompat;
     }
 
     private HungerCompat createHungerCompat() {

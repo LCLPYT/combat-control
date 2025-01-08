@@ -17,18 +17,19 @@ import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
 import java.nio.file.Path;
+import java.util.Optional;
 
 public class CombatControlMod implements ModInitializer {
 
 	public static final String MOD_ID = "combat-control";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	private static volatile ConfigManager _configManager = null;
 
 	@Override
 	public void onInitialize() {
 		ConfigManager configManager = loadConfig();
-
-		GlobalCombatControlImpl combatControl = GlobalCombatControlImpl.get();
-		combatControl.update(configManager.getConfig());
+		_configManager = configManager;
+		GlobalCombatControlImpl.get().bind(configManager);
 
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
 			CombatControl control = new CombatControlImpl(server, configManager);
@@ -49,10 +50,13 @@ public class CombatControlMod implements ModInitializer {
 	}
 
 	private ConfigManager loadConfig() {
-		Path configPath = FabricLoader.getInstance().getConfigDir().resolve(MOD_ID).resolve("config.json");
-		ConfigManager configManager = new ConfigManager(configPath, LOGGER);
+		Path configPath = FabricLoader.getInstance().getConfigDir()
+				.resolve(MOD_ID)
+				.resolve("config.toml");
 
-		configManager.init().join();
+		ConfigManager configManager = new ConfigManager(configPath);
+
+		configManager.load();
 
 		return configManager;
 	}
@@ -64,5 +68,9 @@ public class CombatControlMod implements ModInitializer {
 	 */
 	public static Identifier identifier(String path) {
 		return Identifier.of(MOD_ID, path);
+	}
+
+	public static Optional<ConfigManager> configManager() {
+		return Optional.ofNullable(_configManager);
 	}
 }

@@ -1,30 +1,17 @@
 package work.lclpnet.combatctl.api;
 
-import org.jetbrains.annotations.Nullable;
+import work.lclpnet.combatctl.config.CombatConfig;
+import work.lclpnet.combatctl.config.CombatControlConfig;
+import work.lclpnet.combatctl.config.CombatGlobalConfig;
 
-public enum CombatStyle {
+public interface CombatStyle {
 
-    OLD("old"),
-    MODERN("modern");
+    void configure(CombatConfig player);
 
-    private final String value;
+    void configure(CombatGlobalConfig global);
 
-    CombatStyle(String value) {
-        this.value = value;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    @Nullable
-    public static CombatStyle tryFrom(String value) {
-        for (CombatStyle style : values()) {
-            if (style.value.equals(value)) {
-                return style;
-            }
-        }
-
-        return null;
+    default void configure(CombatControlConfig config) {
+        configure(config.player);
+        configure(config.global);
     }
 }

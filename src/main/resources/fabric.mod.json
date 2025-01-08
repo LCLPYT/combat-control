@@ -19,7 +19,10 @@
 			"work.lclpnet.combatctl.CombatControlMod"
 		],
 		"client": [
-			"work.lclpnet.combatctl.CombatControlClientMod"
+			"work.lclpnet.combatctl.CCClientMod"
+		],
+		"server": [
+			"work.lclpnet.combatctl.CCServerInit"
 		]
 	},
 	"mixins": [

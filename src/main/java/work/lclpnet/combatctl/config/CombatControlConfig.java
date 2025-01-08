@@ -1,42 +1,15 @@
 package work.lclpnet.combatctl.config;
 
-import org.json.JSONObject;
-import work.lclpnet.combatctl.api.CombatStyle;
-import work.lclpnet.config.json.JsonConfig;
-import work.lclpnet.config.json.JsonConfigFactory;
+import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
+import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
 
-public class CombatControlConfig implements JsonConfig {
+public class CombatControlConfig {
 
-    public CombatStyle combatStyle = CombatStyle.MODERN;
+    @SerdeComment("Default player configuration")
+    @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
+    public final CombatConfig player = new CombatConfig();
 
-    public CombatControlConfig() {}
-
-    public CombatControlConfig(JSONObject json) {
-        if (json.has("combat-style")) {
-            CombatStyle style = CombatStyle.tryFrom(json.getString("combat-style"));
-
-            if (style != null) this.combatStyle = style;
-        }
-    }
-
-    @Override
-    public JSONObject toJson() {
-        JSONObject json = new JSONObject();
-
-        json.put("combat-style", combatStyle.getValue());
-
-        return json;
-    }
-
-    public static final JsonConfigFactory<CombatControlConfig> FACTORY = new JsonConfigFactory<>() {
-        @Override
-        public CombatControlConfig createDefaultConfig() {
-            return new CombatControlConfig();
-        }
-
-        @Override
-        public CombatControlConfig createConfig(JSONObject json) {
-            return new CombatControlConfig(json);
-        }
-    };
+    @SerdeComment("Global configuration that doesn't involve specific players")
+    @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
+    public final CombatGlobalConfig global = new CombatGlobalConfig();
 }

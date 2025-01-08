@@ -1,28 +1,59 @@
 package work.lclpnet.combatctl.config;
 
-import org.slf4j.Logger;
-import work.lclpnet.config.json.ConfigHandler;
-import work.lclpnet.config.json.FileConfigSerializer;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.serde.ObjectDeserializer;
+import com.electronwill.nightconfig.core.serde.ObjectSerializer;
 
 import java.nio.file.Path;
-import java.util.concurrent.CompletableFuture;
 
-public class ConfigManager implements ConfigAccess {
+public class ConfigManager implements ConfigAccess, AutoCloseable {
 
-    private final ConfigHandler<CombatControlConfig> handler;
+    private final CommentedFileConfig config;
+    private final ObjectSerializer serializer;
+    private final ObjectDeserializer deserializer;
+    private final CombatControlConfig obj = new CombatControlConfig();
 
-    public ConfigManager(Path configPath, Logger logger) {
-        var serializer = new FileConfigSerializer<>(CombatControlConfig.FACTORY, logger);
+    public ConfigManager(Path configPath) {
+        config = CommentedFileConfig.builder(configPath)
+                .autoreload()
+                .onAutoReload(this::updateObj)
+                .build();
 
-        handler = new ConfigHandler<>(configPath, serializer, logger);
+        serializer = ObjectSerializer.standard();
+        deserializer = ObjectDeserializer.standard();
     }
 
     @Override
-    public CombatControlConfig getConfig() {
-        return handler.getConfig();
+    public CombatControlConfig config() {
+        return obj;
     }
 
-    public CompletableFuture<Void> init() {
-        return CompletableFuture.runAsync(handler::loadConfig);
+    public synchronized void load() {
+        config.load();
+        updateObj();
+
+        if (config.isEmpty()) {
+            save();
+        }
+    }
+
+    public synchronized void save() {
+        updateConfig();
+        config.save();
+    }
+
+    private synchronized void updateObj() {
+        deserializer.deserializeFields(config, obj);
+    }
+
+    private void updateConfig() {
+        serializer.serializeFields(obj, config);
+    }
+
+    @Override
+    public void close() {
+        if (config != null) {
+            config.close();
+        }
     }
 }

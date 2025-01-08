@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.impl.CombatConfig;
+import work.lclpnet.combatctl.config.CombatConfig;
 
 @SuppressWarnings("UnreachableCode")
 @Mixin(PlayerEntity.class)

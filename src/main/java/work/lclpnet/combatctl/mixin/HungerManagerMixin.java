@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.compat.CompatManager;
 import work.lclpnet.combatctl.compat.HungerCompat;
-import work.lclpnet.combatctl.impl.CombatConfig;
+import work.lclpnet.combatctl.config.CombatConfig;
 
 /**
  * @implNote Mixin copied from GoldenAgeCombat and adapted to yarn mappings
