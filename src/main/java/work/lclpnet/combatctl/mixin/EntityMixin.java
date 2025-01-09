@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import work.lclpnet.combatctl.api.CombatControl;
+import work.lclpnet.combatctl.impl.StaticCombatControl;
 
 @Mixin(Entity.class)
 public class EntityMixin {
@@ -16,9 +16,7 @@ public class EntityMixin {
             cancellable = true
     )
     public void combatControl$modifyTargetingMargin(CallbackInfoReturnable<Float> cir) {
-        Entity self = (Entity) (Object) this;
-
-        if (!CombatControl.get(self.getServer()).globalConfig().isLargerHitboxes()) return;
+        if (!StaticCombatControl.get().globalConfig().isLargerHitboxes()) return;
 
         cir.setReturnValue(0.1f);
     }

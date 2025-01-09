@@ -80,6 +80,10 @@ public class CCModInit implements ModInitializer {
 		return Identifier.of(MOD_ID, path);
 	}
 
+	public static String permission(String suffix) {
+		return MOD_ID + "." + suffix;
+	}
+
 	public static Optional<ConfigManager> configManager() {
 		return Optional.ofNullable(_configManager);
 	}

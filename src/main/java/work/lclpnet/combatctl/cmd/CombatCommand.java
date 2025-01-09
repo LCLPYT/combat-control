@@ -10,12 +10,14 @@ import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.Pair;
+import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
@@ -31,8 +33,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import static me.lucko.fabric.api.permissions.v0.Permissions.require;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static work.lclpnet.combatctl.CCModInit.permission;
 
 public class CombatCommand {
 
@@ -41,31 +45,38 @@ public class CombatCommand {
     private final ModTranslations translations;
     private final List<Option> options;
     private final DynamicCommandExceptionType unknownStyleError;
+    private final Text missingPermission;
 
     public CombatCommand(ModTranslations translations) {
         this.translations = translations;
         options = loadOptions();
 
         unknownStyleError = new DynamicCommandExceptionType(arg -> translations.fallback("argument.combat_style.notfound", arg));
+        missingPermission = translations.fallback("error.combat-control.missing_permission_cmd");
     }
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("combat")
-                .requires(s -> s.hasPermissionLevel(2))
-                .then(thenEach(literal("set"), options, opt -> opt.createArg()
-                        .map(arg -> literal(opt.name()).then(thenIf(
-                                argument(VALUE_NAME, arg)
-                                        .executes(ctx -> setGlobalOpt(ctx, opt)),
-                                !opt.global(),
-                                argument("targets", EntityArgumentType.players())
-                                        .executes(ctx -> setOpt(ctx, opt)))))))
-                .then(thenEach(literal("get"), options, opt -> Optional.of(thenIf(
+                .requires(require(permission("command.combat"), 2))
+                .then(thenEach(literal("set")
+                        .requires(require(permission("command.combat.set"), 2)), options, opt -> opt.createArg()
+                        .map(arg -> literal(opt.name())
+                                .requires(require(permission("command.combat.set." + opt.name()), 2))
+                                .then(thenIf(argument(VALUE_NAME, arg)
+                                                .executes(ctx -> setGlobalOpt(ctx, opt)),
+                                        !opt.global(),
+                                        argument("targets", EntityArgumentType.players())
+                                                .executes(ctx -> setOpt(ctx, opt)))))))
+                .then(thenEach(literal("get")
+                        .requires(require(permission("command.combat.get"), 2)), options, opt -> Optional.of(thenIf(
                         literal(opt.name())
+                                .requires(require(permission("command.combat.get." + opt.name()), 2))
                                 .executes(ctx -> getGlobalOpt(ctx, opt)),
                         !opt.global(),
                         argument("target", EntityArgumentType.player())
                                 .executes(ctx -> getOpt(ctx, opt))))))
                 .then(literal("style")
+                        .requires(require(permission("command.combat.style"), 2))
                         .then(argument("style", IdentifierArgumentType.identifier())
                                 .suggests(CombatCommand::suggestStyles)
                                 .executes(this::applyGlobalStyle)
@@ -74,6 +85,11 @@ public class CombatCommand {
     }
 
     private int applyGlobalStyle(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+        if (!Permissions.check(ctx.getSource(), permission("command.combat.style.global"), 2)) {
+            ctx.getSource().sendError(missingPermission);
+            return 0;
+        }
+
         var style = combatStyleArg(ctx);
 
         CombatControl.get(ctx.getSource().getServer()).setStyle(style.value());
@@ -115,6 +131,11 @@ public class CombatCommand {
     }
 
     private int setGlobalOpt(CommandContext<ServerCommandSource> ctx, Option opt) {
+        if (!Permissions.check(ctx.getSource(), permission("command.combat.set.global." + opt.name()), 2)) {
+            ctx.getSource().sendError(missingPermission);
+            return 0;
+        }
+
         Object value = opt.argValue(ctx);
         opt.setValue(ctx.getSource().getServer(), value, List.of());
 

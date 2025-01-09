@@ -7,5 +7,6 @@
   "commands.combat.get.player": "Current value of \"%s\" for %s is \"%s\"",
   "commands.combat.set": "Set \"%s\" to \"%s\"",
   "commands.combat.set.single": "Set \"%s\" for %s to \"%s\"",
-  "commands.combat.set.multiple": "Set \"%s\" for %s players to \"%s\""
+  "commands.combat.set.multiple": "Set \"%s\" for %s players to \"%s\"",
+  "error.combat-control.missing_permission_cmd": "You are not allowed to execute that command"
 }

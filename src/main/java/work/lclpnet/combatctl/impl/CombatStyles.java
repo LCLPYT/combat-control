@@ -55,7 +55,7 @@ public class CombatStyles {
             player.setModernFishingRodSounds(modern);
             player.setModernSharpness(modern);
             player.setNoReequipWhenUsing(!modern);
-            player.setFishingRodPull(false);  // wasn't enabled in vanilla, but usually enabled on pvp-servers, opt-in
+            player.setFishingRodPull(true);  // has always been enabled in vanilla, but usually disabled on pvp-servers -> opt-in
         }
 
         @Override
