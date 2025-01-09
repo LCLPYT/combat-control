@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * A configuration for combat details that are not within a player context. i.e. item stack or entity context etc.
+ * A configuration for non-player specific combat details that is available within the server context.
  */
 @Getter @Setter
 public class GlobalConfig {

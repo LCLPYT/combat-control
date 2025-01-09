@@ -14,7 +14,7 @@ import work.lclpnet.combatctl.cmd.CombatCommand;
 import work.lclpnet.combatctl.cmd.ModTranslations;
 import work.lclpnet.combatctl.config.ConfigManager;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
-import work.lclpnet.combatctl.impl.GlobalCombatControlImpl;
+import work.lclpnet.combatctl.impl.StaticCombatControl;
 import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
@@ -32,7 +32,7 @@ public class CombatControlMod implements ModInitializer {
 	public void onInitialize() {
 		ConfigManager configManager = loadConfig();
 		_configManager = configManager;
-		GlobalCombatControlImpl.get().bind(configManager);
+		StaticCombatControl.get().bind(configManager);
 
 		var translations = new ModTranslations(LOGGER);
 		translations.load().join();

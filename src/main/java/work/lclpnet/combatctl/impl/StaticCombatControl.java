@@ -1,23 +1,24 @@
 package work.lclpnet.combatctl.impl;
 
 import org.jetbrains.annotations.ApiStatus;
-import work.lclpnet.combatctl.api.GlobalCombatControl;
 import work.lclpnet.combatctl.config.ConfigAccess;
 import work.lclpnet.combatctl.config.GlobalConfig;
 
 import java.util.Objects;
 
+/**
+ * A singleton featuring data that needs to be available outside a server context, but on the server side, i.e. for features that don't have a server context.
+ */
 @ApiStatus.Internal
-public class GlobalCombatControlImpl implements GlobalCombatControl {
+public class StaticCombatControl {
 
     private GlobalConfig globalConfig;
 
-    public GlobalCombatControlImpl() {
+    public StaticCombatControl() {
         this.globalConfig = new GlobalConfig();
     }
 
-    @Override
-    public GlobalConfig getGlobalConfig() {
+    public GlobalConfig globalConfig() {
         return globalConfig;
     }
 
@@ -25,11 +26,11 @@ public class GlobalCombatControlImpl implements GlobalCombatControl {
         globalConfig = Objects.requireNonNull(access.config().global);
     }
 
-    public static GlobalCombatControlImpl get() {
+    public static StaticCombatControl get() {
         return Holder.instance;
     }
 
     private static class Holder {
-        private static final GlobalCombatControlImpl instance = new GlobalCombatControlImpl();
+        private static final StaticCombatControl instance = new StaticCombatControl();
     }
 }

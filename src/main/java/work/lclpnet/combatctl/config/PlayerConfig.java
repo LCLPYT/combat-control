@@ -5,10 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * A configuration of player combat details.
- * Each player will have their own config.
- * There is also a global player config that is persisted in the mod configuration.
- * Upon joining the server, a player gets assigned an independent copy of the global config.
+ * A configuration of player specific combat details that is available within the server context.
+ * Combat control features a global player config that is persisted in the mod configuration.
+ * Each player is assigned an independent copy of the global config upon joining.
  */
 @Getter @Setter
 public class PlayerConfig implements Cloneable {
