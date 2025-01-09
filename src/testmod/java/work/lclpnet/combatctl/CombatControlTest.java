@@ -6,6 +6,6 @@ public class CombatControlTest implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        CombatControlMod.LOGGER.info("Test mod loaded");
+        CCModInit.LOGGER.info("Test mod loaded");
     }
 }

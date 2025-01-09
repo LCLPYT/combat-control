@@ -4,7 +4,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import work.lclpnet.combatctl.CombatControlMod;
+import work.lclpnet.combatctl.CCModInit;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -26,7 +26,7 @@ public class ModTranslations {
     }
 
     private void _load() {
-        String res = "/assets/%s/en_us.json".formatted(CombatControlMod.MOD_ID);
+        String res = "/assets/%s/en_us.json".formatted(CCModInit.MOD_ID);
 
         var in = getClass().getResourceAsStream(res);
 

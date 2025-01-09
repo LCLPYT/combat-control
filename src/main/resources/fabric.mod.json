@@ -16,7 +16,7 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"work.lclpnet.combatctl.CombatControlMod"
+          "work.lclpnet.combatctl.CCModInit"
 		],
 		"client": [
 			"work.lclpnet.combatctl.CCClientMod"

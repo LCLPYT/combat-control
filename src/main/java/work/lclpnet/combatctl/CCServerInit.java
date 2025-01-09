@@ -9,6 +9,6 @@ public class CCServerInit implements DedicatedServerModInitializer {
     @Override
     public void onInitializeServer() {
         ServerLifecycleEvents.SERVER_STOPPING.register(server
-                -> CombatControlMod.configManager().ifPresent(ConfigManager::close));
+                -> CCModInit.configManager().ifPresent(ConfigManager::close));
     }
 }

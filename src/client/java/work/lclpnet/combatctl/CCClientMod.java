@@ -26,6 +26,6 @@ public class CCClientMod implements ClientModInitializer {
 		});
 
 		ClientLifecycleEvents.CLIENT_STOPPING.register(client
-				-> CombatControlMod.configManager().ifPresent(ConfigManager::close));
+				-> CCModInit.configManager().ifPresent(ConfigManager::close));
 	}
 }

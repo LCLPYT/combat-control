@@ -22,7 +22,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 
 @ApiStatus.Internal
-public class CombatControlMod implements ModInitializer {
+public class CCModInit implements ModInitializer {
 
 	public static final String MOD_ID = "combat-control";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
