@@ -28,7 +28,7 @@ public class ItemStackMixin {
     public void combatControl$applyAttributeModifiers(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
         ItemStack self = (ItemStack) (Object) this;
 
-        AttackAttributeHandler.modifyAttackDamageAttribute(self);
+        AttackAttributeHandler._modifyAttackDamageAttribute(self);
     }
 
     @Inject(
