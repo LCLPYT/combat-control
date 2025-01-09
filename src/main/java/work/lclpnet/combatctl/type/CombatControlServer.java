@@ -1,10 +1,12 @@
 package work.lclpnet.combatctl.type;
 
-import work.lclpnet.combatctl.api.CombatControl;
+import org.jetbrains.annotations.ApiStatus;
+import work.lclpnet.combatctl.impl.CombatControlImpl;
 
+@ApiStatus.Internal
 public interface CombatControlServer {
 
-    void combatControl$set(CombatControl combatControl);
+    void combatControl$set(CombatControlImpl combatControl);
 
-    CombatControl combatControl$get();
+    CombatControlImpl combatControl$get();
 }

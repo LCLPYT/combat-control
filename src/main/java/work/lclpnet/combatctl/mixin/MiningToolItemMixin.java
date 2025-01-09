@@ -50,7 +50,7 @@ public class MiningToolItemMixin implements ToolMaterialCapture {
     public void combatControl$postHit(ItemStack stack, LivingEntity target, LivingEntity attacker, CallbackInfoReturnable<Boolean> cir) {
         if (!(attacker instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         if (config.isModernItemDurability()) return;
 

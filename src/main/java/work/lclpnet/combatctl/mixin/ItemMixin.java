@@ -24,7 +24,7 @@ public class ItemMixin {
     )
     public void combatControl$damageTool(ItemStack instance, int amount, LivingEntity miner, EquipmentSlot slot, Operation<Void> original) {
         if (miner instanceof ServerPlayerEntity player && instance.getItem() instanceof SwordItem
-            && !CombatControl.get(player.getServer()).getConfig(player).isModernItemDurability()) {
+            && !CombatControl.get(player.getServer()).playerConfig(player).isModernItemDurability()) {
             original.call(instance, 1, miner, slot);
         } else {
             original.call(instance, amount, miner, slot);

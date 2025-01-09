@@ -35,7 +35,7 @@ public class FishingRodItemMixin {
             return;
         }
 
-        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         if (config.isModernFishingRodSounds()) {
             original.call(world, except, x, y, z, sound, category, volume, pitch);

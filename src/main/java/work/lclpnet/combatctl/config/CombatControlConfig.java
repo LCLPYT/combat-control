@@ -2,7 +2,9 @@ package work.lclpnet.combatctl.config;
 
 import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
+import org.jetbrains.annotations.ApiStatus;
 
+@ApiStatus.Internal
 public class CombatControlConfig {
 
     @SerdeComment("Default player configuration")

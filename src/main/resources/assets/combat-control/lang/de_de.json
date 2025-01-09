@@ -1,0 +1,11 @@
+{
+  "argument.combat_style.notfound": "Unbekannter Kampfstil \"%s\"",
+  "commands.combat.style.global": "Kampfstil zu \"%s\" geändert",
+  "commands.combat.style.single": "Kampfstil von %s zu \"%s\" geändert",
+  "commands.combat.style.multiple": "Kampfstil von %s Spielern auf \"%s\" geändert",
+  "commands.combat.get": "Der aktuelle Wert von \"%s\" ist \"%s\"",
+  "commands.combat.get.player": "Der aktuelle Wert von \"%s\" für %s ist \"%s\"",
+  "commands.combat.set": "Der Wert von \"%s\" wurde auf \"%s\" gesetzt",
+  "commands.combat.set.single": "Der Wert von \"%s\" wurde für %s auf \"%s\" gesetzt",
+  "commands.combat.set.multiple": "Der Wert von \"%s\" wurde für %s Spieler auf \"%s\" gesetzt"
+}

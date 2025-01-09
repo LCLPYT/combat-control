@@ -172,6 +172,6 @@ public abstract class FishingBobberEntityMixin {
     private PlayerConfig combatConfig() {
         if (!(getPlayerOwner() instanceof ServerPlayerEntity player)) return null;
 
-        return CombatControl.get(player.getServer()).getConfig(player);
+        return CombatControl.get(player.getServer()).playerConfig(player);
     }
 }

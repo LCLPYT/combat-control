@@ -6,10 +6,12 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.cmd.CombatCommand;
+import work.lclpnet.combatctl.cmd.ModTranslations;
 import work.lclpnet.combatctl.config.ConfigManager;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
 import work.lclpnet.combatctl.impl.GlobalCombatControlImpl;
@@ -19,6 +21,7 @@ import work.lclpnet.combatctl.type.CombatControlServer;
 import java.nio.file.Path;
 import java.util.Optional;
 
+@ApiStatus.Internal
 public class CombatControlMod implements ModInitializer {
 
 	public static final String MOD_ID = "combat-control";
@@ -31,10 +34,17 @@ public class CombatControlMod implements ModInitializer {
 		_configManager = configManager;
 		GlobalCombatControlImpl.get().bind(configManager);
 
+		var translations = new ModTranslations(LOGGER);
+		translations.load().join();
+
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			CombatControl control = new CombatControlImpl(server, configManager);
+			var control = new CombatControlImpl(server, configManager);
 			((CombatControlServer) server).combatControl$set(control);
+			configManager.onChanged(control::updatePlayers);
 		});
+
+		ServerLifecycleEvents.SERVER_STOPPING.register(server
+				-> configManager.onChanged(null));
 
 		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
 			CombatControl control = CombatControl.get(newPlayer.getServer());
@@ -42,7 +52,7 @@ public class CombatControlMod implements ModInitializer {
 		});
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment)
-				-> new CombatCommand().register(dispatcher));
+				-> new CombatCommand(translations).register(dispatcher));
 
 		CombatControlNetworking.init();
 

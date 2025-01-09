@@ -39,7 +39,7 @@ public abstract class LivingEntityMixin {
     protected void combatControl$completeUsingItem(CallbackInfo ci) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         if (config.isModernNotchApple() || !activeItemStack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) return;
 
@@ -56,7 +56,7 @@ public abstract class LivingEntityMixin {
     public void combatControl$beforeKnockBack(double strength, double ratioX, double ratioZ, CallbackInfo callback) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         if (!config.isStrongKnockBackInAir()) return;
 

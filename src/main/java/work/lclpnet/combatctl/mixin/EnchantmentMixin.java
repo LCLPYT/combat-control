@@ -62,7 +62,7 @@ public class EnchantmentMixin {
         }
 
         // filter user with old sharpness
-        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(player);
+        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         if (config.isModernSharpness()) {
             return original.call(instance, type);

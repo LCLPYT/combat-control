@@ -61,6 +61,7 @@ dependencies {
     modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
 
     include(implementation('com.electronwill.night-config:toml:3.8.1'))
+    include(implementation('org.json:json:20250107'))
 }
 
 [processResources, processTestmodResources].each {

@@ -1,0 +1,11 @@
+{
+  "argument.combat_style.notfound": "Unknown combat style \"%s\"",
+  "commands.combat.style.global": "Changed the combat style to \"%s\"",
+  "commands.combat.style.single": "Changed the combat style of %s to \"%s\"",
+  "commands.combat.style.multiple": "Changed the combat style of %s players to \"%s\"",
+  "commands.combat.get": "Current value of \"%s\" is \"%s\"",
+  "commands.combat.get.player": "Current value of \"%s\" for %s is \"%s\"",
+  "commands.combat.set": "Set \"%s\" to \"%s\"",
+  "commands.combat.set.single": "Set \"%s\" for %s to \"%s\"",
+  "commands.combat.set.multiple": "Set \"%s\" for %s players to \"%s\""
+}

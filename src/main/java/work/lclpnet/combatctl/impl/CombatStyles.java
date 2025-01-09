@@ -1,12 +1,35 @@
 package work.lclpnet.combatctl.impl;
 
+import net.minecraft.util.Identifier;
 import work.lclpnet.combatctl.api.CombatStyle;
 import work.lclpnet.combatctl.config.GlobalConfig;
 import work.lclpnet.combatctl.config.PlayerConfig;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 public class CombatStyles {
 
     public static final CombatStyle CLASSIC = new ModernStyle(false), MODERN = new ModernStyle(true);
+    private static final Map<Identifier, CombatStyle> registry = new HashMap<>();
+
+    static {
+        register(Identifier.ofVanilla("classic"), CLASSIC);
+        register(Identifier.ofVanilla("modern"), MODERN);
+    }
+
+    public static void register(Identifier id, CombatStyle style) {
+        Objects.requireNonNull(id);
+        Objects.requireNonNull(style);
+
+        registry.put(id, style);
+    }
+
+    public static Map<Identifier, CombatStyle> registry() {
+        return Collections.unmodifiableMap(registry);
+    }
 
     private record ModernStyle(boolean modern) implements CombatStyle {
 

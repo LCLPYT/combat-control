@@ -42,7 +42,7 @@ public abstract class HungerManagerMixin {
     public void combatControl$tick(ServerPlayerEntity player, CallbackInfo callback) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).getConfig(serverPlayer);
+        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(serverPlayer);
 
         if (config.isModernRegeneration()) return;
 
