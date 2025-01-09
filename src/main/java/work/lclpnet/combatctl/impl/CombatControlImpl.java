@@ -147,41 +147,10 @@ public class CombatControlImpl implements CombatControl {
     private void updateModdedPlayer(ServerPlayerEntity player) {
         PlayerConfig config = playerConfig(player);
         CombatAbilities abilities = getAbilities(player);
-        boolean changed = false;
 
-        {
-            boolean b = config.isAttackCooldown();
-
-            if (b != abilities.attackCooldown) {
-                abilities.attackCooldown = b;
-                changed = true;
-            }
-        } {
-            boolean b = config.isAttackWhileUsing();
-
-            if (b != abilities.attackWhileUsing) {
-                abilities.attackWhileUsing = b;
-                changed = true;
-            }
-        } {
-            boolean b = config.isRenderSwingArmWhileUsing();
-
-            if (b != abilities.renderArmSwingWhileUsing) {
-                abilities.renderArmSwingWhileUsing = b;
-                changed = true;
-            }
-        } {
-            boolean b = config.isNoReequipWhenUsing();
-
-            if (b != abilities.noReequipWhenUsing) {
-                abilities.noReequipWhenUsing = b;
-                changed = true;
-            }
+        if (abilities.syncFrom(config)) {
+            var packet = new CombatAbilitiesS2CPacket(abilities);
+            ServerPlayNetworking.send(player, packet);
         }
-
-        if (!changed) return;
-
-        var packet = new CombatAbilitiesS2CPacket(abilities);
-        ServerPlayNetworking.send(player, packet);
     }
 }
