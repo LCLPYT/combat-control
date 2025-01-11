@@ -53,7 +53,7 @@ public class CCModInit implements ModInitializer {
 		});
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment)
-				-> new CombatCommand(translations).register(dispatcher));
+				-> new CombatCommand(translations, configManager).register(dispatcher));
 
 		CombatControlNetworking.init();
 

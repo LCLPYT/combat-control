@@ -26,7 +26,7 @@ public class ModTranslations {
     }
 
     private void _load() {
-        String res = "/assets/%s/en_us.json".formatted(CCModInit.MOD_ID);
+        String res = "/assets/%s/lang/en_us.json".formatted(CCModInit.MOD_ID);
 
         var in = getClass().getResourceAsStream(res);
 

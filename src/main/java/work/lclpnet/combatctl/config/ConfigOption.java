@@ -7,9 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class ConfigOption {
 
@@ -121,17 +119,52 @@ public class ConfigOption {
         return type.isPrimitive() || type.isArray() || type.isEnum() || type.isAssignableFrom(Collection.class);
     }
 
-    public static List<ConfigOption> allOf(Class<?> srcClass, List<ConfigOption> options) {
-        for (Field field : srcClass.getDeclaredFields()) {
-            var type = field.getType();
+    public static List<Instance> instanceTree(Class<?> srcClass) {
+        List<Instance> list = new ArrayList<>();
+        _instanceTree(srcClass, list, new LinkedList<>());
+        return list;
+    }
 
-            if (isValue(type)) {
-                options.add(new ConfigOption(field, srcClass));
-            } else {
-                allOf(type, options);
+    private static void _instanceTree(Class<?> srcClass, List<Instance> list, LinkedList<Field> path) {
+        for (Field field : srcClass.getDeclaredFields()) {
+            if (isValue(field.getType())) {
+                list.add(new Instance(new ConfigOption(field, srcClass), path));
+                continue;
+            }
+
+            var nextPath = new LinkedList<>(path);
+            nextPath.add(field);
+
+            _instanceTree(field.getType(), list, nextPath);
+        }
+    }
+
+    public record Instance(ConfigOption option, List<Field> srcPath) {
+
+        public Object get(Object src) {
+            src = applyPath(src);
+
+            return src != null ? option.get(src) : null;
+        }
+
+        public void set(Object src, Object val) {
+            src = applyPath(src);
+
+            if (src != null) {
+                option.set(src, val);
             }
         }
 
-        return options;
+        private @Nullable Object applyPath(Object src) {
+            try {
+                for (Field field : srcPath) {
+                    src = field.get(src);
+                }
+            } catch (IllegalAccessException e) {
+                return null;
+            }
+
+            return src;
+        }
     }
 }

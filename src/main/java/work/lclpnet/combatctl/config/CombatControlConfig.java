@@ -2,6 +2,7 @@ package work.lclpnet.combatctl.config;
 
 import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
+import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipSerializingIf;
 import org.jetbrains.annotations.ApiStatus;
 import work.lclpnet.combatctl.util.EnvUtil;
 
@@ -19,11 +20,19 @@ public class CombatControlConfig {
     @SerdeComment("Client configuration")
     @SerdeSkipDeserializingIf(
             value = SerdeSkipDeserializingIf.SkipDeIf.CUSTOM,
-            customCheck = "skipDeserializeClient"
+            customCheck = "skipClientDeserializationOnServer"
+    )
+    @SerdeSkipSerializingIf(
+            value = SerdeSkipSerializingIf.SkipSerIf.CUSTOM,
+            customCheck = "skipClientSerializationOnServer"
     )
     public final ClientConfig client = new ClientConfig();
 
-    private static boolean skipDeserializeClient(Object client) {
+    private static boolean skipClientDeserializationOnServer(Object client) {
         return client == null || !EnvUtil.isClient();
+    }
+
+    private static boolean skipClientSerializationOnServer(ClientConfig ignoredClient) {
+        return !EnvUtil.isClient();
     }
 }

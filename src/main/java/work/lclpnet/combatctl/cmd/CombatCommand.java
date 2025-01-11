@@ -1,8 +1,6 @@
 package work.lclpnet.combatctl.cmd;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -14,7 +12,6 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.command.argument.EntityArgumentType;
 import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -22,15 +19,13 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
-import work.lclpnet.combatctl.config.GlobalConfig;
-import work.lclpnet.combatctl.config.PlayerConfig;
+import work.lclpnet.combatctl.config.*;
 import work.lclpnet.combatctl.impl.CombatStyles;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
@@ -43,13 +38,30 @@ public class CombatCommand {
     private static final String VALUE_NAME = "value";
 
     private final ModTranslations translations;
-    private final List<Option> options;
+    private final CombatControlConfig config;
+    private final List<ConfigOption.Instance> options;
     private final DynamicCommandExceptionType unknownStyleError;
     private final Text missingPermission;
 
-    public CombatCommand(ModTranslations translations) {
+    public CombatCommand(ModTranslations translations, ConfigAccess<CombatControlConfig> configManager) {
         this.translations = translations;
-        options = loadOptions();
+        this.config = configManager.config();
+
+        options = ConfigOption.instanceTree(CombatControlConfig.class)
+                .stream()
+                .filter(inst -> inst.option().srcClass() != ClientConfig.class)
+                .map(inst -> {
+                    ConfigOption opt = inst.option();
+                    int len = inst.srcPath().size();
+
+                    if (opt.srcClass() == PlayerConfig.class && len >= 1) {
+                        return new ConfigOption.Instance(opt, inst.srcPath().subList(1, len));
+                    }
+
+                    return inst;
+                })
+                .sorted(Comparator.comparing(inst -> inst.option().field().getName()))
+                .toList();
 
         unknownStyleError = new DynamicCommandExceptionType(arg -> translations.fallback("argument.combat_style.notfound", arg));
         missingPermission = translations.fallback("error.combat-control.missing_permission_cmd");
@@ -59,22 +71,22 @@ public class CombatCommand {
         dispatcher.register(literal("combat")
                 .requires(require(permission("command.combat"), 2))
                 .then(thenEach(literal("set")
-                        .requires(require(permission("command.combat.set"), 2)), options, opt -> opt.createArg()
-                        .map(arg -> literal(opt.name())
-                                .requires(require(permission("command.combat.set." + opt.name()), 2))
+                        .requires(require(permission("command.combat.set"), 2)), options, inst -> inst.option().argumentType()
+                        .map(arg -> literal(inst.option().field().getName())
+                                .requires(require(permission("command.combat.set." + inst.option().field().getName()), 2))
                                 .then(thenIf(argument(VALUE_NAME, arg)
-                                                .executes(ctx -> setGlobalOpt(ctx, opt)),
-                                        !opt.global(),
+                                                .executes(ctx -> setGlobalOpt(ctx, inst)),
+                                        inst.option().srcClass() == PlayerConfig.class,
                                         argument("targets", EntityArgumentType.players())
-                                                .executes(ctx -> setOpt(ctx, opt)))))))
+                                                .executes(ctx -> setOpt(ctx, inst)))))))
                 .then(thenEach(literal("get")
-                        .requires(require(permission("command.combat.get"), 2)), options, opt -> Optional.of(thenIf(
-                        literal(opt.name())
-                                .requires(require(permission("command.combat.get." + opt.name()), 2))
-                                .executes(ctx -> getGlobalOpt(ctx, opt)),
-                        !opt.global(),
+                        .requires(require(permission("command.combat.get"), 2)), options, inst -> Optional.of(thenIf(
+                        literal(inst.option().field().getName())
+                                .requires(require(permission("command.combat.get." + inst.option().field().getName()), 2))
+                                .executes(ctx -> getGlobalOpt(ctx, inst)),
+                        inst.option().srcClass() == PlayerConfig.class,
                         argument("target", EntityArgumentType.player())
-                                .executes(ctx -> getOpt(ctx, opt))))))
+                                .executes(ctx -> getOpt(ctx, inst))))))
                 .then(literal("style")
                         .requires(require(permission("command.combat.style"), 2))
                         .then(argument("style", IdentifierArgumentType.identifier())
@@ -113,48 +125,97 @@ public class CombatCommand {
         return 1;
     }
 
-    private int getGlobalOpt(CommandContext<ServerCommandSource> ctx, Option opt) {
-        Object value = opt.getValue(ctx.getSource().getServer(), null);
+    private int getGlobalOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) {
+        ConfigOption opt = inst.option();
+        Object value = get(inst, null);
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get", opt.name, opt.stringify(value)), false);
+        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get", opt.field().getName(), opt.stringify(value)), false);
 
         return code(value);
     }
 
-    private int getOpt(CommandContext<ServerCommandSource> ctx, Option opt) throws CommandSyntaxException {
+    private int getOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) throws CommandSyntaxException {
         ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "target");
-        Object value = opt.getValue(player.getServer(), player);
+        ConfigOption opt = inst.option();
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get.player", opt.name, player.getNameForScoreboard(), opt.stringify(value)), false);
+        Object value = get(inst, player);
+
+        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get.player", opt.field().getName(), player.getNameForScoreboard(), opt.stringify(value)), false);
 
         return code(value);
     }
 
-    private int setGlobalOpt(CommandContext<ServerCommandSource> ctx, Option opt) {
-        if (!Permissions.check(ctx.getSource(), permission("command.combat.set.global." + opt.name()), 2)) {
+    private int setGlobalOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) {
+        ConfigOption opt = inst.option();
+        String name = opt.field().getName();
+
+        if (!Permissions.check(ctx.getSource(), permission("command.combat.set.global." + name), 2)) {
             ctx.getSource().sendError(missingPermission);
             return 0;
         }
 
-        Object value = opt.argValue(ctx);
-        opt.setValue(ctx.getSource().getServer(), value, List.of());
+        Object value = opt.argumentValue(ctx, VALUE_NAME);
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.set", opt.name, opt.stringify(value)), false);
+        // set global player config
+        set(inst, value, null);
+
+        // set online player configs
+        if (opt.srcClass() == PlayerConfig.class) {
+            for (ServerPlayerEntity player : PlayerLookup.all(ctx.getSource().getServer())) {
+                set(inst, value, player);
+            }
+        }
+
+        CombatControl.get(ctx.getSource().getServer()).update();
+
+        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.set", name, opt.stringify(value)), false);
 
         return 1;
     }
 
-    private int setOpt(CommandContext<ServerCommandSource> ctx, Option opt) throws CommandSyntaxException {
+    private int setOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) throws CommandSyntaxException {
         var players = EntityArgumentType.getPlayers(ctx, "targets");
-        Object value = opt.argValue(ctx);
 
-        opt.setValue(ctx.getSource().getServer(), value, players);
+        ConfigOption opt = inst.option();
+        Object value = opt.argumentValue(ctx, VALUE_NAME);
+
+        var control = CombatControl.get(ctx.getSource().getServer());
+
+        for (ServerPlayerEntity player : players) {
+            set(inst, value, player);
+            control.update(player);
+        }
+
+        String name = opt.field().getName();
 
         ctx.getSource().sendFeedback(() -> players.size() == 1
-                ? translations.fallback("commands.combat.set.single", opt.name, players.iterator().next().getNameForScoreboard(), opt.stringify(value))
-                : translations.fallback("commands.combat.set.multiple", opt.name, players.size(), opt.stringify(value)), false);
+                ? translations.fallback("commands.combat.set.single", name, players.iterator().next().getNameForScoreboard(), opt.stringify(value))
+                : translations.fallback("commands.combat.set.multiple", name, players.size(), opt.stringify(value)), false);
 
         return 1;
+    }
+
+    private void set(ConfigOption.Instance inst, Object val, @Nullable ServerPlayerEntity player) {
+        if (inst.option().srcClass() != PlayerConfig.class) {
+            inst.set(config, val);
+            return;
+        }
+
+        inst.set(playerCfg(player), val);
+    }
+
+    private Object get(ConfigOption.Instance inst, @Nullable ServerPlayerEntity player) {
+        if (inst.option().srcClass() != PlayerConfig.class) {
+            return inst.get(config);
+        }
+
+        return inst.get(playerCfg(player));
+    }
+
+    private PlayerConfig playerCfg(@Nullable ServerPlayerEntity player) {
+        return player != null
+                ? CombatControl.get(player.getServer()).playerConfig(player)
+                : config.player;
     }
 
     private static <S, B extends ArgumentBuilder<S, B>, T> B thenEach(B parent, Iterable<T> items, Function<T, Optional<ArgumentBuilder<S, ?>>> func) {
@@ -198,129 +259,5 @@ public class CombatCommand {
                 .forEach(builder::suggest);
 
         return builder.buildFuture();
-    }
-
-    private static List<Option> loadOptions() {
-        var options = new ArrayList<Option>();
-
-        for (Field field : PlayerConfig.class.getDeclaredFields()) {
-            options.add(new Option(field.getName(), field.getType(), false));
-        }
-
-        for (Field field : GlobalConfig.class.getDeclaredFields()) {
-            options.add(new Option(field.getName(), field.getType(), true));
-        }
-
-        options.sort(Comparator.comparing(Option::name));
-
-        return options;
-    }
-
-    private record Option(String name, Class<?> type, boolean global) {
-
-        public Optional<ArgumentType<?>> createArg() {
-            if (type == boolean.class) {
-                return Optional.of(BoolArgumentType.bool());
-            }
-
-            return Optional.empty();
-        }
-
-        public Object argValue(CommandContext<ServerCommandSource> ctx) {
-            if (type == boolean.class) {
-                return BoolArgumentType.getBool(ctx, VALUE_NAME);
-            }
-
-            return null;
-        }
-
-        public Object getValue(MinecraftServer server, @Nullable ServerPlayerEntity target) {
-            CombatControl cc = CombatControl.get(server);
-            Object src = global
-                    ? cc.globalConfig()
-                    : (target != null ? cc.playerConfig(target) : cc.playerConfig());
-
-            try {
-                final String getterName = (type == boolean.class ? "is" : "get") + ucfirst(name);
-
-                Method getter = src.getClass().getDeclaredMethod(getterName);
-                getter.setAccessible(true);
-
-                return getter.invoke(src);
-            } catch (ReflectiveOperationException e) {
-                return null;
-            }
-        }
-
-        public void setValue(MinecraftServer server, Object value, Collection<ServerPlayerEntity> targets) {
-            var setter = setter();
-
-            if (setter == null) return;
-
-            CombatControl cc = CombatControl.get(server);
-
-            if (global) {
-                setter.accept(cc.globalConfig(), value);
-                cc.update();
-                return;
-            }
-
-            if (targets.isEmpty()) {
-                setter.accept(cc.playerConfig(), value);
-
-                for (ServerPlayerEntity player : PlayerLookup.all(server)) {
-                    setter.accept(cc.playerConfig(player), value);
-                }
-
-                cc.update();
-                return;
-            }
-
-            for (ServerPlayerEntity player : targets) {
-                setter.accept(cc.playerConfig(player), value);
-                cc.update(player);
-            }
-        }
-
-        private @Nullable BiConsumer<Object, Object> setter() {
-            try {
-                Class<?> cls = global ? GlobalConfig.class : PlayerConfig.class;
-
-                Method setterMethod = cls.getDeclaredMethod("set" + ucfirst(name), type);
-                setterMethod.setAccessible(true);
-
-                return (cfg, val) -> {
-                    try {
-                        setterMethod.invoke(cfg, val);
-                    } catch (ReflectiveOperationException ignored) {}
-                };
-            } catch (NoSuchMethodException e) {
-                return null;
-            }
-        }
-
-        public String stringify(Object val) {
-            if (type == boolean.class) {
-                return Boolean.toString(val instanceof Boolean b && b);
-            }
-
-            return "unknown";
-        }
-
-        private static String ucfirst(String s) {
-            int len = s.length();
-
-            if (len == 0) {
-                return s;
-            }
-
-            char c = Character.toTitleCase(s.charAt(0));
-
-            if (len == 1) {
-                return String.valueOf(c);
-            }
-
-            return c + s.substring(1);
-        }
     }
 }
