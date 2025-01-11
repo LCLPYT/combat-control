@@ -24,10 +24,10 @@ import java.util.function.Consumer;
 public class CombatControlImpl implements CombatControl {
 
     private final MinecraftServer server;
-    private final ConfigAccess configAccess;
+    private final ConfigAccess<CombatControlConfig> configAccess;
     private final CombatControlConfig defaultConfig;
 
-    public CombatControlImpl(MinecraftServer server, ConfigAccess configAccess) {
+    public CombatControlImpl(MinecraftServer server, ConfigAccess<CombatControlConfig> configAccess) {
         this.server = server;
         this.configAccess = configAccess;
         this.defaultConfig = configAccess.config();

@@ -4,23 +4,26 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.serde.ObjectDeserializer;
 import com.electronwill.nightconfig.core.serde.ObjectSerializer;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Path;
 
 @ApiStatus.Internal
-public class ConfigManager implements ConfigAccess, AutoCloseable {
+public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
 
-    private final CommentedFileConfig config;
+    private final CommentedFileConfig fileConfig;
     private final ObjectSerializer serializer;
     private final ObjectDeserializer deserializer;
-    private final CombatControlConfig obj = new CombatControlConfig();
+    private final C config;
     private @Nullable Runnable onChanged = null;
 
-    public ConfigManager(Path configPath) {
-        config = CommentedFileConfig.builder(configPath)
+    public ConfigManager(Path configPath, C config) {
+        this.config = config;
+
+        fileConfig = CommentedFileConfig.builder(configPath)
                 .autoreload()
-                .onAutoReload(this::updateObj)
+                .onAutoReload(this::updateConfig)
                 .build();
 
         serializer = ObjectSerializer.standard();
@@ -28,41 +31,41 @@ public class ConfigManager implements ConfigAccess, AutoCloseable {
     }
 
     @Override
-    public CombatControlConfig config() {
-        return obj;
+    public @NotNull C config() {
+        return config;
     }
 
     public synchronized void load() {
-        config.load();
-        updateObj();
+        fileConfig.load();
+        updateConfig();
 
-        if (config.isEmpty()) {
+        if (fileConfig.isEmpty()) {
             save();
         }
     }
 
     @Override
     public synchronized void save() {
-        updateConfig();
-        config.save();
+        updateFileConfig();
+        fileConfig.save();
     }
 
-    private synchronized void updateObj() {
-        deserializer.deserializeFields(config, obj);
+    private synchronized void updateConfig() {
+        deserializer.deserializeFields(fileConfig, config);
 
         if (onChanged != null) {
             onChanged.run();
         }
     }
 
-    private void updateConfig() {
-        serializer.serializeFields(obj, config);
+    private void updateFileConfig() {
+        serializer.serializeFields(config, fileConfig);
     }
 
     @Override
     public void close() {
-        if (config != null) {
-            config.close();
+        if (fileConfig != null) {
+            fileConfig.close();
         }
     }
 

@@ -13,7 +13,7 @@ public class CCClientMod implements ClientModInitializer {
 
 	@Override
 	public void onInitializeClient() {
-		CombatControlClient control = CombatControlClient.get();
+		var control = CombatControlClient.get();
 
 		new CombatControlClientNetworking(control).init();
 

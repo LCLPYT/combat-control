@@ -8,5 +8,7 @@
   "commands.combat.set": "Der Wert von \"%s\" wurde auf \"%s\" gesetzt",
   "commands.combat.set.single": "Der Wert von \"%s\" wurde für %s auf \"%s\" gesetzt",
   "commands.combat.set.multiple": "Der Wert von \"%s\" wurde für %s Spieler auf \"%s\" gesetzt",
-  "error.combat-control.missing_permission_cmd": "Dir ist es nicht gestattet dieses Kommando auszuführen"
+  "error.combat-control.missing_permission_cmd": "Dir ist es nicht gestattet dieses Kommando auszuführen",
+  "combat-control.config": "Combat Control Einstellungen",
+  "combat-control.config.client": "Client"
 }

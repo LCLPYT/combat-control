@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.cmd.CombatCommand;
 import work.lclpnet.combatctl.cmd.ModTranslations;
+import work.lclpnet.combatctl.config.CombatControlConfig;
 import work.lclpnet.combatctl.config.ConfigManager;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
 import work.lclpnet.combatctl.impl.StaticCombatControl;
@@ -26,11 +27,11 @@ public class CCModInit implements ModInitializer {
 
 	public static final String MOD_ID = "combat-control";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-	private static volatile ConfigManager _configManager = null;
+	private static volatile ConfigManager<CombatControlConfig> _configManager = null;
 
 	@Override
 	public void onInitialize() {
-		ConfigManager configManager = loadConfig();
+		var configManager = loadConfig();
 		_configManager = configManager;
 		StaticCombatControl.get().bind(configManager);
 
@@ -59,12 +60,13 @@ public class CCModInit implements ModInitializer {
 		LOGGER.info("Initialized.");
 	}
 
-	private ConfigManager loadConfig() {
+	private ConfigManager<CombatControlConfig> loadConfig() {
 		Path configPath = FabricLoader.getInstance().getConfigDir()
 				.resolve(MOD_ID)
 				.resolve("config.toml");
 
-		ConfigManager configManager = new ConfigManager(configPath);
+
+		var configManager = new ConfigManager<>(configPath, new CombatControlConfig());
 
 		configManager.load();
 
@@ -84,7 +86,7 @@ public class CCModInit implements ModInitializer {
 		return MOD_ID + "." + suffix;
 	}
 
-	public static Optional<ConfigManager> configManager() {
+	public static Optional<ConfigManager<CombatControlConfig>> configManager() {
 		return Optional.ofNullable(_configManager);
 	}
 }

@@ -23,6 +23,9 @@
 		],
 		"server": [
 			"work.lclpnet.combatctl.CCServerInit"
+		],
+		"modmenu": [
+			"work.lclpnet.combatctl.CCModMenu"
 		]
 	},
 	"mixins": [

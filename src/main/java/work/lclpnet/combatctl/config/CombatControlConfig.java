@@ -3,6 +3,7 @@ package work.lclpnet.combatctl.config;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
 import org.jetbrains.annotations.ApiStatus;
+import work.lclpnet.combatctl.util.EnvUtil;
 
 @ApiStatus.Internal
 public class CombatControlConfig {
@@ -14,4 +15,15 @@ public class CombatControlConfig {
     @SerdeComment("Global configuration that doesn't involve specific players")
     @SerdeSkipDeserializingIf(SerdeSkipDeserializingIf.SkipDeIf.IS_MISSING)
     public final GlobalConfig global = new GlobalConfig();
+
+    @SerdeComment("Client configuration")
+    @SerdeSkipDeserializingIf(
+            value = SerdeSkipDeserializingIf.SkipDeIf.CUSTOM,
+            customCheck = "skipDeserializeClient"
+    )
+    public final ClientConfig client = new ClientConfig();
+
+    private static boolean skipDeserializeClient(Object client) {
+        return client == null || !EnvUtil.isClient();
+    }
 }
