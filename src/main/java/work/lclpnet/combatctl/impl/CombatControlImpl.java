@@ -54,6 +54,11 @@ public class CombatControlImpl implements CombatControl {
     public void setStyle(CombatStyle style) {
         style.configure(defaultConfig.global);
         style.configure(defaultConfig.player);
+
+        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+            style.configure(playerConfig(player));
+        }
+
         update();
     }
 
