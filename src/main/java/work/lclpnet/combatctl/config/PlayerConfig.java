@@ -36,7 +36,7 @@ public class PlayerConfig implements Cloneable {
     @SerdeComment("If enabled, fishing rod hits will not apply knockback")
     private boolean noFishingRodKnockBack = true;
 
-    @SerdeComment("If disabled, entities attacked in the air will take more knockback")
+    @SerdeComment("Whether players attacked in the air will take more knockback")
     private boolean strongKnockBackInAir = false;
 
     @SerdeComment("If enabled, critical hits will not be possible while sprinting")

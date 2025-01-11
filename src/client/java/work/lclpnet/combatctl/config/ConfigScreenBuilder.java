@@ -5,7 +5,9 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
@@ -24,9 +26,12 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
             DESC = MOD_ID + ".config.desc";
 
     private final ConfigManager<CombatControlConfig> configManager;
+    private final CombatControlConfig config, defaultConfig;
 
     public ConfigScreenBuilder(ConfigManager<CombatControlConfig> configManager) {
         this.configManager = configManager;
+        this.config = configManager.config();
+        this.defaultConfig = new CombatControlConfig();
     }
 
     @Override
@@ -36,37 +41,48 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
                 .setTitle(translatable(TITLE))
                 .setSavingRunnable(configManager::save);
 
-        CombatControlConfig config = configManager.config();
-        CombatControlConfig defaultConfig = new CombatControlConfig();
+        addCategory("client", builder);
 
-        // categories
-        for (Field field : CombatControlConfig.class.getDeclaredFields()) {
-            String name = field.getName();
+        IntegratedServer server = MinecraftClient.getInstance().getServer();
 
-            var category = builder.getOrCreateCategory(translatable(join(".", TITLE, name)));
-
-            String comment = comment(field);
-
-            if (comment != null) {
-                category.setDescription(new StringVisitable[] {
-                        translatableWithFallback(join(".", DESC, name), comment)
-                });
-            }
-
-            Object src, defaultSrc;
-
-            try {
-                field.setAccessible(true);
-                src = field.get(config);
-                defaultSrc = field.get(defaultConfig);
-            } catch (IllegalAccessException ignored) {
-                continue;
-            }
-
-            initCategory(builder, category, field, src, defaultSrc);
+        if (server == null || !server.isRemote()) {
+            addCategory("player", builder);
+            addCategory("global", builder);
         }
 
         return builder.build();
+    }
+
+    private void addCategory(String name, ConfigBuilder builder) {
+        Field field;
+
+        try {
+            field = CombatControlConfig.class.getDeclaredField(name);
+        } catch (NoSuchFieldException e) {
+            return;
+        }
+
+        var category = builder.getOrCreateCategory(translatable(join(".", TITLE, name)));
+
+        String comment = comment(field);
+
+        if (comment != null) {
+            category.setDescription(new StringVisitable[] {
+                    translatableWithFallback(join(".", DESC, name), comment)
+            });
+        }
+
+        Object src, defaultSrc;
+
+        try {
+            field.setAccessible(true);
+            src = field.get(config);
+            defaultSrc = field.get(defaultConfig);
+        } catch (IllegalAccessException ignored) {
+            return;
+        }
+
+        initCategory(builder, category, field, src, defaultSrc);
     }
 
     private void initCategory(ConfigBuilder builder, ConfigCategory category, Field parent, Object src, Object defaultSrc) {
