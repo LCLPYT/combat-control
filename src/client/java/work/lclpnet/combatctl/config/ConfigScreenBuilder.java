@@ -7,12 +7,13 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
+import java.util.function.Consumer;
 
 import static java.lang.String.join;
 import static net.minecraft.text.Text.translatable;
@@ -43,9 +44,10 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
 
         addCategory("client", builder);
 
-        IntegratedServer server = MinecraftClient.getInstance().getServer();
+        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
 
-        if (server == null || !server.isRemote()) {
+        // when not connected to a multiplayer server, show player and global
+        if (networkHandler == null || networkHandler.getServerInfo() == null) {
             addCategory("player", builder);
             addCategory("global", builder);
         }
@@ -105,7 +107,7 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
                         ? translatableWithFallback(join(".", DESC, parent.getName(), name), comment)
                         : null;
 
-                var entry = entry(builder, type, value, defaultValue, label, tooltip);
+                var entry = entry(builder, type, value, defaultValue, v -> option.set(src, v), label, tooltip);
 
                 if (entry != null) {
                     category.addEntry(entry);
@@ -116,12 +118,14 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
 
     private @Nullable AbstractConfigListEntry<?> entry(ConfigBuilder builder, Class<?> type,
                                                        Object value, Object defaultValue,
+                                                       Consumer<Object> saveConsumer,
                                                        Text label, @Nullable Text tooltip) {
         if (type == boolean.class) {
             return builder.entryBuilder()
                     .startBooleanToggle(label, value instanceof Boolean b && b)
                     .setDefaultValue(defaultValue instanceof Boolean b && b)
                     .setTooltip(tooltip)
+                    .setSaveConsumer(saveConsumer::accept)
                     .build();
         }
 

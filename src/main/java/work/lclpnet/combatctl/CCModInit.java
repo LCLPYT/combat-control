@@ -4,7 +4,9 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
@@ -48,8 +50,18 @@ public class CCModInit implements ModInitializer {
 				-> configManager.onChanged(null));
 
 		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
-			CombatControl control = CombatControl.get(newPlayer.getServer());
+			var control = CombatControl.get(newPlayer.getServer());
 			control.copyData(oldPlayer, newPlayer);
+		});
+
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			var control = CombatControl.get(server);
+
+			ServerPlayerEntity player = handler.player;
+
+			if (player != null) {
+				control.update(player);
+			}
 		});
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment)

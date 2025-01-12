@@ -3,8 +3,9 @@ package work.lclpnet.combatctl.config;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipSerializingIf;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.ApiStatus;
-import work.lclpnet.combatctl.util.EnvUtil;
 
 @ApiStatus.Internal
 public class CombatControlConfig {
@@ -29,10 +30,10 @@ public class CombatControlConfig {
     public final ClientConfig client = new ClientConfig();
 
     private static boolean skipClientDeserializationOnServer(Object client) {
-        return client == null || !EnvUtil.isClient();
+        return client == null || FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT;
     }
 
     private static boolean skipClientSerializationOnServer(ClientConfig ignoredClient) {
-        return !EnvUtil.isClient();
+        return FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT;
     }
 }
