@@ -13,18 +13,18 @@ import java.util.Objects;
 @ApiStatus.Internal
 public class StaticCombatControl {
 
-    private GlobalConfig globalConfig;
+    private CombatControlConfig config;
 
     public StaticCombatControl() {
-        this.globalConfig = new GlobalConfig();
+        this.config = new CombatControlConfig();
     }
 
     public GlobalConfig globalConfig() {
-        return globalConfig;
+        return config.global;
     }
 
     public void bind(ConfigAccess<CombatControlConfig> access) {
-        globalConfig = Objects.requireNonNull(access.config().global);
+        config = Objects.requireNonNull(access.config());
     }
 
     public static StaticCombatControl get() {
