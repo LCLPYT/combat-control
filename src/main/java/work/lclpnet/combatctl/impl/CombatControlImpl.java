@@ -25,11 +25,13 @@ public class CombatControlImpl implements CombatControl {
 
     private final MinecraftServer server;
     private final ConfigAccess<CombatControlConfig> configAccess;
+    private final CombatControlNetworking networking;
     private final CombatControlConfig defaultConfig;
 
-    public CombatControlImpl(MinecraftServer server, ConfigAccess<CombatControlConfig> configAccess) {
+    public CombatControlImpl(MinecraftServer server, ConfigAccess<CombatControlConfig> configAccess, CombatControlNetworking networking) {
         this.server = server;
         this.configAccess = configAccess;
+        this.networking = networking;
         this.defaultConfig = configAccess.config();
     }
 
@@ -107,7 +109,7 @@ public class CombatControlImpl implements CombatControl {
 
     @Override
     public void update(ServerPlayerEntity player) {
-        if (CombatControlNetworking.isListening(player)) {
+        if (networking.understands(player)) {
             updateModdedPlayer(player);
         } else {
             updateVanillaPlayer(player);

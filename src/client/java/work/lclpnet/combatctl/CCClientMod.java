@@ -15,7 +15,7 @@ public class CCClientMod implements ClientModInitializer {
 	public void onInitializeClient() {
 		var control = CombatControlClient.get();
 
-		new CombatControlClientNetworking(control).init();
+		new CombatControlClientNetworking(control, CCModInit.LOGGER).init();
 
 		CombatAbilities abilities = control.getAbilities();
 

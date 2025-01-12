@@ -9,6 +9,8 @@
   "commands.combat.set.single": "Set \"%s\" for %s to \"%s\"",
   "commands.combat.set.multiple": "Set \"%s\" for %s players to \"%s\"",
   "error.combat-control.missing_permission_cmd": "You are not allowed to execute that command",
+  "kibu.proto.combat-control.version.too_old": "Your client uses an older version of combat-control than the server. Please update, so that everything works properly.",
+  "kibu.proto.combat-control.version.too_new": "Your client uses a newer version of combat-control than the server. Some things may not work properly.",
   "combat-control.config.title": "Combat Control Config",
   "combat-control.config.title.client": "Client",
   "combat-control.config.title.player": "Player",

@@ -9,6 +9,8 @@
   "commands.combat.set.single": "Der Wert von \"%s\" wurde für %s auf \"%s\" gesetzt",
   "commands.combat.set.multiple": "Der Wert von \"%s\" wurde für %s Spieler auf \"%s\" gesetzt",
   "error.combat-control.missing_permission_cmd": "Dir ist es nicht gestattet dieses Kommando auszuführen",
+  "kibu.proto.combat-control.version.too_old": "Dein Client nutzt eine ältere Version von combat-control als der Server. Bitte aktualisiere Notica, damit alles funktioniert.",
+  "kibu.proto.combat-control.version.too_new": "Dein Client nutzt eine neuere Version von combat-control als der Server. Manche Dinge werden nicht funktionieren.",
   "combat-control.config.title": "Combat Control Einstellungen",
   "combat-control.config.title.client": "Klient",
   "combat-control.config.title.player": "Spieler",

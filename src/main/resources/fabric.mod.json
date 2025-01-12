@@ -40,7 +40,8 @@
 		"minecraft": "~1.21.4",
 		"java": ">=21",
 		"fabric-api": "*",
-		"fabric-permissions-api-v0": "*"
+		"fabric-permissions-api-v0": "*",
+		"kibu-networking-api": "*"
 	},
 	"suggests": {}
 }

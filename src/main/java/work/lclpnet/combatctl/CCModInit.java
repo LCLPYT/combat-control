@@ -40,8 +40,11 @@ public class CCModInit implements ModInitializer {
 		var translations = new ModTranslations(LOGGER);
 		translations.load().join();
 
+		var networking = new CombatControlNetworking(LOGGER);
+		networking.init();
+
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-			var control = new CombatControlImpl(server, configManager);
+			var control = new CombatControlImpl(server, configManager, networking);
 			((CombatControlServer) server).combatControl$set(control);
 			configManager.onChanged(control::updatePlayers);
 		});
@@ -66,8 +69,6 @@ public class CCModInit implements ModInitializer {
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment)
 				-> new CombatCommand(translations, configManager).register(dispatcher));
-
-		CombatControlNetworking.init();
 
 		LOGGER.info("Initialized.");
 	}
