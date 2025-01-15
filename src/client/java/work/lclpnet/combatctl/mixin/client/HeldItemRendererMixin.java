@@ -10,6 +10,8 @@ import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.SwordItem;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import org.spongepowered.asm.mixin.Final;
@@ -71,5 +73,20 @@ public abstract class HeldItemRendererMixin {
                 && client.player.getActiveHand() == hand) {
             ci.cancel();
         }
+    }
+
+    @WrapOperation(
+            method = "renderFirstPersonItem",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/item/ItemStack;getUseAction()Lnet/minecraft/item/consume/UseAction;"
+            )
+    )
+    private UseAction combatControl$getUseAction(ItemStack instance, Operation<UseAction> original) {
+        if (CombatControlClient.get().abilities().swordBlocking && instance.getItem() instanceof SwordItem) {
+            return UseAction.BLOCK;
+        }
+
+        return original.call(instance);
     }
 }

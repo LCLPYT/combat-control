@@ -10,12 +10,15 @@
     "HungerManagerMixin",
     "ItemMixin",
     "ItemStackMixin",
+    "LivingEntityAccessor",
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "MiningToolItemMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
-    "SwordItemMixin"
+    "SwordItemMixin",
+    "packet.EntityEquipmentUpdateS2CPacketMixin",
+    "packet.EntityTrackerUpdateS2CPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

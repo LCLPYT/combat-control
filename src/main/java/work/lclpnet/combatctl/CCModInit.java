@@ -18,6 +18,7 @@ import work.lclpnet.combatctl.config.CombatControlConfig;
 import work.lclpnet.combatctl.config.ConfigManager;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
 import work.lclpnet.combatctl.impl.StaticCombatControl;
+import work.lclpnet.combatctl.impl.SwordBlockingHandler;
 import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
@@ -43,14 +44,22 @@ public class CCModInit implements ModInitializer {
 		var networking = new CombatControlNetworking(LOGGER);
 		networking.init();
 
+		var swordBlockingHandler = new SwordBlockingHandler();
+
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
 			var control = new CombatControlImpl(server, configManager, networking);
 			((CombatControlServer) server).combatControl$set(control);
+
 			configManager.onChanged(control::updatePlayers);
+
+			swordBlockingHandler.init();
 		});
 
-		ServerLifecycleEvents.SERVER_STOPPING.register(server
-				-> configManager.onChanged(null));
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            configManager.onChanged(null);
+
+			swordBlockingHandler.destroy();
+        });
 
 		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
 			var control = CombatControl.get(newPlayer.getServer());

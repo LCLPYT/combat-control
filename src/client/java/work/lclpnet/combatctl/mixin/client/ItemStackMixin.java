@@ -2,22 +2,31 @@ package work.lclpnet.combatctl.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.SwordItem;
+import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
@@ -29,7 +38,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Mixin(ItemStack.class)
-public class ItemStackMixin {
+public abstract class ItemStackMixin {
+
+    @Shadow public abstract Item getItem();
 
     // combatControl$wrapAppendAttributeModifiersTooltip is originally taken from GoldenAgeCombat
     @WrapMethod(method = "appendAttributeModifiersTooltip")
@@ -106,5 +117,47 @@ public class ItemStackMixin {
     private boolean combatControl$addModifierTooltip(boolean baseId) {
         // block the green tooltip formatting style for legacy type
         return baseId && !CombatControlClient.get().config().isOldAttributeStyle();
+    }
+
+    @WrapOperation(
+            method = "use",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/item/Item;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;"
+            )
+    )
+    private ActionResult combatControl$useClient(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
+        if (!(instance instanceof SwordItem) || !world.isClient || !CombatControlClient.get().abilities().swordBlocking) {
+            return original.call(instance, world, user, hand);
+        }
+
+        // set using sword
+        user.setCurrentHand(hand);
+
+        return ActionResult.CONSUME;
+    }
+
+    @WrapMethod(method = "getMaxUseTime")
+    private int combatControl$getMaxUseTimeClient(LivingEntity user, Operation<Integer> original) {
+        if (!(getItem() instanceof SwordItem) || user == null) {
+            return original.call(user);
+        }
+
+        World world = user.getWorld();
+
+        if (world == null || !world.isClient || !CombatControlClient.get().abilities().swordBlocking) {
+            return original.call(user);
+        }
+
+        return 72000;
+    }
+
+    @WrapMethod(method = "getUseAction")
+    private UseAction combatControl$getUseActionClient(Operation<UseAction> original) {
+        if (!(getItem() instanceof SwordItem) || !CombatControlClient.get().abilities().swordBlocking) {
+            return original.call();
+        }
+
+        return UseAction.BLOCK;
     }
 }

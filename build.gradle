@@ -68,7 +68,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"
+    include(modImplementation("work.lclpnet.mods.kibu:kibu-hooks:${project.kibu_hooks_version}"))
     include(modImplementation("work.lclpnet.mods.kibu:kibu-networking-api:${project.kibu_networking_api_version}"))
     include(modImplementation("me.lucko:fabric-permissions-api:${project.permission_api_version}"))
 

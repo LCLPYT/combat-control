@@ -109,11 +109,16 @@ public class CombatControlImpl implements CombatControl {
 
     @Override
     public void update(ServerPlayerEntity player) {
-        if (networking.understands(player)) {
+        if (hasModInstalled(player)) {
             updateModdedPlayer(player);
         } else {
             updateVanillaPlayer(player);
         }
+    }
+
+    @Override
+    public boolean hasModInstalled(ServerPlayerEntity player) {
+        return networking.understands(player);
     }
 
     @Override

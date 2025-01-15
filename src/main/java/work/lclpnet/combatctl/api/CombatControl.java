@@ -66,6 +66,13 @@ public interface CombatControl {
     void copyData(ServerPlayerEntity source, ServerPlayerEntity target);
 
     /**
+     * Determines whether a player has the mod installed with a compatible version.
+     * @param player The player to check.
+     * @return True, if the player has the mod installed on the client and whether the protocol is supported.
+     */
+    boolean hasModInstalled(ServerPlayerEntity player);
+
+    /**
      * Configures the {@link GlobalConfig}, then automatically calls {@link #update()}.
      * @param action A consumer that configures the global config.
      */
