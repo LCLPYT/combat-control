@@ -22,7 +22,7 @@ public class CameraMixin {
             at = @At("TAIL")
     )
     private void combatControl$updateEyeHeight(CallbackInfo ci) {
-        if (!CombatControlClient.get().clientConfig().isInstantEyeHeight() || focusedEntity == null) return;
+        if (!CombatControlClient.get().config().isInstantEyeHeight() || focusedEntity == null) return;
 
         this.lastCameraY = this.cameraY = focusedEntity.getStandingEyeHeight();
     }

@@ -8,7 +8,7 @@ public interface CombatControlClient {
 
     CombatAbilities abilities();
 
-    ClientConfig clientConfig();
+    ClientConfig config();
 
     static CombatControlClient get() {
         return CombatControlClientImpl.get();

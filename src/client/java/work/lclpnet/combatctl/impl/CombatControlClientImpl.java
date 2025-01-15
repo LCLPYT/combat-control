@@ -21,7 +21,7 @@ public class CombatControlClientImpl implements CombatControlClient {
     }
 
     @Override
-    public ClientConfig clientConfig() {
+    public ClientConfig config() {
         return config.client;
     }
 

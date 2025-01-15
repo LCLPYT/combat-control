@@ -1,5 +1,7 @@
 package work.lclpnet.combatctl.config;
 
+import com.electronwill.nightconfig.core.Config;
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.serde.ObjectDeserializer;
 import com.electronwill.nightconfig.core.serde.ObjectSerializer;
@@ -36,9 +38,18 @@ public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
     }
 
     public synchronized void load() {
+        var defaults = Config.inMemory();
+        serializer.serializeFields(config, defaults);
+
         fileConfig.load();
+
+        boolean changed = addMissingEntries(defaults, fileConfig);
+
         updateConfig();
-        save();
+
+        if (changed) {
+            fileConfig.save();
+        }
     }
 
     @Override
@@ -57,6 +68,28 @@ public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
 
     private void updateFileConfig() {
         serializer.serializeFields(config, fileConfig);
+    }
+
+    private boolean addMissingEntries(UnmodifiableConfig src, Config dest) {
+        boolean changed = false;
+
+        for (var entry : src.entrySet()) {
+            String key = entry.getKey();
+            Object srcValue = entry.getValue();
+            Object destValue = dest.getRaw(key);
+
+            if (destValue == null) {
+                dest.set(key, srcValue);
+                changed = true;
+                continue;
+            }
+
+            if (srcValue instanceof UnmodifiableConfig nestedSrc && destValue instanceof Config nestedDest) {
+                changed |= addMissingEntries(nestedSrc, nestedDest);
+            }
+        }
+
+        return changed;
     }
 
     @Override

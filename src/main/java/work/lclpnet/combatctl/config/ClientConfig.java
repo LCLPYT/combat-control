@@ -14,4 +14,7 @@ public class ClientConfig {
 
     @SerdeComment("Disables the smooth sneak animation, like in older versions")
     private boolean instantEyeHeight = false;
+
+    @SerdeComment("Displays attributes like in earlier versions. Recognizable by the blue text.")
+    private boolean oldAttributeStyle = false;
 }
