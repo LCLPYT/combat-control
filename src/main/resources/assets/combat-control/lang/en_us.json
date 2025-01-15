@@ -60,5 +60,7 @@
   "combat-control.config.title.global.modernDamageValues": "Modern tool attack damage",
   "combat-control.config.desc.global.modernDamageValues": "If enabled, tools like axes will deal the modern amount of damage that takes cooldown into account. If disabled, damage values will be reverted / adapted to 1.8 and previous versions",
   "combat-control.config.title.global.largerHitboxes": "Larger entity hit boxes",
-  "combat-control.config.desc.global.largerHitboxes": "Expand hitboxes by 10% to make hits more accurate"
+  "combat-control.config.desc.global.largerHitboxes": "Expand hitboxes by 10% to make hits more accurate",
+  "combat-control.config.title.client.instantEyeHeight": "Disable smooth sneak",
+  "combat-control.config.desc.client.instantEyeHeight": "Disables the smooth sneak animation, like in older versions. Note: In newer versions, the sneak-height is lower. That is why the movement is more extreme."
 }

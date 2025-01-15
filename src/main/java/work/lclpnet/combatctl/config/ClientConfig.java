@@ -1,5 +1,6 @@
 package work.lclpnet.combatctl.config;
 
+import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,4 +11,7 @@ import lombok.Setter;
  */
 @Getter @Setter
 public class ClientConfig {
+
+    @SerdeComment("Disables the smooth sneak animation, like in older versions")
+    private boolean instantEyeHeight = false;
 }

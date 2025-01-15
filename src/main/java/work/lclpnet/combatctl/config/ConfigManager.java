@@ -38,10 +38,7 @@ public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
     public synchronized void load() {
         fileConfig.load();
         updateConfig();
-
-        if (fileConfig.isEmpty()) {
-            save();
-        }
+        save();
     }
 
     @Override

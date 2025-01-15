@@ -13,11 +13,7 @@ import java.util.Objects;
 @ApiStatus.Internal
 public class StaticCombatControl {
 
-    private CombatControlConfig config;
-
-    public StaticCombatControl() {
-        this.config = new CombatControlConfig();
-    }
+    private CombatControlConfig config = new CombatControlConfig();
 
     public GlobalConfig globalConfig() {
         return config.global;

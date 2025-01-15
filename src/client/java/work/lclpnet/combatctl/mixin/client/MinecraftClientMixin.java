@@ -51,7 +51,7 @@ public class MinecraftClientMixin {
     public void combatControl$handleInputEvents(CallbackInfo callback) {
         // required for enabling block breaking while e.g. sword blocking
         // it is actually enabled by a different patch below, this just makes sure breaking particles show correctly (which only works sometimes otherwise)
-        if (!CombatControlClient.get().getAbilities().attackWhileUsing || this.player == null || !this.player.isUsingItem()) return;
+        if (!CombatControlClient.get().abilities().attackWhileUsing || this.player == null || !this.player.isUsingItem()) return;
 
         while (this.options.attackKey.wasPressed()) {
             this.combatControl$startBlockAttack();
@@ -102,7 +102,7 @@ public class MinecraftClientMixin {
             )
     )
     public boolean combatControl$handleBlockBreaking(boolean original) {
-        if (!CombatControlClient.get().getAbilities().attackWhileUsing) return original;
+        if (!CombatControlClient.get().abilities().attackWhileUsing) return original;
 
         return false;
     }
@@ -115,7 +115,7 @@ public class MinecraftClientMixin {
             )
     )
     public boolean combatControl$startUseItem(boolean original) {
-        if (!CombatControlClient.get().getAbilities().attackWhileUsing) return original;
+        if (!CombatControlClient.get().abilities().attackWhileUsing) return original;
 
         return false;
     }

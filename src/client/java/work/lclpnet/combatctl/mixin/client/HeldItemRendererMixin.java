@@ -36,7 +36,7 @@ public abstract class HeldItemRendererMixin {
             )
     )
     public void combatControl$onRenderFirstPersonItem(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack stack, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        if (!CombatControlClient.get().getAbilities().renderArmSwingWhileUsing
+        if (!CombatControlClient.get().abilities().renderArmSwingWhileUsing
                 || stack.isEmpty() || stack.isOf(Items.FILLED_MAP) || !player.isUsingItem()
                 || player.getItemUseTimeLeft() <= 0 || player.getActiveHand() != hand)
             return;
@@ -53,7 +53,7 @@ public abstract class HeldItemRendererMixin {
             )
     )
     public float combatControl$removeCooldownEquipAnimation(ClientPlayerEntity instance, float v, Operation<Float> original) {
-        if (CombatControlClient.get().getAbilities().attackCooldown) {
+        if (CombatControlClient.get().abilities().attackCooldown) {
             return original.call(instance, v);
         }
 
@@ -66,7 +66,7 @@ public abstract class HeldItemRendererMixin {
             cancellable = true
     )
     public void combatControl$onResetEquipProgress(Hand hand, CallbackInfo ci) {
-        if (CombatControlClient.get().getAbilities().noReequipWhenUsing
+        if (CombatControlClient.get().abilities().noReequipWhenUsing
                 && client.player != null && client.player.isUsingItem()
                 && client.player.getActiveHand() == hand) {
             ci.cancel();

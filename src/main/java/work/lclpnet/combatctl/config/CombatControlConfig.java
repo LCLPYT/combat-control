@@ -1,5 +1,6 @@
 package work.lclpnet.combatctl.config;
 
+import com.electronwill.nightconfig.core.UnmodifiableConfig;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipDeserializingIf;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeSkipSerializingIf;
@@ -29,8 +30,10 @@ public class CombatControlConfig {
     )
     public final ClientConfig client = new ClientConfig();
 
-    private static boolean skipClientDeserializationOnServer(Object client) {
-        return client == null || FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT;
+    private static boolean skipClientDeserializationOnServer(Object value) {
+        return value == null
+                || (value instanceof UnmodifiableConfig cfg && cfg.isEmpty()) 
+                || FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT;
     }
 
     private static boolean skipClientSerializationOnServer(ClientConfig ignoredClient) {

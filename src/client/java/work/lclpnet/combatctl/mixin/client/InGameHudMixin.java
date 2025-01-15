@@ -22,7 +22,7 @@ public abstract class InGameHudMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Unique
-    private final CombatAbilities combatAbilities = CombatControlClient.get().getAbilities();
+    private final CombatAbilities combatAbilities = CombatControlClient.get().abilities();
     @Unique
     @Nullable
     private static AttackIndicator attackIndicator = null;

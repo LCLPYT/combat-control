@@ -23,6 +23,6 @@ public class CombatControlClientNetworking {
     }
 
     private void onAbilitiesUpdate(CombatAbilitiesS2CPacket payload, ClientPlayNetworking.Context context) {
-        control.getAbilities().copy(payload.abilities());
+        control.abilities().copy(payload.abilities());
     }
 }
