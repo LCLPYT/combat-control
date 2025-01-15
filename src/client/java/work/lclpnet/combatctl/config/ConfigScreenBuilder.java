@@ -8,9 +8,11 @@ import me.shedaniel.clothconfig2.api.ConfigCategory;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.combatctl.api.CombatControl;
 
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
@@ -35,12 +37,24 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
         this.defaultConfig = new CombatControlConfig();
     }
 
+    private void save() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        IntegratedServer server = client.getServer();
+
+        if (server != null) {
+            var control = CombatControl.get(server);
+            control.update();
+        } else {
+            configManager.save();
+        }
+    }
+
     @Override
     public Screen create(Screen parent) {
         var builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(translatable(TITLE))
-                .setSavingRunnable(configManager::save);
+                .setSavingRunnable(this::save);
 
         addCategory("client", builder);
 
