@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.mixin.LivingEntityAccessor;
 import work.lclpnet.combatctl.type.ModifiablePacket;
+import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.network.ServerSendPacketCallback;
 
 import java.util.ArrayList;
@@ -28,13 +29,14 @@ public class SwordBlockingHandler {
 
     private static final TrackedData<Byte> LIVING_FLAGS = LivingEntityAccessor.getLivingFlagsTrackedData();
     private static final int OFF_HAND_ACTIVE_FLAG = LivingEntityAccessor.getOffHandActiveFlag();
+    private final HookContainer hooks = new HookContainer();
 
     public void init() {
-        ServerSendPacketCallback.HOOK.register(this::onServerSendPacket);
+        hooks.registerHook(ServerSendPacketCallback.HOOK, this::onServerSendPacket);
     }
 
-    public void destroy() {  // TODO DEBUG if actually removes the correct lambda
-        ServerSendPacketCallback.HOOK.unregister(this::onServerSendPacket);
+    public void destroy() {
+        hooks.unload();
     }
 
     private boolean onServerSendPacket(Packet<?> packet, ServerCommonNetworkHandler handler) {
