@@ -75,6 +75,9 @@ public class PlayerConfig implements Cloneable {
     @SerdeComment("Whether reeling in an entity pulls it towards the player. Many PVP servers disabled this, however it was always enabled in vanilla")
     private boolean fishingRodPull = true;
 
+    @SerdeComment("Allows the player to block using a sword. Unlike when blocking with a shield, the damage is only reduced partially. Players without the mod can also use this feature, but will receive a temporary shield instead.")
+    private boolean swordBlocking = false;
+
     /* ----- */
 
     @Override

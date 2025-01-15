@@ -56,6 +56,8 @@
   "combat-control.config.desc.player.modernFishingRodSounds": "If enabled, plays the modern fishing rod reeling sounds",
   "combat-control.config.title.player.fishingRodPull": "Enable fishing rod pull",
   "combat-control.config.desc.player.fishingRodPull": "Whether reeling in an entity pulls it towards the player. Many PVP servers disabled this, however it was always enabled in vanilla",
+  "combat-control.config.title.player.swordBlocking": "Blocking with swords",
+  "combat-control.config.desc.player.swordBlocking": "Allows the player to block using a sword. Unlike when blocking with a shield, the damage is only reduced partially. Players without the mod can also use this feature, but will receive a temporary shield instead.",
   "combat-control.config.title.global": "Global",
   "combat-control.config.title.global.modernDamageValues": "Modern tool attack damage",
   "combat-control.config.desc.global.modernDamageValues": "If enabled, tools like axes will deal the modern amount of damage that takes cooldown into account. If disabled, damage values will be reverted / adapted to 1.8 and previous versions",

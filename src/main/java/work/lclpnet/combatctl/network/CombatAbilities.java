@@ -21,12 +21,15 @@ public class CombatAbilities {
     public boolean renderArmSwingWhileUsing;
     /** Skip equip animation when using items (e.g. shield) */
     public boolean noReequipWhenUsing;
+    /** Whether sword blocking is allowed */
+    public boolean swordBlocking;
 
     public CombatAbilities() {
         attackCooldown = true;
         attackWhileUsing = false;
         renderArmSwingWhileUsing = false;
         noReequipWhenUsing = false;
+        swordBlocking = false;
     }
 
     public CombatAbilities(PacketByteBuf buf) {
@@ -34,6 +37,7 @@ public class CombatAbilities {
         attackWhileUsing = buf.readBoolean();
         renderArmSwingWhileUsing = buf.readBoolean();
         noReequipWhenUsing = buf.readBoolean();
+        swordBlocking = buf.readBoolean();
     }
 
     public void write(PacketByteBuf buf) {
@@ -41,6 +45,7 @@ public class CombatAbilities {
         buf.writeBoolean(attackWhileUsing);
         buf.writeBoolean(renderArmSwingWhileUsing);
         buf.writeBoolean(noReequipWhenUsing);
+        buf.writeBoolean(swordBlocking);
     }
 
     public void copy(CombatAbilities abilities) {
@@ -48,6 +53,7 @@ public class CombatAbilities {
         this.attackWhileUsing = abilities.attackWhileUsing;
         this.renderArmSwingWhileUsing = abilities.renderArmSwingWhileUsing;
         this.noReequipWhenUsing = abilities.noReequipWhenUsing;
+        this.swordBlocking = abilities.swordBlocking;
     }
 
     /**
@@ -84,6 +90,13 @@ public class CombatAbilities {
 
         if (b != noReequipWhenUsing) {
             noReequipWhenUsing = b;
+            changed = true;
+        }
+
+        b = config.isSwordBlocking();
+
+        if (b != swordBlocking) {
+            swordBlocking = b;
             changed = true;
         }
 

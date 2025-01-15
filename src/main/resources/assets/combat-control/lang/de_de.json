@@ -56,6 +56,8 @@
   "combat-control.config.desc.player.modernFishingRodSounds": "Spielt die neuen Angelgeräusche ab. Ansonsten wird nur das klassische Wurfgeräusch abgespielt.",
   "combat-control.config.title.player.fishingRodPull": "Angeln können Ziehen",
   "combat-control.config.desc.player.fishingRodPull": "Ob Angeln Spieler, Tiere und Monster heranziehen können. Viele 1.8 und 1.7 PvP-Server haben das ausgeschaltet, wobei es im Basisspiel immer eingeschaltet war.",
+  "combat-control.config.title.player.swordBlocking": "Blocken mit Schwertern",
+  "combat-control.config.desc.player.swordBlocking": "Erlaubt das Blocken mit Schwertern. Anders als beim Blocken mit einem Schild, bekommt ein Spieler nur verringerten Schaden. Spieler ohne die Mod können trotzdem mit Schwertern blocken, weil sie ein temporäres Schild in der zweiten Hand erhalten.",
   "combat-control.config.title.global": "Global",
   "combat-control.config.title.global.modernDamageValues": "Neuer Angriffsschaden bei Werkzeugen",
   "combat-control.config.desc.global.modernDamageValues": "Ob Werkzeuge den modernen Angriffsschaden verursachen sollen, der die Abklingzeit berücksichtigt (1.9 und neuer). Ansonsten wird der klassische Angriffsschaden genutzt.",
