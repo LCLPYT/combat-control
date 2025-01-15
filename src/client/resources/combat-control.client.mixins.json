@@ -7,10 +7,12 @@
   },
   "client": [
     "CameraMixin",
+    "GameRendererMixin",
     "HeldItemRendererAccessor",
     "HeldItemRendererMixin",
     "InGameHudMixin",
     "ItemStackMixin",
-    "MinecraftClientMixin"
+    "MinecraftClientMixin",
+    "PlayerEntityMixin"
   ]
 }

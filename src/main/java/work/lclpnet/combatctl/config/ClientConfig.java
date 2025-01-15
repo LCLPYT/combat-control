@@ -17,4 +17,7 @@ public class ClientConfig {
 
     @SerdeComment("Displays attributes like in earlier versions. Recognizable by the blue text.")
     private boolean oldAttributeStyle = false;
+
+    @SerdeComment("Renders the classic bobbing effect, with a slight head tilt when jumping. Will only work if view bobbing is enabled.")
+    private boolean oldBobbing = false;
 }
