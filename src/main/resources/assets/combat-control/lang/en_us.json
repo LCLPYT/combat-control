@@ -68,5 +68,7 @@
   "combat-control.config.title.client.oldAttributeStyle": "Classic attribute style",
   "combat-control.config.desc.client.oldAttributeStyle": "Displays attributes like in earlier versions. Recognizable by the blue text.",
   "combat-control.config.title.client.oldBobbing": "Classic bobbing head tilt",
-  "combat-control.config.desc.client.oldBobbing": "Renders the classic bobbing effect, with a slight head tilt when jumping. Will only work if view bobbing is enabled."
+  "combat-control.config.desc.client.oldBobbing": "Renders the classic bobbing effect, with a slight head tilt when jumping. Will only work if view bobbing is enabled.",
+  "combat-control.config.title.client.noFlashingHearts": "Disable flashing hearts",
+  "combat-control.config.desc.client.noFlashingHearts": "Disables flashing effect of hearts when taking damage. This makes it easier to see your current health."
 }

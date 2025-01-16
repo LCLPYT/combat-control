@@ -60,6 +60,12 @@ public interface CombatControl {
     void update(ServerPlayerEntity player);
 
     /**
+     * Resets the player's associated {@link PlayerConfig} to the global {@link PlayerConfig}.
+     * @param player The player to reset.
+     */
+    void resetPlayerConfig(ServerPlayerEntity player);
+
+    /**
      * Copies one players config to another.
      * Then updates the other player, if needed.
      */

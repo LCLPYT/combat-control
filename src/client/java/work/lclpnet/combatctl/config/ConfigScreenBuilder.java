@@ -5,6 +5,7 @@ import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -43,6 +44,7 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
 
         if (server != null) {
             var control = CombatControl.get(server);
+            PlayerLookup.all(server).forEach(control::resetPlayerConfig);
             control.update();
         } else {
             configManager.save();

@@ -20,4 +20,7 @@ public class ClientConfig {
 
     @SerdeComment("Renders the classic bobbing effect, with a slight head tilt when jumping. Will only work if view bobbing is enabled.")
     private boolean oldBobbing = false;
+
+    @SerdeComment("Disables flashing effect of hearts when taking damage. This makes it easier to see your current health.")
+    private boolean noFlashingHearts = false;
 }

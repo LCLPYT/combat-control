@@ -117,6 +117,11 @@ public class CombatControlImpl implements CombatControl {
     }
 
     @Override
+    public synchronized void resetPlayerConfig(ServerPlayerEntity player) {
+        ((CombatControlPlayer) player).combatControl$setConfig(defaultConfig.player.clone());
+    }
+
+    @Override
     public boolean hasModInstalled(ServerPlayerEntity player) {
         return networking.understands(player);
     }
@@ -125,7 +130,9 @@ public class CombatControlImpl implements CombatControl {
     public void copyData(ServerPlayerEntity source, ServerPlayerEntity target) {
         PlayerConfig config = ((CombatControlPlayer) source).combatControl$getConfig();
 
-        ((CombatControlPlayer) target).combatControl$setConfig(config);
+        synchronized (this) {
+            ((CombatControlPlayer) target).combatControl$setConfig(config);
+        }
 
         if (source.networkHandler != target.networkHandler) {
             update(target);

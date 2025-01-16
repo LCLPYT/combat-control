@@ -12,6 +12,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControlClient;
 import work.lclpnet.combatctl.network.CombatAbilities;
@@ -79,5 +80,19 @@ public abstract class InGameHudMixin {
             client.options.getAttackIndicator().setValue(attackIndicator);
             attackIndicator = null;
         }
+    }
+
+    @ModifyVariable(
+            method = "renderHealthBar",
+            at = @At("HEAD"),
+            ordinal = 5,
+            argsOnly = true
+    )
+    private int combatControl$modifyRegeneratingHeartIndex(int regeneratingHeartIndex) {
+        if (CombatControlClient.get().config().isNoFlashingHearts()) {
+            return 0;
+        }
+
+        return regeneratingHeartIndex;
     }
 }

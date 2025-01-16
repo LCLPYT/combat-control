@@ -68,5 +68,7 @@
   "combat-control.config.title.client.oldAttributeStyle": "Klassische Attribut-Anzeige",
   "combat-control.config.desc.client.oldAttributeStyle": "Zeigt Attribute von Waffen und co. im klassischen Stil mit dem blauen Text an.",
   "combat-control.config.title.client.oldBobbing": "Klassische Kopfbewegung",
-  "combat-control.config.desc.client.oldBobbing": "Fügt eine leichte Kopfbewegung beim Springen hinzu, die es damals bei der Gehbewegung gab. Funktioniert nur, wenn die Gehbewegung eingeschaltet ist."
+  "combat-control.config.desc.client.oldBobbing": "Fügt eine leichte Kopfbewegung beim Springen hinzu, die es damals bei der Gehbewegung gab. Funktioniert nur, wenn die Gehbewegung eingeschaltet ist.",
+  "combat-control.config.title.client.noFlashingHearts": "Blinkende Herzen deaktivieren",
+  "combat-control.config.desc.client.noFlashingHearts": "Entfernt das Blinken der Herzen in der Lebensanzeige, wenn man Schaden bekommt. Das macht es leichter die aktuellen Leben zu sehen."
 }
