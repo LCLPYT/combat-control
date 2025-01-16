@@ -1,6 +1,7 @@
 package work.lclpnet.combatctl.mixin;
 
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.entity.Entity;
@@ -10,8 +11,11 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.SwordItem;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -224,5 +228,34 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (!config.isNoAttackSprinting() && sprintDuringAttack.get()) {
             this.setSprinting(true);
         }
+    }
+
+    @ModifyVariable(
+            method = "applyDamage",
+            at = @At(
+                    value = "LOAD",
+                    ordinal = 0
+            ),
+            argsOnly = true
+    )
+    private float combatControl$modifySwordBlockingDamage(float amount, @Local(argsOnly = true) DamageSource source) {
+        PlayerEntity self = (PlayerEntity) (Object) this;
+
+        if (!self.isUsingItem()) {
+            return amount;
+        }
+
+        ItemStack stack = self.getActiveItem();
+
+        if (stack == null || !(stack.getItem() instanceof SwordItem)) {
+            return amount;
+        }
+
+        // damage reduction from 1.7.10
+        if (!source.isIn(DamageTypeTags.BYPASSES_ARMOR) && amount > 0.0F) {
+            return (1.0F + amount) * 0.5F;
+        }
+
+        return amount;
     }
 }
