@@ -56,6 +56,7 @@ public class CombatStyles {
             player.setModernSharpness(modern);
             player.setNoReequipWhenUsing(!modern);
             player.setFishingRodPull(true);  // has always been enabled in vanilla, but usually disabled on pvp-servers -> opt-in
+            player.setSwordBlocking(!modern);
         }
 
         @Override
