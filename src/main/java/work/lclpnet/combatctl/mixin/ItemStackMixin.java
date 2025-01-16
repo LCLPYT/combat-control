@@ -49,7 +49,13 @@ public abstract class ItemStackMixin {
             )
     )
     private ActionResult combatControl$use(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
-        if (!(user instanceof ServerPlayerEntity player)) {
+        ItemStack stack = user.getActiveItem();
+
+        if (stack != null && stack.getItem() instanceof SwordItem && hand != user.getActiveHand()) {
+            return ActionResult.FAIL;
+        }
+
+        if (!(instance instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
             return original.call(instance, world, user, hand);
         }
 

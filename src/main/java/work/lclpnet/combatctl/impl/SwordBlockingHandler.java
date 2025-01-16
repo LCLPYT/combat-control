@@ -23,6 +23,7 @@ import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.network.ServerSendPacketCallback;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SwordBlockingHandler {
@@ -168,17 +169,25 @@ public class SwordBlockingHandler {
     }
 
     public static EntityEquipmentUpdateS2CPacket fakeShieldEquipPacket(ServerPlayerEntity related) {
-        var list = List.of(Pair.of(otherHandSlot(related), new ItemStack(Items.SHIELD)));
+        EquipmentSlot otherHand = otherHandSlot(related);
+
+        var list = Arrays.stream(EquipmentSlot.values())
+                .map(slot -> Pair.of(slot, slot == otherHand
+                        ? new ItemStack(Items.SHIELD)
+                        : related.getEquippedStack(slot)))
+                .toList();
+
         var packet = new EntityEquipmentUpdateS2CPacket(related.getId(), list);
 
         return modified(packet);
     }
 
     public static EntityEquipmentUpdateS2CPacket fakeShieldUnequipPacket(ServerPlayerEntity related) {
-        EquipmentSlot slot = otherHandSlot(related);
-        ItemStack stack = related.getEquippedStack(slot);
+        var list = Arrays.stream(EquipmentSlot.values())
+                .map(slot -> Pair.of(slot, related.getEquippedStack(slot)))
+                .toList();
 
-        var packet = new EntityEquipmentUpdateS2CPacket(related.getId(), List.of(Pair.of(slot, stack)));
+        var packet = new EntityEquipmentUpdateS2CPacket(related.getId(), list);
 
         return modified(packet);
     }
