@@ -16,6 +16,7 @@
     "MiningToolItemMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayNetworkHandlerMixin",
     "SwordItemMixin",
     "packet.EntityEquipmentUpdateS2CPacketMixin",
     "packet.EntityTrackerUpdateS2CPacketMixin"

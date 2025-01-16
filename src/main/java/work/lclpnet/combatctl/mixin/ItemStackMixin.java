@@ -3,7 +3,6 @@ package work.lclpnet.combatctl.mixin;
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.component.MergedComponentMap;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -11,14 +10,12 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -69,7 +66,7 @@ public abstract class ItemStackMixin {
         user.setCurrentHand(hand);
 
         // setup fake shield for vanilla players
-        sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldEquipPacket(player));
+        SwordBlockingHandler.sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldEquipPacket(player), true);
 
         return ActionResult.CONSUME;
     }
@@ -93,7 +90,7 @@ public abstract class ItemStackMixin {
         }
 
         // remove fake shield for vanilla players
-        sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldUnequipPacket(player));
+        SwordBlockingHandler.sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldUnequipPacket(player), true);
 
         return true;
     }
@@ -111,19 +108,5 @@ public abstract class ItemStackMixin {
         }
 
         return 72000;
-    }
-
-    @Unique
-    private void sendToNearbyVanillaPlayers(ServerPlayerEntity player, CombatControl control, EntityEquipmentUpdateS2CPacket packet) {
-        // PlayerLookup.tracking(player) does not guarantee that the player itself is part of it
-        if (!control.hasModInstalled(player)) {
-            player.networkHandler.sendPacket(packet);
-        }
-
-        for (ServerPlayerEntity other : PlayerLookup.tracking(player)) {
-            if (control.hasModInstalled(other) || other == player) continue;
-
-            other.networkHandler.sendPacket(packet);
-        }
     }
 }

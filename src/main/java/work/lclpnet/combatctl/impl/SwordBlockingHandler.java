@@ -1,6 +1,7 @@
 package work.lclpnet.combatctl.impl;
 
 import com.mojang.datafixers.util.Pair;
+import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -190,5 +191,17 @@ public class SwordBlockingHandler {
         var packet = new EntityEquipmentUpdateS2CPacket(related.getId(), list);
 
         return modified(packet);
+    }
+
+    public static void sendToNearbyVanillaPlayers(ServerPlayerEntity player, CombatControl control, EntityEquipmentUpdateS2CPacket packet, boolean withSelf) {
+        if (withSelf && !control.hasModInstalled(player)) {
+            player.networkHandler.sendPacket(packet);
+        }
+
+        for (ServerPlayerEntity other : PlayerLookup.tracking(player)) {
+            if (other == player || control.hasModInstalled(other)) continue;
+
+            other.networkHandler.sendPacket(packet);
+        }
     }
 }
