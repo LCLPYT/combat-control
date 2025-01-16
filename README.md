@@ -40,6 +40,7 @@ The mod is **only required on the server**, but having the mod installed on your
 - old bobbing animation with head tilt when jumping
 - instant sneak animation
 - old attribute style on weapons
+- remove flashing hearts animation
 
 ## Commands
 Change the combat style with the `/combat style` command:
