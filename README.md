@@ -16,6 +16,7 @@ The mod is **only required on the server**, but having the mod installed on your
 
 ## Features
 - remove the attack cooldown
+- reintroduce sword blocking
 - axes and other tools deal less damage, like in 1.8.9
 - revert food mechanics and fast regeneration
 - make snowballs inflict knockback again
@@ -36,6 +37,9 @@ The mod is **only required on the server**, but having the mod installed on your
 - the fishing rod bobber moves faster 
 - tools will take less durability damage when attacking with them
 - remove the re-equip animation when using items like shields
+- old bobbing animation with head tilt when jumping
+- instant sneak animation
+- old attribute style on weapons
 
 ## Commands
 Change the combat style with the `/combat style` command:
