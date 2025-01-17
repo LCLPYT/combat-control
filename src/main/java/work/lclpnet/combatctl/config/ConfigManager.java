@@ -9,11 +9,14 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 @ApiStatus.Internal
 public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
 
+    private final Path configPath;
     private final CommentedFileConfig fileConfig;
     private final ObjectSerializer serializer;
     private final ObjectDeserializer deserializer;
@@ -21,6 +24,7 @@ public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
     private @Nullable Runnable onChanged = null;
 
     public ConfigManager(Path configPath, C config) {
+        this.configPath = configPath;
         this.config = config;
 
         fileConfig = CommentedFileConfig.builder(configPath)
@@ -38,6 +42,16 @@ public class ConfigManager<C> implements ConfigAccess<C>, AutoCloseable {
     }
 
     public synchronized void load() {
+        Path dir = configPath.getParent();
+
+        if (!Files.exists(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create config directory", e);
+            }
+        }
+
         var defaults = Config.inMemory();
         serializer.serializeFields(config, defaults);
 

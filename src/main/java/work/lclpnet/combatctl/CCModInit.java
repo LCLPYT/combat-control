@@ -87,7 +87,6 @@ public class CCModInit implements ModInitializer {
 				.resolve(MOD_ID)
 				.resolve("config.toml");
 
-
 		var configManager = new ConfigManager<>(configPath, new CombatControlConfig());
 
 		configManager.load();
