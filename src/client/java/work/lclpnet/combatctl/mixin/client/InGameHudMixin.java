@@ -82,6 +82,7 @@ public abstract class InGameHudMixin {
         }
     }
 
+    // combatControl$modifyRegeneratingHeartIndex is taken from GoldenAgeCombat
     @ModifyVariable(
             method = "renderHealthBar",
             at = @At("HEAD"),
