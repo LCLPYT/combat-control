@@ -31,6 +31,8 @@ import java.util.function.Function;
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.util.Formatting.ITALIC;
+import static net.minecraft.util.Formatting.YELLOW;
 import static work.lclpnet.combatctl.CCModInit.permission;
 
 public class CombatCommand {
@@ -41,7 +43,7 @@ public class CombatCommand {
     private final CombatControlConfig config;
     private final List<ConfigOption.Instance> options;
     private final DynamicCommandExceptionType unknownStyleError;
-    private final Text missingPermission;
+    private final Text missingPermission, invalidValue;
 
     public CombatCommand(ModTranslations translations, ConfigAccess<CombatControlConfig> configManager) {
         this.translations = translations;
@@ -55,7 +57,7 @@ public class CombatCommand {
                     int len = inst.srcPath().size();
 
                     if (opt.srcClass() == PlayerConfig.class && len >= 1) {
-                        return new ConfigOption.Instance(opt, inst.srcPath().subList(1, len));
+                        return new ConfigOption.Instance(opt, inst.srcPath().subList(1, len), inst.path());
                     }
 
                     return inst;
@@ -65,6 +67,7 @@ public class CombatCommand {
 
         unknownStyleError = new DynamicCommandExceptionType(arg -> translations.fallback("argument.combat_style.notfound", arg));
         missingPermission = translations.fallback("error.combat-control.missing_permission_cmd");
+        invalidValue = translations.fallback("error.combat-control.invalid_value");
     }
 
     public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
@@ -75,6 +78,7 @@ public class CombatCommand {
                         .map(arg -> literal(inst.option().field().getName())
                                 .requires(require(permission("command.combat.set." + inst.option().field().getName()), 2))
                                 .then(thenIf(argument(VALUE_NAME, arg)
+                                                .suggests(inst.option().suggestions())
                                                 .executes(ctx -> setGlobalOpt(ctx, inst)),
                                         inst.option().srcClass() == PlayerConfig.class,
                                         argument("targets", EntityArgumentType.players())
@@ -119,7 +123,7 @@ public class CombatCommand {
         players.forEach(player -> cc.setStyle(player, style.value()));
 
         ctx.getSource().sendFeedback(() -> players.size() == 1
-                ? translations.fallback("commands.combat.style.single", players.iterator().next().getNameForScoreboard(), style.key().toString())
+                ? translations.fallback("commands.combat.style.single", Text.literal(players.iterator().next().getNameForScoreboard()).formatted(YELLOW), style.key().toString())
                 : translations.fallback("commands.combat.style.multiple", players.size(), style.key().toString()), true);
 
         return 1;
@@ -129,7 +133,9 @@ public class CombatCommand {
         ConfigOption opt = inst.option();
         Object value = get(inst, null);
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get", opt.field().getName(), opt.stringify(value)), false);
+        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get",
+                translations.optionTitle(inst).formatted(ITALIC),
+                opt.asText(value, inst, translations).formatted(ITALIC)), false);
 
         return code(value);
     }
@@ -140,7 +146,10 @@ public class CombatCommand {
 
         Object value = get(inst, player);
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get.player", opt.field().getName(), player.getNameForScoreboard(), opt.stringify(value)), false);
+        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get.player",
+                translations.optionTitle(inst).formatted(ITALIC),
+                Text.literal(player.getNameForScoreboard()).formatted(YELLOW),
+                opt.asText(value, inst, translations).formatted(ITALIC)), false);
 
         return code(value);
     }
@@ -156,6 +165,11 @@ public class CombatCommand {
 
         Object value = opt.argumentValue(ctx, VALUE_NAME);
 
+        if (value == null) {
+            ctx.getSource().sendError(invalidValue);
+            return 0;
+        }
+
         // set global player config
         set(inst, value, null);
 
@@ -168,7 +182,9 @@ public class CombatCommand {
 
         CombatControl.get(ctx.getSource().getServer()).update();
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.set", name, opt.stringify(value)), false);
+        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.set",
+                translations.optionTitle(inst).formatted(ITALIC),
+                opt.asText(value, inst, translations).formatted(ITALIC)), false);
 
         return 1;
     }
@@ -179,6 +195,11 @@ public class CombatCommand {
         ConfigOption opt = inst.option();
         Object value = opt.argumentValue(ctx, VALUE_NAME);
 
+        if (value == null) {
+            ctx.getSource().sendError(invalidValue);
+            return 0;
+        }
+
         var control = CombatControl.get(ctx.getSource().getServer());
 
         for (ServerPlayerEntity player : players) {
@@ -186,11 +207,12 @@ public class CombatCommand {
             control.update(player);
         }
 
-        String name = opt.field().getName();
+        var name = translations.optionTitle(inst).formatted(ITALIC);
+        var val = opt.asText(value, inst, translations).formatted(ITALIC);
 
         ctx.getSource().sendFeedback(() -> players.size() == 1
-                ? translations.fallback("commands.combat.set.single", name, players.iterator().next().getNameForScoreboard(), opt.stringify(value))
-                : translations.fallback("commands.combat.set.multiple", name, players.size(), opt.stringify(value)), false);
+                ? translations.fallback("commands.combat.set.single", name, Text.literal(players.iterator().next().getNameForScoreboard()).formatted(YELLOW), val)
+                : translations.fallback("commands.combat.set.multiple", name, players.size(), val), false);
 
         return 1;
     }

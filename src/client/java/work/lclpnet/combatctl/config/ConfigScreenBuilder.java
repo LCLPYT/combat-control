@@ -1,33 +1,31 @@
 package work.lclpnet.combatctl.config;
 
-import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
+import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.lang.String.join;
 import static net.minecraft.text.Text.translatable;
 import static net.minecraft.text.Text.translatableWithFallback;
-import static work.lclpnet.combatctl.CCModInit.MOD_ID;
+import static work.lclpnet.combatctl.cmd.ModTranslations.*;
 
 public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
-
-    private static final String
-            TITLE = MOD_ID + ".config.title",
-            DESC = MOD_ID + ".config.desc";
 
     private final ConfigManager<CombatControlConfig> configManager;
     private final CombatControlConfig config, defaultConfig;
@@ -80,13 +78,13 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
             return;
         }
 
-        var category = builder.getOrCreateCategory(translatable(join(".", TITLE, name)));
+        var category = builder.getOrCreateCategory(translatableWithFallback(optionTitleKey(name), name));
 
-        String comment = comment(field);
+        String comment = ConfigManager.comment(field);
 
         if (comment != null) {
             category.setDescription(new StringVisitable[] {
-                    translatableWithFallback(join(".", DESC, name), comment)
+                    translatableWithFallback(optionDescKey(name), comment)
             });
         }
 
@@ -109,56 +107,95 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
         for (Field field : srcClass.getDeclaredFields()) {
             var type = field.getType();
             String name = field.getName();
-            String comment = comment(field);
+            String comment = ConfigManager.comment(field);
 
-            if (ConfigOption.isValue(type)) {
-                var option = new ConfigOption(field, srcClass);
-                Object value = option.get(src);
-                Object defaultValue = option.get(defaultSrc);
+            if (!ConfigOption.isValue(type)) {
+                continue;
+            }
 
-                if (value == null || defaultValue == null) continue;
+            var option = new ConfigOption(field, srcClass);
+            Object value = option.get(src);
+            Object defaultValue = option.get(defaultSrc);
 
-                var label = translatable(join(".", TITLE, parent.getName(), name));
-                var tooltip = comment != null
-                        ? translatableWithFallback(join(".", DESC, parent.getName(), name), comment)
-                        : null;
+            if (value == null || defaultValue == null) continue;
 
-                var entry = entry(builder, type, value, defaultValue, v -> option.set(src, v), label, tooltip);
+            var label = translatable(optionTitleKey(join(".", parent.getName(), name)));
+            String path = join(".", parent.getName(), name);
 
-                if (entry != null) {
-                    category.addEntry(entry);
-                }
+            var tooltip = comment != null
+                    ? translatableWithFallback(optionDescKey(path), comment)
+                    : null;
+
+            var entry = entry(new EntryData(builder, type, value, defaultValue, v -> option.set(src, v), label, path, tooltip));
+
+            if (entry != null) {
+                category.addEntry(entry);
             }
         }
     }
 
-    private @Nullable AbstractConfigListEntry<?> entry(ConfigBuilder builder, Class<?> type,
-                                                       Object value, Object defaultValue,
-                                                       Consumer<Object> saveConsumer,
-                                                       Text label, @Nullable Text tooltip) {
-        if (type == boolean.class) {
-            return builder.entryBuilder()
-                    .startBooleanToggle(label, value instanceof Boolean b && b)
-                    .setDefaultValue(defaultValue instanceof Boolean b && b)
-                    .setTooltip(tooltip)
-                    .setSaveConsumer(saveConsumer::accept)
+    private @Nullable AbstractConfigListEntry<?> entry(EntryData data) {
+        if (data.type == boolean.class) {
+            return data.builder.entryBuilder()
+                    .startBooleanToggle(data.label, data.value instanceof Boolean b && b)
+                    .setDefaultValue(data.defaultValue instanceof Boolean b && b)
+                    .setTooltip(data.tooltip)
+                    .setSaveConsumer(data.saveConsumer::accept)
                     .build();
+        }
+
+        if (data.type.isEnum()) {
+            return enumSelector(data);
         }
 
         return null;
     }
 
-    private static @Nullable String comment(Field field) {
-        SerdeComment[] comments = field.getDeclaredAnnotationsByType(SerdeComment.class);
+    // convince the compiler that some class is an enum and that the value is an enum constant of it 💀💀💀
+    @SuppressWarnings("unchecked")
+    private <T extends Enum<T>> EnumListEntry<?> enumSelector(EntryData data) {
+        return data.builder.entryBuilder()
+                .startEnumSelector(data.label, (Class<T>) data.type(), (T) data.value)
+                .setDefaultValue((T) data.defaultValue)
+                .setTooltipSupplier(val -> {
+                    Field field;
 
-        if (comments.length == 0) return null;
+                    try {
+                        field = data.type().getField(val.name());
+                    } catch (NoSuchFieldException e) {
+                        return Optional.ofNullable(data.tooltip).map(t -> new Text[] {t});
+                    }
 
-        var comment = new StringBuilder(comments[0].value());
+                    String comment = ConfigManager.comment(field);
 
-        for (int i = 1; i < comments.length; i++) {
-            comment.append("\n").append(comments[i].value());
+                    if (comment == null) {
+                        return Optional.ofNullable(data.tooltip).map(t -> new Text[] {t});
+                    }
+
+                    Text desc = data.enumName(val)
+                            .append(": ")
+                            .append(translatableWithFallback(enumDescKey(val, data.path), comment));
+
+                    return data.tooltip == null
+                            ? Optional.of(new Text[]{desc})
+                            : Optional.of(new Text[]{data.tooltip, desc});
+                })
+                .setEnumNameProvider(data::enumName)
+                .setSaveConsumer(data.saveConsumer::accept)
+                .build();
+    }
+
+    private record EntryData(
+            ConfigBuilder builder,
+            Class<?> type, Object value,
+            Object defaultValue,
+            Consumer<Object> saveConsumer,
+            Text label,
+            String path,
+            @Nullable Text tooltip) {
+
+        public MutableText enumName(Enum<?> val) {
+            return translatableWithFallback(enumNameKey(val, path), val.name());
         }
-
-        return comment.toString();
     }
 }

@@ -2,6 +2,7 @@ package work.lclpnet.combatctl.impl;
 
 import net.minecraft.util.Identifier;
 import work.lclpnet.combatctl.api.CombatStyle;
+import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.config.GlobalConfig;
 import work.lclpnet.combatctl.config.PlayerConfig;
 
@@ -57,6 +58,7 @@ public class CombatStyles {
             player.setNoReequipWhenUsing(!modern);
             player.setFishingRodPull(true);  // has always been enabled in vanilla, but usually disabled on pvp-servers -> opt-in
             player.setSwordBlocking(!modern);
+            player.setKnockbackVariant(KnockbackVariant.DEFAULT);  // opt-in, but on classic pvp-servers in 1.8, it was usually NO_SCALING
         }
 
         @Override

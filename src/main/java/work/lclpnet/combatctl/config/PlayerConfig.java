@@ -3,6 +3,7 @@ package work.lclpnet.combatctl.config;
 import com.electronwill.nightconfig.core.serde.annotations.SerdeComment;
 import lombok.Getter;
 import lombok.Setter;
+import work.lclpnet.combatctl.api.KnockbackVariant;
 
 /**
  * A configuration of player specific combat details that is available within the server context.
@@ -77,6 +78,9 @@ public class PlayerConfig implements Cloneable {
 
     @SerdeComment("Allows the player to block using a sword. Unlike when blocking with a shield, the damage is only reduced partially. Players without the mod can also use this feature, but will receive a temporary shield instead.")
     private boolean swordBlocking = false;
+
+    @SerdeComment("Determines how the player receives knockback.")
+    private KnockbackVariant knockbackVariant = KnockbackVariant.DEFAULT;
 
     /* ----- */
 

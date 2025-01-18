@@ -2,12 +2,22 @@ package work.lclpnet.combatctl.config;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.MutableText;
 import org.jetbrains.annotations.Nullable;
+import work.lclpnet.combatctl.cmd.ModTranslations;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static net.minecraft.text.Text.literal;
+import static net.minecraft.util.Formatting.GREEN;
+import static net.minecraft.util.Formatting.RED;
 
 public class ConfigOption {
 
@@ -32,16 +42,56 @@ public class ConfigOption {
     }
 
     public Optional<ArgumentType<?>> argumentType() {
-        if (field.getType() == boolean.class) {
+        var type = field.getType();
+
+        if (type == boolean.class) {
             return Optional.of(BoolArgumentType.bool());
+        }
+
+        if (type.isEnum()) {
+            return Optional.of(StringArgumentType.word());
         }
 
         return Optional.empty();
     }
 
+    public @Nullable SuggestionProvider<ServerCommandSource> suggestions() {
+        Class<?> type = field.getType();
+
+        if (type.isEnum()) {
+            return (context, builder) -> {
+                for (Field typeField : type.getFields()) {
+                    builder.suggest(typeField.getName());
+                }
+
+                return builder.buildFuture();
+            };
+        }
+
+        return null;
+    }
+
     public Object argumentValue(CommandContext<?> ctx, String name) {
-        if (field.getType() == boolean.class) {
+        var type = field.getType();
+
+        if (type == boolean.class) {
             return BoolArgumentType.getBool(ctx, name);
+        }
+
+        if (type.isEnum()) {
+            String strVal = StringArgumentType.getString(ctx, name);
+
+            for (Field typeField : type.getFields()) {
+                if (!typeField.getName().equals(strVal)) continue;
+
+                try {
+                    return typeField.get(null);
+                } catch (Throwable t) {
+                    return null;
+                }
+            }
+
+            return null;
         }
 
         return null;
@@ -65,12 +115,19 @@ public class ConfigOption {
         } catch (ReflectiveOperationException ignored) {}
     }
 
-    public String stringify(Object val) {
-        if (field.getType() == boolean.class) {
-            return Boolean.toString(val instanceof Boolean b && b);
+    public MutableText asText(Object val, Instance inst, ModTranslations translations) {
+        var type = field.getType();
+
+        if (type == boolean.class) {
+            boolean bool = val instanceof Boolean b && b;
+            return literal(Boolean.toString(bool)).formatted(bool ? GREEN : RED);
         }
 
-        return "unknown";
+        if (type.isEnum() && val instanceof Enum<?> enumVal) {
+            return translations.enumName(enumVal, inst);
+        }
+
+        return literal("unknown");
     }
 
     private static String ucfirst(String s) {
@@ -139,7 +196,13 @@ public class ConfigOption {
         }
     }
 
-    public record Instance(ConfigOption option, List<Field> srcPath) {
+    public record Instance(ConfigOption option, List<Field> srcPath, String path) {
+
+        public Instance(ConfigOption option, List<Field> srcPath) {
+            this(option, srcPath, srcPath.stream()
+                    .map(Field::getName)
+                    .collect(Collectors.joining(".")) + "." + option.field().getName());
+        }
 
         public Object get(Object src) {
             src = applyPath(src);

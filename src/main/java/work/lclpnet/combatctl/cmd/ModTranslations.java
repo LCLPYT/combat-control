@@ -5,14 +5,25 @@ import net.minecraft.text.Text;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import work.lclpnet.combatctl.CCModInit;
+import work.lclpnet.combatctl.config.ConfigOption;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import static java.lang.String.join;
+import static work.lclpnet.combatctl.CCModInit.MOD_ID;
+
 public class ModTranslations {
+
+    public static final String
+            TITLE = MOD_ID + ".config.title",
+            DESC = MOD_ID + ".config.desc",
+            ENUM = MOD_ID + ".config.enum",
+            ENUM_DESC = MOD_ID + ".config.enum_desc";
 
     private final Logger logger;
     private final Map<String, String> defaultTranslations = new HashMap<>();
@@ -63,5 +74,29 @@ public class ModTranslations {
         }
 
         return Text.translatableWithFallback(key, fallback, args);
+    }
+
+    public MutableText enumName(Enum<?> enumVal, ConfigOption.Instance inst) {
+        return fallback(enumNameKey(enumVal, inst.path()));
+    }
+
+    public MutableText optionTitle(ConfigOption.Instance inst) {
+        return fallback(optionTitleKey(inst.path()));
+    }
+
+    public static String optionTitleKey(String path) {
+        return join(".", TITLE, path);
+    }
+
+    public static String optionDescKey(String path) {
+        return join(".", DESC, path);
+    }
+
+    public static String enumNameKey(Enum<?> enumVal, String path) {
+        return join(".", ENUM, path, enumVal.name().toLowerCase(Locale.ROOT));
+    }
+
+    public static String enumDescKey(Enum<?> enumVal, String path) {
+        return join(".", ENUM_DESC, path, enumVal.name().toLowerCase(Locale.ROOT));
     }
 }
