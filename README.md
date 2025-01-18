@@ -30,7 +30,6 @@ The mod is **only required on the server**, but having the mod installed on your
 - remove modern combat sounds
 - remove modern combat particles, such as the damage indicator
 - revert enchanted golden apple ("notch apple") effects
-- increase knockback to airborne targets
 - fishing rods pull entities slightly more upwards
 - fishing rods take less durability damage when pulling entities
 - make fishing rods play the old sounds

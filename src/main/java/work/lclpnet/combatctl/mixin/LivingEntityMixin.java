@@ -1,7 +1,9 @@
 package work.lclpnet.combatctl.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
@@ -10,12 +12,11 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
+import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.config.PlayerConfig;
 
 @Mixin(LivingEntity.class)
@@ -23,9 +24,6 @@ public abstract class LivingEntityMixin {
 
     @Shadow
     protected ItemStack activeItemStack;
-
-    @Unique
-    protected double knockBackStrength = Double.NaN;
 
     @SuppressWarnings("ConstantValue")
     @Inject(
@@ -48,41 +46,27 @@ public abstract class LivingEntityMixin {
         player.addStatusEffect(new StatusEffectInstance(StatusEffects.REGENERATION, 600, 4));
     }
 
-    @SuppressWarnings("ConstantValue")
-    @Inject(
+    @WrapOperation(
             method = "takeKnockback",
-            at = @At("HEAD")
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/LivingEntity;setVelocity(DDD)V"
+            )
     )
-    public void combatControl$beforeKnockBack(double strength, double ratioX, double ratioZ, CallbackInfo callback) {
-        if (!((Object) this instanceof ServerPlayerEntity player)) return;
+    private void combatControl$modifyVelocity(LivingEntity instance, double x, double y, double z, Operation<Void> original,
+                                              @Local(ordinal = 0) Vec3d velocity, @Local(ordinal = 1) Vec3d knockbackDir,
+                                              @Local(ordinal = 0, argsOnly = true) double strength) {
+        if (!(instance instanceof ServerPlayerEntity player)) {
+            original.call(instance, x, y, z);
+            return;
+        }
 
         PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
-        if (!config.isStrongKnockBackInAir()) return;
-
-        // knock back functionality from GoldenAgeCombat, but only players are affected
-        if (player.isOnGround() && !player.isTouchingWater()) {
-            knockBackStrength = strength * (1.0 - player.getAttributeValue(EntityAttributes.KNOCKBACK_RESISTANCE));
-
-            final Vec3d deltaMovement = player.getVelocity();
-            player.setVelocity(deltaMovement.x, Math.min(0.4, deltaMovement.y / 2.0D + strength), deltaMovement.x);
+        if (config.getKnockbackVariant() == KnockbackVariant.NO_SCALING) {
+            player.setVelocity(velocity.x / 2.0 - knockbackDir.x, Math.min(0.4, velocity.y / 2.0 + strength), velocity.z / 2.0 - knockbackDir.z);
+        } else {
+            original.call(instance, x, y, z);
         }
-    }
-
-    @ModifyVariable(
-            method = "takeKnockback",
-            at = @At(
-                    value = "HEAD"
-            ),
-            ordinal = 0,
-            argsOnly = true
-    )
-    public double combatControl$modifyKnockBackStrength(double strength) {
-        if (Double.isNaN(knockBackStrength)) return strength;
-
-        strength = knockBackStrength;
-        knockBackStrength = Double.NaN;
-
-        return strength;
     }
 }

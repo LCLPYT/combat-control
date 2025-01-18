@@ -44,7 +44,6 @@ public class CombatStyles {
             player.setModernNotchApple(modern);
             player.setNoWeakAttackKnockBack(modern);
             player.setNoFishingRodKnockBack(modern);
-            player.setStrongKnockBackInAir(!modern);
             player.setNoSprintCriticalHits(modern);
             player.setNoAttackSprinting(modern);
             player.setFishingRodLaunch(!modern);
