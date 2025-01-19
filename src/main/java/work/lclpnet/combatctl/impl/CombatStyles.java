@@ -48,14 +48,14 @@ public class CombatStyles {
             player.setNoAttackSprinting(modern);
             player.setFishingRodLaunch(!modern);
             player.setModernFishingRodDurability(modern);
-            player.setAttackWhileUsing(false);  // was available in 1.7.10, but not in 1.8.9, therefore opt-in
+            player.setAttackWhileUsing(!modern);
             player.setRenderSwingArmWhileUsing(!modern);
             player.setModernItemDurability(modern);
             player.setSlowFishingRodMotion(modern);
             player.setModernFishingRodSounds(modern);
             player.setModernSharpness(modern);
             player.setNoReequipWhenUsing(!modern);
-            player.setFishingRodPull(true);  // has always been enabled in vanilla, but usually disabled on pvp-servers -> opt-in
+            player.setFishingRodPull(!modern);
             player.setSwordBlocking(!modern);
             player.setKnockbackVariant(KnockbackVariant.DEFAULT);  // opt-in, but on classic pvp-servers in 1.8, it was usually NO_SCALING
         }

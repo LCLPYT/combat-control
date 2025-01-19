@@ -72,6 +72,8 @@
   "combat-control.config.desc.global.modernDamageValues": "If enabled, tools like axes will deal the modern amount of damage that takes cooldown into account. If disabled, damage values will be reverted / adapted to 1.8 and previous versions",
   "combat-control.config.title.global.largerHitboxes": "Larger entity hit boxes",
   "combat-control.config.desc.global.largerHitboxes": "Expand hitboxes by 10% to make hits more accurate",
+  "combat-control.config.title.global.pingUpdateTicks": "Ping refresh ticks",
+  "combat-control.config.desc.global.pingUpdateTicks": "Period in ticks when to refresh player pings",
   "combat-control.config.title.global.pingSpikeMs": "Ping spike threshold",
   "combat-control.config.desc.global.pingSpikeMs": "Threshold in milliseconds when to consider the difference in players's ping a lag spike",
   "combat-control.config.title.client.instantEyeHeight": "Disable smooth sneak",

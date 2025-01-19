@@ -30,6 +30,7 @@ public class PingHandler {
     private final MinecraftServer server;
     private final CombatControl combatControl;
     private volatile ChildScheduler scheduler = null;
+    private int time = 0;
 
     public PingHandler(MinecraftServer server) {
         this.server = server;
@@ -40,7 +41,7 @@ public class PingHandler {
         if (scheduler != null) return;
 
         scheduler = new ChildScheduler(KibuScheduling.getRootScheduler(), logger);
-        scheduler.interval(this::tick, TICK_RATE);
+        scheduler.interval(this::tick, 1);
     }
 
     public synchronized void destroy() {
@@ -50,6 +51,8 @@ public class PingHandler {
     }
 
     private void tick() {
+        if (++time % combatControl.globalConfig().getPingUpdateTicks() != 0) return;
+
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
             if (combatControl.playerConfig(player).getKnockbackVariant() != KnockbackVariant.PING_ADJUSTED) continue;
 

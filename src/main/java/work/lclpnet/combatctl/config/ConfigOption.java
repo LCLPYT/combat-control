@@ -1,9 +1,6 @@
 package work.lclpnet.combatctl.config;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.server.command.ServerCommandSource;
@@ -17,8 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.minecraft.text.Text.literal;
-import static net.minecraft.util.Formatting.GREEN;
-import static net.minecraft.util.Formatting.RED;
+import static net.minecraft.util.Formatting.*;
 
 public class ConfigOption {
 
@@ -53,6 +49,10 @@ public class ConfigOption {
             return Optional.of(DoubleArgumentType.doubleArg());
         }
 
+        if (type == int.class) {
+            return Optional.of(IntegerArgumentType.integer());
+        }
+
         if (type.isEnum()) {
             return Optional.of(StringArgumentType.word());
         }
@@ -81,6 +81,14 @@ public class ConfigOption {
 
         if (type == boolean.class) {
             return BoolArgumentType.getBool(ctx, name);
+        }
+
+        if (type == double.class) {
+            return DoubleArgumentType.getDouble(ctx, name);
+        }
+
+        if (type == int.class) {
+            return IntegerArgumentType.getInteger(ctx, name);
         }
 
         if (type.isEnum()) {
@@ -126,6 +134,14 @@ public class ConfigOption {
         if (type == boolean.class) {
             boolean bool = val instanceof Boolean b && b;
             return literal(Boolean.toString(bool)).formatted(bool ? GREEN : RED);
+        }
+
+        if (type == double.class && val instanceof Number n) {
+            return literal(String.format("%.2f", n.doubleValue())).formatted(AQUA);
+        }
+
+        if (type == int.class && val instanceof Number n) {
+            return literal(Integer.toString(n.intValue())).formatted(AQUA);
         }
 
         if (type.isEnum() && val instanceof Enum<?> enumVal) {

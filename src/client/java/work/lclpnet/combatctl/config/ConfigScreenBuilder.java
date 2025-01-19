@@ -144,6 +144,28 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
                     .build();
         }
 
+        if (data.type == double.class) {
+            double dd = data.defaultValue instanceof Number n ? n.doubleValue() : 0.d;
+
+            return data.builder.entryBuilder()
+                    .startDoubleField(data.label, data.value instanceof Number n ? n.doubleValue() : dd)
+                    .setDefaultValue(dd)
+                    .setTooltip(data.tooltip)
+                    .setSaveConsumer(data.saveConsumer::accept)
+                    .build();
+        }
+
+        if (data.type == int.class) {
+            int di = data.defaultValue instanceof Number n ? n.intValue() : 0;
+
+            return data.builder.entryBuilder()
+                    .startIntField(data.label, data.value instanceof Number n ? n.intValue() : di)
+                    .setDefaultValue(di)
+                    .setTooltip(data.tooltip)
+                    .setSaveConsumer(data.saveConsumer::accept)
+                    .build();
+        }
+
         if (data.type.isEnum()) {
             return enumSelector(data);
         }
