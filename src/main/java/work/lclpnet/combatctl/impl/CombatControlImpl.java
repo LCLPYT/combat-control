@@ -171,5 +171,14 @@ public class CombatControlImpl implements CombatControl {
             var packet = new CombatAbilitiesS2CPacket(abilities);
             ServerPlayNetworking.send(player, packet);
         }
+
+        // reset attack speed, if player was not modded anytime before
+        if (config.isAttackCooldown()) {
+            EntityAttributeInstance attr = player.getAttributeInstance(EntityAttributes.ATTACK_SPEED);
+
+            if (attr != null) {
+                attr.setBaseValue(EntityAttributes.ATTACK_SPEED.value().getDefaultValue());
+            }
+        }
     }
 }
