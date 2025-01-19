@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
+import work.lclpnet.combatctl.impl.KnockbackHandler;
 import work.lclpnet.combatctl.impl.PingHandler;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
@@ -16,6 +17,7 @@ public class MinecraftServerMixin implements CombatControlServer {
     @Unique private final Object ccLock = new Object[0];
     @Unique private CombatControlImpl combatControl = null;
     @Unique private volatile PingHandler pingHandler = null;
+    @Unique private volatile KnockbackHandler knockbackHandler = null;
 
     @Override
     public void combatControl$set(CombatControlImpl combatControl) {
@@ -40,5 +42,20 @@ public class MinecraftServerMixin implements CombatControlServer {
         }
 
         return pingHandler;
+    }
+
+    @Override
+    public @NotNull KnockbackHandler combatControl$getKnockbackHandler() {
+        if (knockbackHandler != null) {
+            return knockbackHandler;
+        }
+
+        synchronized (ccLock) {
+            if (knockbackHandler == null) {
+                knockbackHandler = new KnockbackHandler();
+            }
+        }
+
+        return knockbackHandler;
     }
 }

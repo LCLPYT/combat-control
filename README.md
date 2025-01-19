@@ -104,12 +104,21 @@ If you have ModMenu installed on the client, you can also configure all features
 
 ## Acknowledgements
 This mod is heavily inspired by [Golden Age Combat](https://github.com/Fuzss/goldenagecombat) by Fuzss.
-Some files and methods are literally copied from it and remapped into yarn mappings.
+Some methods are literally copied from it and remapped into yarn mappings.
 Code in this project that is originally from Golden Age Combat is annotated with a comment or doc-comment.
+The MPL-2.0 license from Golden Age Combat is respected; this project uses the same license. 
 
 The reason why this project exists as a separate mod, is to make the combat configurable for each player, alongside with some other adjustments.
 
-This project is licensed under the terms of the MPL-2.0 license.
+Also, the `PING_ADJUSTED` knockback variant is heavily inspired in functionality by the awesome [knockback-sync](https://github.com/CASELOAD7000/knockback-sync) plugin by CASELOAD7000 for Bukkit, Folia and Fabric.
+It calculates the vertical component of a player's received knockback, depending on the player's latency.
+To achieve that, a movement simulation takes place, utilizing a differential equation solver using the Euler method to predict a player's client-sided position.
+The values for the gravity gradient are taken from the Minecraft movement code and from [Minecraft Movement Tools](https://github.com/OrHy3/MinecraftMotionTools) by OrHy3.
+Combat-control's implementation differs from knockback-sync mainly in terms of injection points and control-flow.
+It also works somewhat differently, as combat-control aims to provide a dynamically configurable knockback-system. 
+If you want to use this mod alongside knockback-sync, make sure to set the global knockback variant to `DEFAULT`!
+
+I got the motivation for implementing different knockback variants from [this video](https://www.youtube.com/watch?v=SVokpr3v-TA) by Intel Edits. 
 
 ## API for developers
 Combat-control offers an API for developers that allows for changing each players' combat style and features.

@@ -16,8 +16,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
-import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.config.PlayerConfig;
+import work.lclpnet.combatctl.impl.KnockbackHandler;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
@@ -56,20 +56,10 @@ public abstract class LivingEntityMixin {
     private void combatControl$modifyVelocity(LivingEntity instance, double x, double y, double z, Operation<Void> original,
                                               @Local(ordinal = 0) Vec3d velocity, @Local(ordinal = 1) Vec3d knockbackDir,
                                               @Local(ordinal = 0, argsOnly = true) double strength) {
-        if (!(instance instanceof ServerPlayerEntity player)) {
+
+        if (!(instance instanceof ServerPlayerEntity player)
+                || !KnockbackHandler.get(player.getServer()).applyKnockback(player, velocity, knockbackDir, strength)) {
             original.call(instance, x, y, z);
-            return;
         }
-
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
-
-        if (config.getKnockbackVariant() == KnockbackVariant.NO_SCALING) {
-            if (!player.isTouchingWater()) {
-                player.setVelocity(velocity.x / 2.0 - knockbackDir.x, Math.min(0.4, velocity.y / 2.0 + strength), velocity.z / 2.0 - knockbackDir.z);
-                return;
-            }
-        }
-
-        original.call(instance, x, y, z);
     }
 }
