@@ -9,6 +9,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.combatctl.api.CombatControl;
+import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.mixin.ServerCommonNetworkHandlerAccessor;
 import work.lclpnet.combatctl.type.CCServerPlayNetworkHandler;
 import work.lclpnet.combatctl.type.CombatControlServer;
@@ -50,6 +51,8 @@ public class PingHandler {
 
     private void tick() {
         for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+            if (combatControl.playerConfig(player).getKnockbackVariant() != KnockbackVariant.PING_ADJUSTED) continue;
+
             requestPing(player);
         }
     }
