@@ -15,6 +15,7 @@
     "MinecraftServerMixin",
     "MiningToolItemMixin",
     "PlayerEntityMixin",
+    "ServerCommonNetworkHandlerAccessor",
     "ServerCommonNetworkHandlerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",

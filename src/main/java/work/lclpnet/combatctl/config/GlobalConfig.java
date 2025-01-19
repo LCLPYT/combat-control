@@ -16,4 +16,6 @@ public class GlobalConfig {
     @SerdeComment("Expand hitboxes by 10% to make hits more accurate")
     private boolean largerHitboxes = false;
 
+    @SerdeComment("Threshold in milliseconds when to consider the difference in players's ping an outlier (lag spike)")
+    private double pingSpikeMs = 20.d;
 }

@@ -72,6 +72,8 @@
   "combat-control.config.desc.global.modernDamageValues": "Ob Werkzeuge den modernen Angriffsschaden verursachen sollen, der die Abklingzeit berücksichtigt (1.9 und neuer). Ansonsten wird der klassische Angriffsschaden genutzt.",
   "combat-control.config.title.global.largerHitboxes": "Größere Hitboxen",
   "combat-control.config.desc.global.largerHitboxes": "Alle Hitboxen werden um 10% vergrößert, damit Angriffe genauer sind.",
+  "combat-control.config.title.global.pingSpikeMs": "Latenzbereinigungsschwellwert",
+  "combat-control.config.desc.global.pingSpikeMs": "Schwellwert in Millisekunden, ab wann die Latenzdifferenz eines Spielers als Ausreißer gewertet wird",
   "combat-control.config.title.client.instantEyeHeight": "Animation beim Ducken entfernen",
   "combat-control.config.desc.client.instantEyeHeight": "Entfernt die weiche Kamerabewegung beim Ducken, so wie in älteren Versionen. In neueren Versionen duckt man sich tiefer, weswegen die sofortige Bewegung extremer ist.",
   "combat-control.config.title.client.oldAttributeStyle": "Klassische Attribut-Anzeige",

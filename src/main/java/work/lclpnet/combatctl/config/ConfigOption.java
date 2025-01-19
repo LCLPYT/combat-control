@@ -2,6 +2,7 @@ package work.lclpnet.combatctl.config;
 
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
@@ -46,6 +47,10 @@ public class ConfigOption {
 
         if (type == boolean.class) {
             return Optional.of(BoolArgumentType.bool());
+        }
+
+        if (type == double.class) {
+            return Optional.of(DoubleArgumentType.doubleArg());
         }
 
         if (type.isEnum()) {
