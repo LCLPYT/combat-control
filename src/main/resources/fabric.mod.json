@@ -42,7 +42,8 @@
 		"fabric-api": "*",
 		"fabric-permissions-api-v0": "*",
 		"kibu-hooks": "*",
-		"kibu-networking-api": "*"
+		"kibu-networking-api": "*",
+		"kibu-scheduler-api": "*"
 	},
 	"suggests": {}
 }
