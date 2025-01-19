@@ -64,9 +64,12 @@ public abstract class LivingEntityMixin {
         PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         if (config.getKnockbackVariant() == KnockbackVariant.NO_SCALING) {
-            player.setVelocity(velocity.x / 2.0 - knockbackDir.x, Math.min(0.4, velocity.y / 2.0 + strength), velocity.z / 2.0 - knockbackDir.z);
-        } else {
-            original.call(instance, x, y, z);
+            if (!player.isTouchingWater()) {
+                player.setVelocity(velocity.x / 2.0 - knockbackDir.x, Math.min(0.4, velocity.y / 2.0 + strength), velocity.z / 2.0 - knockbackDir.z);
+                return;
+            }
         }
+
+        original.call(instance, x, y, z);
     }
 }
