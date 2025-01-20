@@ -87,6 +87,11 @@ public class PingHandler {
         return true;
     }
 
+    /**
+     * Returns a player's network latency (round trip) in milliseconds.
+     * @param player The player.
+     * @return Ping (round trip) in ms
+     */
     public static double pingOf(ServerPlayerEntity player) {
         return data(player).cleanedPingMs;
     }

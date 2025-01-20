@@ -79,7 +79,7 @@ public class KnockbackHandler {
         state.vy = player.getVelocity().getY();
 
         double grav = player.getAttributeValue(GRAVITY);
-        int forwardTicks = (int) round(pingOf(player) * PING_TICK_COEFFICIENT);
+        int forwardTicks = (int) round(pingOf(player) * 0.5 * PING_TICK_COEFFICIENT);
 
         for (int i = 0; i < forwardTicks; i++) {
             eulerStep(state, grav);
@@ -147,7 +147,7 @@ public class KnockbackHandler {
         var inAirTicks = inAirTicks(groundDist, vy, grav, sim);
 
         // formula from KnockbackSync, slightly rearranged
-        return inAirTicks.isPresent() && round(pingOf(player) * PING_TICK_COEFFICIENT) >= inAirTicks.getAsInt();
+        return inAirTicks.isPresent() && round(pingOf(player) * 0.5 * PING_TICK_COEFFICIENT) >= inAirTicks.getAsInt();
     }
 
     private static OptionalInt inAirTicks(double groundDist, double vy, double grav, SimulationState sim) {
