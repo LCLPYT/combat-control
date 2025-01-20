@@ -10,10 +10,6 @@ You can have some players using attack cooldown while others don't.
 
 The mod is **only required on the server**, but having the mod installed on your client makes the experience better.
 
-## Requirements
-- [Fabric API](https://modrinth.com/mod/fabric-api)
-- [Cloth Config](https://modrinth.com/mod/cloth-config) (client only)
-
 ## Features
 - remove the attack cooldown
 - reintroduce sword blocking
@@ -21,8 +17,9 @@ The mod is **only required on the server**, but having the mod installed on your
 - revert food mechanics and fast regeneration
 - make snowballs inflict knockback again
 - make fishing rods inflict knockback
-- disable fishing rod pulling, like on many PvP servers (opt-in)
-- allow attacking while using a bow or eating, like in 1.7.10 (opt-in)
+- different knockback variants improve hit combos
+- disable fishing rod pulling, like on many PvP servers
+- allow attacking while using a bow or eating, like in 1.7.10
 - disable sweep attack with a sword when standing still. The Sweeping Edge enchantment will still trigger a sweep attack
 - make critical hits possible while sprinting
 - attacking no longer stops you from sprinting
@@ -40,6 +37,31 @@ The mod is **only required on the server**, but having the mod installed on your
 - instant sneak animation
 - old attribute style on weapons
 - remove flashing hearts animation
+
+## Showcase
+Sword blocking
+
+![Sword blocking](img/sword-blocking.jpg)
+
+Classic bobbing animation
+
+![Bobbing comparison](img/bobbing.gif)
+
+Reduced heart flashing (lost hearts no longer flash in light red)
+
+![Health display](img/flashing-hearts.gif)
+
+Instant sneak animation
+
+![Instant sneak](img/instant-sneak.gif)
+
+Old attribute display
+
+![Attribute style](img/attributes.jpg)
+
+## Requirements
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+- [Cloth Config](https://modrinth.com/mod/cloth-config) (client only)
 
 ## Commands
 Change the combat style with the `/combat style` command:
@@ -101,6 +123,8 @@ Once you save the config, any changes will automatically be loaded.
 No need to restart your game or reload anything.
 
 If you have ModMenu installed on the client, you can also configure all features from there.
+
+![Mod settings](img/settings.jpg)
 
 ## Acknowledgements
 This mod is heavily inspired by [Golden Age Combat](https://github.com/Fuzss/goldenagecombat) by Fuzss.

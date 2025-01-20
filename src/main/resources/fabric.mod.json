@@ -3,7 +3,7 @@
 	"id": "combat-control",
 	"version": "${version}",
 	"name": "combat-control",
-	"description": "Player-based combat control mod that aims brings back 1.8 combat to newer versions",
+	"description": "Bring back classic combat from 1.8.9 and earlier. Remove the attack cooldown, re-introduce sword blocking and more!",
 	"authors": [
 		"LCLP"
 	],
