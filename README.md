@@ -140,6 +140,8 @@ The values for the gravity simulation are taken from the Minecraft movement code
 
 I got the motivation for implementing different knockback variants from [this video](https://www.youtube.com/watch?v=SVokpr3v-TA) by Intel Edits. 
 
+Thanks to b0ps_ for creating the mod icon!
+
 ## API for developers
 Combat-control offers an API for developers that allows for changing each players' combat style and features.
 The API offers fine-grained control of every combat-control feature, for every player.
