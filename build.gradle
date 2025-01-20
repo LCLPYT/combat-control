@@ -5,6 +5,7 @@ plugins {
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.7.0'
     id 'io.freefair.lombok' version '8.11'
+    id 'com.modrinth.minotaur' version '2.4.3'
 }
 
 Properties props = buildUtils.loadProperties('publish.properties')  // will be empty, if the file is missing
@@ -126,6 +127,21 @@ tasks.register("github", GithubDeploymentTask) {
     }
 
     assets.add(tasks.remapJar.archiveFile.get())
+}
+
+modrinth {
+    token = env.get("MODRINTH_TOKEN")
+
+    projectId = "combat-control"
+    versionName = "[$project.minecraft_version] Combat Control $project.version"
+    versionType = "release"
+    uploadFile = remapJar
+
+    dependencies {
+        required.project "fabric-api"
+        optional.project "modmenu"
+        optional.project "cloth-config"
+    }
 }
 
 // configure the maven publication
