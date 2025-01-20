@@ -111,12 +111,8 @@ The MPL-2.0 license from Golden Age Combat is respected; this project uses the s
 The reason why this project exists as a separate mod, is to make the combat configurable for each player, alongside with some other adjustments.
 
 Also, the `PING_ADJUSTED` knockback variant is heavily inspired in functionality by the awesome [knockback-sync](https://github.com/CASELOAD7000/knockback-sync) plugin by CASELOAD7000 for Bukkit, Folia and Fabric.
-It calculates the vertical component of a player's received knockback, depending on the player's latency.
-To achieve that, a movement simulation takes place, utilizing a differential equation solver using the Euler method to predict a player's client-sided position.
-The values for the gravity gradient are taken from the Minecraft movement code and from [Minecraft Movement Tools](https://github.com/OrHy3/MinecraftMotionTools) by OrHy3.
-Combat-control's implementation differs from knockback-sync mainly in terms of injection points and control-flow.
-It also works somewhat differently, as combat-control aims to provide a dynamically configurable knockback-system. 
-If you want to use this mod alongside knockback-sync, make sure to set the global knockback variant to `DEFAULT`!
+It calculates a player's knockback depending on their network latency.
+The values for the gravity simulation are taken from the Minecraft movement code and from [Minecraft Movement Tools](https://github.com/OrHy3/MinecraftMotionTools) by OrHy3.
 
 I got the motivation for implementing different knockback variants from [this video](https://www.youtube.com/watch?v=SVokpr3v-TA) by Intel Edits. 
 

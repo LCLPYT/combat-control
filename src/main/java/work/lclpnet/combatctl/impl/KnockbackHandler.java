@@ -4,7 +4,6 @@ import it.unimi.dsi.fastutil.ints.IntDoublePair;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,6 +28,7 @@ import java.util.OptionalInt;
 
 import static java.lang.Math.min;
 import static java.lang.Math.round;
+import static net.minecraft.entity.attribute.EntityAttributes.GRAVITY;
 import static work.lclpnet.combatctl.impl.PingHandler.pingOf;
 
 public class KnockbackHandler {
@@ -48,29 +48,23 @@ public class KnockbackHandler {
 
         switch (variant) {
             case NO_SCALING -> {
-                player.setVelocity(velocity.x / 2.0 - knockbackDir.x,
-                        Math.min(0.4, velocity.y / 2.0 + strength),
-                        velocity.z / 2.0 - knockbackDir.z);
+                setRisingKnockback(player, velocity, knockbackDir, strength);
                 return true;
             }
             case PING_ADJUSTED -> {
                 if (player.hasStatusEffect(StatusEffects.LEVITATION)) return false;
 
-                // heavily inspired by KnockbackSync
+                // functionality heavily inspired by KnockbackSync
                 double groundDist = serverGroundDist(player);
-                System.out.println(groundDist);
 
-                if (groundDist <= 2.e-02) {
-                    System.out.println("on ground server");
-                    return false;
-                }
+                if (groundDist <= 2.e-02) return false;
 
-                if (isOnGroundWRTPing(player, groundDist)) {
-                    System.out.println("on ground client");
-                    // TODO implement
+                var sim = new SimulationState();
+
+                if (simulateIsOnGround(player, groundDist, sim)) {
+                    setRisingKnockback(player, velocity, knockbackDir, strength);
                 } else {
-                    System.out.println("in air client");
-                    // TODO implement
+                    setSimulatedKnockback(player, velocity, knockbackDir, sim);
                 }
 
                 return true;
@@ -79,6 +73,27 @@ public class KnockbackHandler {
                 return false;
             }
         }
+    }
+
+    private static void setSimulatedKnockback(ServerPlayerEntity player, Vec3d velocity, Vec3d knockbackDir, SimulationState state) {
+        state.vy = player.getVelocity().getY();
+
+        double grav = player.getAttributeValue(GRAVITY);
+        int forwardTicks = (int) round(pingOf(player) * PING_TICK_COEFFICIENT);
+
+        for (int i = 0; i < forwardTicks; i++) {
+            eulerStep(state, grav);
+        }
+
+        player.setVelocity(velocity.x / 2.0 - knockbackDir.x,
+                state.vy,
+                velocity.z / 2.0 - knockbackDir.z);
+    }
+
+    private static void setRisingKnockback(ServerPlayerEntity player, Vec3d velocity, Vec3d knockbackDir, double strength) {
+        player.setVelocity(velocity.x / 2.0 - knockbackDir.x,
+                Math.min(0.4, velocity.y / 2.0 + strength),
+                velocity.z / 2.0 - knockbackDir.z);
     }
 
     private static boolean isMovementAffected(ServerPlayerEntity player) {
@@ -123,32 +138,35 @@ public class KnockbackHandler {
         return res.getPos().distanceTo(start);
     }
 
-    private boolean isOnGroundWRTPing(ServerPlayerEntity player, double groundDist) {
+    private boolean simulateIsOnGround(ServerPlayerEntity player, double groundDist, SimulationState sim) {
         if (groundDist > 1.3d || (player.hasNoGravity() && groundDist > 2.e-2)) return false;
 
         double vy = player.getVelocity().getY();
-        double grav = player.getAttributeValue(EntityAttributes.GRAVITY);
+        double grav = player.getAttributeValue(GRAVITY);
 
-        var inAirTicks = inAirTicks(groundDist, vy, grav);
+        var inAirTicks = inAirTicks(groundDist, vy, grav, sim);
 
+        // formula from KnockbackSync, slightly rearranged
         return inAirTicks.isPresent() && round(pingOf(player) * PING_TICK_COEFFICIENT) >= inAirTicks.getAsInt();
     }
 
-    private static OptionalInt inAirTicks(double groundDist, double vy, double grav) {
-        var state = new State(0, vy);
+    private static OptionalInt inAirTicks(double groundDist, double vy, double grav, SimulationState sim) {
+        // inspired by KnockbackSync
+        sim.y = 0;
+        sim.vy = vy;
 
         var highestPoint = vy > 0
-                ? findHighestPoint(grav, state)
+                ? findHighestPoint(grav, sim)
                 : Optional.of(IntDoublePair.of(0, 0));
 
         if (highestPoint.isEmpty()) {
             return OptionalInt.empty();
         }
 
-        state.y = 0;
-        state.vy = -Math.abs(vy);
+        sim.y = 0;
+        sim.vy = -Math.abs(vy);
 
-        var fallTicks = fallTicks(grav, highestPoint.get().rightDouble() + groundDist, state);
+        var fallTicks = fallTicks(grav, highestPoint.get().rightDouble() + groundDist, sim);
 
         if (fallTicks.isEmpty()) {
             return OptionalInt.empty();
@@ -157,46 +175,42 @@ public class KnockbackHandler {
         return OptionalInt.of(highestPoint.get().leftInt() + fallTicks.getAsInt());
     }
 
-    private static Optional<IntDoublePair> findHighestPoint(final double gravity, State state) {
+    private static Optional<IntDoublePair> findHighestPoint(final double gravity, SimulationState sim) {
         for (int tick = 0; tick < MAX_SOLVER_TICKS; tick++) {
-            if (state.vy <= 0) {
+            if (sim.vy <= 0) {
                 //noinspection SuspiciousNameCombination
-                return Optional.of(IntDoublePair.of(tick, state.y));
+                return Optional.of(IntDoublePair.of(tick, sim.y));
             }
 
-            eulerStep(state, gravity);
+            eulerStep(sim, gravity);
         }
 
         return Optional.empty();
     }
 
-    private static OptionalInt fallTicks(final double gravity, double fallDist, State state) {
+    private static OptionalInt fallTicks(final double gravity, double fallDist, SimulationState sim) {
         for (int tick = 0; tick < MAX_SOLVER_TICKS; tick++) {
-            if (-state.y >= fallDist) {
+            if (-sim.y >= fallDist) {
                 return OptionalInt.of(tick - 1);
             }
 
-            eulerStep(state, gravity);
+            eulerStep(sim, gravity);
         }
 
         return OptionalInt.empty();
     }
 
-    private static void eulerStep(State state, double gravity) {
-        state.y += state.vy;
-        state.vy = AIR_DRAG * (state.vy - gravity);
+    private static void eulerStep(SimulationState sim, double gravity) {
+        // apply gravity gradient
+        sim.y += sim.vy;
+        sim.vy = AIR_DRAG * (sim.vy - gravity);
     }
 
     public static @NotNull KnockbackHandler get(MinecraftServer server) {
         return ((CombatControlServer) server).combatControl$getKnockbackHandler();
     }
 
-    private static class State {
+    private static class SimulationState {
         double y, vy;
-
-        State(double y, double vy) {
-            this.y = y;
-            this.vy = vy;
-        }
     }
 }
