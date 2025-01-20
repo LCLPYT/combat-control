@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.config.PlayerConfig;
+import work.lclpnet.combatctl.mixin.DamageTrackerAccessor;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
 import java.util.Optional;
@@ -45,6 +47,17 @@ public class KnockbackHandler {
         PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
 
         KnockbackVariant variant = config.getKnockbackVariant();
+
+        if (variant != KnockbackVariant.DEFAULT && player.maxHurtTime != player.hurtTime) {
+            System.out.println(player.timeUntilRegen);
+            var recentDamage = ((DamageTrackerAccessor) player.getDamageTracker()).getRecentDamage();
+
+            // do not apply knockback when attacked in damage grace period
+            // this occurs if an attack in the grace period is stronger than the initial attack that caused the grace period
+            if (recentDamage.isEmpty() || !recentDamage.getLast().damageSource().isIn(DamageTypeTags.BYPASSES_COOLDOWN)) {
+                return true;
+            }
+        }
 
         switch (variant) {
             case NO_SCALING -> {
