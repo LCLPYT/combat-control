@@ -12,6 +12,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
@@ -26,6 +27,7 @@ import work.lclpnet.combatctl.type.CombatControlServer;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import static java.lang.Math.min;
 import static java.lang.Math.round;
 import static work.lclpnet.combatctl.impl.PingHandler.pingOf;
 
@@ -55,13 +57,19 @@ public class KnockbackHandler {
                 if (player.hasStatusEffect(StatusEffects.LEVITATION)) return false;
 
                 // heavily inspired by KnockbackSync
-                double groundDistSq = serverGroundDistSq(player);
+                double groundDist = serverGroundDist(player);
+                System.out.println(groundDist);
 
-                if (groundDistSq <= 0) return false;
+                if (groundDist <= 2.e-02) {
+                    System.out.println("on ground server");
+                    return false;
+                }
 
-                if (isOnGroundWRTPing(player, groundDistSq)) {
+                if (isOnGroundWRTPing(player, groundDist)) {
+                    System.out.println("on ground client");
                     // TODO implement
                 } else {
+                    System.out.println("in air client");
                     // TODO implement
                 }
 
@@ -81,15 +89,27 @@ public class KnockbackHandler {
         return state.isOf(Blocks.COBWEB) || state.isOf(Blocks.SCAFFOLDING);
     }
 
-    private double serverGroundDistSq(ServerPlayerEntity player) {
+    private double serverGroundDist(ServerPlayerEntity player) {
         // ray-cast down from the player in order to determine the distance
-        final double maxDist = 10.d;
-
-        Vec3d start = player.getPos(), end = start.subtract(0, maxDist, 0);
         ShapeContext shapeCtx = ShapeContext.of(player);
+        ServerWorld world = player.getServerWorld();
+        Box box = player.getBoundingBox();
+        double y = player.getY();
 
-        BlockHitResult res = BlockView.raycast(start, start, null, (_ctx, pos) -> {
-            ServerWorld world = player.getServerWorld();
+        double maxDist = 10.d;
+
+        maxDist = min(maxDist, rayCastDown(shapeCtx, world, box.minX, y, box.minZ, maxDist));
+        maxDist = min(maxDist, rayCastDown(shapeCtx, world, box.minX, y, box.maxZ, maxDist));
+        maxDist = min(maxDist, rayCastDown(shapeCtx, world, box.maxX, y, box.minZ, maxDist));
+        maxDist = min(maxDist, rayCastDown(shapeCtx, world, box.maxX, y, box.maxZ, maxDist));
+
+        return maxDist;
+    }
+
+    private double rayCastDown(ShapeContext shapeCtx, BlockView world, double x, double y, double z, double maxDist) {
+        Vec3d start = new Vec3d(x, y, z), end = start.subtract(0, maxDist, 0);
+
+        BlockHitResult res = BlockView.raycast(start, end, null, (_ctx, pos) -> {
             BlockState state = world.getBlockState(pos);
             VoxelShape shape = RaycastContext.ShapeType.COLLIDER.get(state, world, pos, shapeCtx);
 
@@ -97,21 +117,21 @@ public class KnockbackHandler {
         }, _ctx -> BlockHitResult.createMissed(end, Direction.DOWN, BlockPos.ofFloored(end)));
 
         if (res.getType() != HitResult.Type.BLOCK) {
-            return maxDist * maxDist;
+            return maxDist;
         }
 
-        return res.getPos().squaredDistanceTo(start);
+        return res.getPos().distanceTo(start);
     }
 
-    private boolean isOnGroundWRTPing(ServerPlayerEntity player, double groundDistSq) {
-        if (groundDistSq > 1.7d || (player.hasNoGravity() && groundDistSq > 1.e-3)) return false;
+    private boolean isOnGroundWRTPing(ServerPlayerEntity player, double groundDist) {
+        if (groundDist > 1.3d || (player.hasNoGravity() && groundDist > 2.e-2)) return false;
 
         double vy = player.getVelocity().getY();
         double grav = player.getAttributeValue(EntityAttributes.GRAVITY);
 
-        var inAirTicks = inAirTicks(Math.sqrt(groundDistSq), vy, grav);
+        var inAirTicks = inAirTicks(groundDist, vy, grav);
 
-        return inAirTicks.isPresent() && inAirTicks.getAsInt() <= round(pingOf(player) * PING_TICK_COEFFICIENT);
+        return inAirTicks.isPresent() && round(pingOf(player) * PING_TICK_COEFFICIENT) >= inAirTicks.getAsInt();
     }
 
     private static OptionalInt inAirTicks(double groundDist, double vy, double grav) {

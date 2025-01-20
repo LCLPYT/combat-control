@@ -55,7 +55,7 @@ public class CombatStyles {
             player.setModernFishingRodSounds(modern);
             player.setModernSharpness(modern);
             player.setNoReequipWhenUsing(!modern);
-            player.setFishingRodPull(!modern);
+            player.setFishingRodPull(modern);
             player.setSwordBlocking(!modern);
             player.setKnockbackVariant(KnockbackVariant.DEFAULT);  // opt-in, but on classic pvp-servers in 1.8, it was usually NO_SCALING
         }
