@@ -49,7 +49,6 @@ public class KnockbackHandler {
         KnockbackVariant variant = config.getKnockbackVariant();
 
         if (variant != KnockbackVariant.DEFAULT && player.maxHurtTime != player.hurtTime) {
-            System.out.println(player.timeUntilRegen);
             var recentDamage = ((DamageTrackerAccessor) player.getDamageTracker()).getRecentDamage();
 
             // do not apply knockback when attacked in damage grace period
