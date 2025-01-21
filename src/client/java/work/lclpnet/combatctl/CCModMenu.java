@@ -8,10 +8,9 @@ public class CCModMenu implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        var configManager = CCModInit.configManager().orElse(null);
-
-        return configManager != null
-                ? new ConfigScreenBuilder(configManager)
-                : ModMenuApi.super.getModConfigScreenFactory();
+        return parent -> CCModInit.configManager()
+                .map(ConfigScreenBuilder::new)
+                .map(builder -> builder.create(parent))
+                .orElse(null);
     }
 }

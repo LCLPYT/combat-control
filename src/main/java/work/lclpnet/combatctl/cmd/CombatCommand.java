@@ -19,8 +19,12 @@ import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
-import work.lclpnet.combatctl.config.*;
+import work.lclpnet.combatctl.config.ClientConfig;
+import work.lclpnet.combatctl.config.CombatControlConfig;
+import work.lclpnet.combatctl.config.ConfigOption;
+import work.lclpnet.combatctl.config.PlayerConfig;
 import work.lclpnet.combatctl.impl.CombatStyles;
+import work.lclpnet.kibu.config.ConfigAccess;
 
 import java.util.Comparator;
 import java.util.List;

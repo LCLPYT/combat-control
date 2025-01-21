@@ -4,8 +4,8 @@ import org.jetbrains.annotations.ApiStatus;
 import work.lclpnet.combatctl.api.CombatControlClient;
 import work.lclpnet.combatctl.config.ClientConfig;
 import work.lclpnet.combatctl.config.CombatControlConfig;
-import work.lclpnet.combatctl.config.ConfigAccess;
 import work.lclpnet.combatctl.network.CombatAbilities;
+import work.lclpnet.kibu.config.ConfigAccess;
 
 import java.util.Objects;
 

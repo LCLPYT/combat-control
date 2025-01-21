@@ -2,7 +2,7 @@ package work.lclpnet.combatctl;
 
 import net.fabricmc.api.DedicatedServerModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import work.lclpnet.combatctl.config.ConfigManager;
+import work.lclpnet.kibu.config.ConfigManager;
 
 public class CCServerInit implements DedicatedServerModInitializer {
 

@@ -2,8 +2,8 @@ package work.lclpnet.combatctl.impl;
 
 import org.jetbrains.annotations.ApiStatus;
 import work.lclpnet.combatctl.config.CombatControlConfig;
-import work.lclpnet.combatctl.config.ConfigAccess;
 import work.lclpnet.combatctl.config.GlobalConfig;
+import work.lclpnet.kibu.config.ConfigAccess;
 
 import java.util.Objects;
 

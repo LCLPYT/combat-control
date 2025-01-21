@@ -10,13 +10,13 @@ import org.jetbrains.annotations.ApiStatus;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
 import work.lclpnet.combatctl.config.CombatControlConfig;
-import work.lclpnet.combatctl.config.ConfigAccess;
 import work.lclpnet.combatctl.config.GlobalConfig;
 import work.lclpnet.combatctl.config.PlayerConfig;
 import work.lclpnet.combatctl.network.CombatAbilities;
 import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.network.packet.CombatAbilitiesS2CPacket;
 import work.lclpnet.combatctl.type.CombatControlPlayer;
+import work.lclpnet.kibu.config.ConfigAccess;
 
 import java.util.function.Consumer;
 

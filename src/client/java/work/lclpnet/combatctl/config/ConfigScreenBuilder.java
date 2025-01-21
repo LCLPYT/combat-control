@@ -15,6 +15,7 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
+import work.lclpnet.kibu.config.ConfigManager;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
