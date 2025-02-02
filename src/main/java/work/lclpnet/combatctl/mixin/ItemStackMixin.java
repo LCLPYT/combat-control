@@ -9,8 +9,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
@@ -19,7 +17,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.impl.AttackAttributeHandler;
 import work.lclpnet.combatctl.impl.SwordBlockingHandler;
 
@@ -46,29 +43,13 @@ public abstract class ItemStackMixin {
             )
     )
     private ActionResult combatControl$use(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
-        ItemStack stack = user.getActiveItem();
+        ActionResult res = SwordBlockingHandler.useItem(instance, user, hand);
 
-        if (stack != null && stack.getItem() instanceof SwordItem && hand != user.getActiveHand()) {
-            return ActionResult.FAIL;
-        }
-
-        if (!(instance instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
+        if (res == ActionResult.PASS) {
             return original.call(instance, world, user, hand);
         }
 
-        var control = CombatControl.get(player.getServer());
-
-        if (!control.playerConfig(player).isSwordBlocking()) {
-            return original.call(instance, world, user, hand);
-        }
-
-        // set using sword
-        user.setCurrentHand(hand);
-
-        // setup fake shield for vanilla players
-        SwordBlockingHandler.sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldEquipPacket(player), true);
-
-        return ActionResult.CONSUME;
+        return res;
     }
 
     @WrapOperation(
@@ -79,34 +60,19 @@ public abstract class ItemStackMixin {
             )
     )
     private boolean combatControl$onStoppedUsing(Item instance, ItemStack stack, World world, LivingEntity user, int remainingUseTicks, Operation<Boolean> original) {
-        if (!(instance instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
-            return original.call(instance, stack, world, user, remainingUseTicks);
+        if (SwordBlockingHandler.stopUsing(instance, user)) {
+            return true;
         }
 
-        var control = CombatControl.get(player.getServer());
-
-        if (!control.playerConfig(player).isSwordBlocking()) {
-            return original.call(instance, stack, world, user, remainingUseTicks);
-        }
-
-        // remove fake shield for vanilla players
-        SwordBlockingHandler.sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldUnequipPacket(player), true);
-
-        return true;
+        return original.call(instance, stack, world, user, remainingUseTicks);
     }
 
     @WrapMethod(method = "getMaxUseTime")
     private int combatControl$getMaxUseTime(LivingEntity user, Operation<Integer> original) {
-        if (!(getItem() instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
-            return original.call(user);
+        if (SwordBlockingHandler.canBlockWith(user, getItem())) {
+            return 72000;
         }
 
-        var control = CombatControl.get(player.getServer());
-
-        if (!control.playerConfig(player).isSwordBlocking()) {
-            return original.call(user);
-        }
-
-        return 72000;
+        return original.call(user);
     }
 }

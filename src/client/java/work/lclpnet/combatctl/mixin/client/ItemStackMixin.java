@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import work.lclpnet.combatctl.api.CombatControlClient;
+import work.lclpnet.combatctl.impl.SwordBlockingHandler;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -127,7 +128,8 @@ public abstract class ItemStackMixin {
             )
     )
     private ActionResult combatControl$useClient(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
-        if (!(instance instanceof SwordItem) || !world.isClient || !CombatControlClient.get().abilities().swordBlocking) {
+        if (!(instance instanceof SwordItem) || !world.isClient || !CombatControlClient.get().abilities().swordBlocking
+                || SwordBlockingHandler.shieldTakesPrecence(user, hand)) {
             return original.call(instance, world, user, hand);
         }
 

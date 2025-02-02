@@ -3,8 +3,11 @@ package work.lclpnet.combatctl.impl;
 import com.mojang.datafixers.util.Pair;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
@@ -14,6 +17,7 @@ import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
 import net.minecraft.server.network.ServerCommonNetworkHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -64,7 +68,7 @@ public class SwordBlockingHandler {
 
         return switch (packet) {
             //noinspection DataFlowIssue
-            case EntityTrackerUpdateS2CPacket orig -> modifyEntityTrackerPacket(handler, orig);
+            case EntityTrackerUpdateS2CPacket orig -> modifyEntityTrackerPacket(orig);
             case EntityEquipmentUpdateS2CPacket orig -> modifyEquipmentPacket(orig, related);
             default -> PendingResult.pass();
         };
@@ -124,7 +128,7 @@ public class SwordBlockingHandler {
         return related.getActiveHand() == Hand.MAIN_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
     }
 
-    private static PendingResult<Packet<?>> modifyEntityTrackerPacket(ServerCommonNetworkHandler handler, EntityTrackerUpdateS2CPacket orig) {
+    private static PendingResult<Packet<?>> modifyEntityTrackerPacket(EntityTrackerUpdateS2CPacket orig) {
         var entries = orig.trackedValues();
 
         // search living flags entry to invert the offhand flag, as the player will hold a fake shield in their other hand
@@ -202,5 +206,60 @@ public class SwordBlockingHandler {
 
             other.networkHandler.sendPacket(packet);
         }
+    }
+
+    public static ActionResult useItem(Item item, PlayerEntity user, Hand hand) {
+        ItemStack stack = user.getActiveItem();
+
+        if (stack != null && stack.getItem() instanceof SwordItem && hand != user.getActiveHand()) {
+            return ActionResult.FAIL;
+        }
+
+        if (!(item instanceof SwordItem) || !(user instanceof ServerPlayerEntity player) || shieldTakesPrecence(player, hand)) {
+            return ActionResult.PASS;
+        }
+
+        var control = CombatControl.get(player.getServer());
+
+        if (!control.playerConfig(player).isSwordBlocking()) {
+            return ActionResult.PASS;
+        }
+
+        // set using sword
+        user.setCurrentHand(hand);
+
+        // setup fake shield for vanilla players
+        sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldEquipPacket(player), true);
+
+        return ActionResult.CONSUME;
+    }
+
+    public static boolean stopUsing(Item item, LivingEntity user) {
+        if (!(item instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
+            return false;
+        }
+
+        var control = CombatControl.get(player.getServer());
+
+        if (!control.playerConfig(player).isSwordBlocking()) {
+            return false;
+        }
+
+        // remove fake shield for vanilla players
+        sendToNearbyVanillaPlayers(player, control, SwordBlockingHandler.fakeShieldUnequipPacket(player), true);
+
+        return true;
+    }
+
+    public static boolean canBlockWith(LivingEntity user, Item item) {
+        if (!(item instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
+            return false;
+        }
+
+        return CombatControl.get(player.getServer()).playerConfig(player).isSwordBlocking();
+    }
+
+    public static boolean shieldTakesPrecence(PlayerEntity player, Hand hand) {
+        return hand == Hand.MAIN_HAND && player.getOffHandStack().isOf(Items.SHIELD);
     }
 }
