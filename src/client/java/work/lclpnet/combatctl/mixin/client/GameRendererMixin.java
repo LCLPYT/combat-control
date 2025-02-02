@@ -25,7 +25,10 @@ public class GameRendererMixin {
             at = @At("TAIL")
     )
     public void combatControl$bobView(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
-        if (!CombatControlClient.get().config().isOldBobbing()) return;
+        var control = CombatControlClient.get();
+        var config = control.config();
+
+        if (!config.isOldBobbing() || (config.isServerBobbingOverride() && control.abilities().disableOldBobbing)) return;
 
         if (this.client.getCameraEntity() instanceof AbstractClientPlayerEntity player) {
             var cccPlayer = (CombatControlClientPlayer) player;

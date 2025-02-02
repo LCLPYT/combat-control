@@ -11,7 +11,7 @@ import work.lclpnet.kibu.networking.protocol.ServerProtocolHandler;
 
 public class CombatControlNetworking {
 
-    public static final Protocol PROTOCOL = new Protocol(CCModInit.identifier("version"), 1);
+    public static final Protocol PROTOCOL = new Protocol(CCModInit.identifier("version"), 2);
     private final Logger logger;
     private @Nullable ServerProtocolHandler protocolHandler = null;
 

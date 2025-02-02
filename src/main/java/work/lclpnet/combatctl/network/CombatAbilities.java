@@ -23,6 +23,8 @@ public class CombatAbilities {
     public boolean noReequipWhenUsing;
     /** Whether sword blocking is allowed */
     public boolean swordBlocking;
+    /** Whether the classic bobbing animation should be disabled */
+    public boolean disableOldBobbing;
 
     public CombatAbilities() {
         attackCooldown = true;
@@ -30,6 +32,7 @@ public class CombatAbilities {
         renderArmSwingWhileUsing = false;
         noReequipWhenUsing = false;
         swordBlocking = false;
+        disableOldBobbing = false;
     }
 
     public CombatAbilities(PacketByteBuf buf) {
@@ -38,6 +41,7 @@ public class CombatAbilities {
         renderArmSwingWhileUsing = buf.readBoolean();
         noReequipWhenUsing = buf.readBoolean();
         swordBlocking = buf.readBoolean();
+        disableOldBobbing = buf.readBoolean();
     }
 
     public void write(PacketByteBuf buf) {
@@ -46,6 +50,7 @@ public class CombatAbilities {
         buf.writeBoolean(renderArmSwingWhileUsing);
         buf.writeBoolean(noReequipWhenUsing);
         buf.writeBoolean(swordBlocking);
+        buf.writeBoolean(disableOldBobbing);
     }
 
     public void copy(CombatAbilities abilities) {
@@ -54,6 +59,7 @@ public class CombatAbilities {
         this.renderArmSwingWhileUsing = abilities.renderArmSwingWhileUsing;
         this.noReequipWhenUsing = abilities.noReequipWhenUsing;
         this.swordBlocking = abilities.swordBlocking;
+        this.disableOldBobbing = abilities.disableOldBobbing;
     }
 
     /**
@@ -97,6 +103,13 @@ public class CombatAbilities {
 
         if (b != swordBlocking) {
             swordBlocking = b;
+            changed = true;
+        }
+
+        b = config.isDisableOldBobbing();
+
+        if (b != disableOldBobbing) {
+            disableOldBobbing = b;
             changed = true;
         }
 

@@ -18,6 +18,7 @@ import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.kibu.config.ConfigManager;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -106,6 +107,8 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
         var srcClass = parent.getType();
 
         for (Field field : srcClass.getDeclaredFields()) {
+            if (Modifier.isTransient(field.getModifiers())) continue;
+
             var type = field.getType();
             String name = field.getName();
             String comment = ConfigManager.comment(field);

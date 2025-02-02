@@ -26,6 +26,7 @@ import work.lclpnet.combatctl.config.PlayerConfig;
 import work.lclpnet.combatctl.impl.CombatStyles;
 import work.lclpnet.kibu.config.ConfigAccess;
 
+import java.lang.reflect.Modifier;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -56,6 +57,7 @@ public class CombatCommand {
         options = ConfigOption.instanceTree(CombatControlConfig.class)
                 .stream()
                 .filter(inst -> inst.option().srcClass() != ClientConfig.class)
+                .filter(inst -> !Modifier.isTransient(inst.option().field().getModifiers()))
                 .map(inst -> {
                     ConfigOption opt = inst.option();
                     int len = inst.srcPath().size();

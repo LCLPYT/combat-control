@@ -79,6 +79,8 @@ public class PlayerConfig implements Cloneable {
     @SerdeComment("Determines how the player receives knockback.")
     private KnockbackVariant knockbackVariant = KnockbackVariant.DEFAULT;
 
+    private transient boolean disableOldBobbing = false;
+
     /* ----- */
 
     @Override

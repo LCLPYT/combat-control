@@ -83,5 +83,7 @@
   "combat-control.config.title.client.oldBobbing": "Klassische Kopfbewegung",
   "combat-control.config.desc.client.oldBobbing": "Fügt eine leichte Kopfbewegung beim Springen hinzu, die es damals bei der Gehbewegung gab. Funktioniert nur, wenn die Gehbewegung eingeschaltet ist.",
   "combat-control.config.title.client.noFlashingHearts": "Blinkende Herzen deaktivieren",
-  "combat-control.config.desc.client.noFlashingHearts": "Entfernt das Blinken der Herzen in der Lebensanzeige, wenn man Schaden bekommt. Das macht es leichter die aktuellen Leben zu sehen."
+  "combat-control.config.desc.client.noFlashingHearts": "Entfernt das Blinken der Herzen in der Lebensanzeige, wenn man Schaden bekommt. Das macht es leichter die aktuellen Leben zu sehen.",
+  "combat-control.config.title.client.serverBobbingOverride": "Änderung der Kopfbewegung zulassen",
+  "combat-control.config.desc.client.serverBobbingOverride": "Erlaubt es dem Server, die klassische Kopfbewegung vorübergehend auszuschalten (empfohlen)."
 }

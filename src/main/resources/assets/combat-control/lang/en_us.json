@@ -83,5 +83,7 @@
   "combat-control.config.title.client.oldBobbing": "Classic bobbing head tilt",
   "combat-control.config.desc.client.oldBobbing": "Renders the classic bobbing effect, with a slight head tilt when jumping. Will only work if view bobbing is enabled.",
   "combat-control.config.title.client.noFlashingHearts": "Disable flashing hearts",
-  "combat-control.config.desc.client.noFlashingHearts": "Disables flashing effect of hearts when taking damage. This makes it easier to see your current health."
+  "combat-control.config.desc.client.noFlashingHearts": "Disables flashing effect of hearts when taking damage. This makes it easier to see your current health.",
+  "combat-control.config.title.client.serverBobbingOverride": "Allow temporary bobbing overrides",
+  "combat-control.config.desc.client.serverBobbingOverride": "Allow servers to temporarily disable the classic bobbing setting (recommended)."
 }

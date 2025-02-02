@@ -23,4 +23,7 @@ public class ClientConfig {
 
     @SerdeComment("Disables flashing effect of hearts when taking damage. This makes it easier to see your current health.")
     private boolean noFlashingHearts = false;
+
+    @SerdeComment("Allow servers to temporarily override the old bobbing setting (recommended).")
+    private boolean serverBobbingOverride = true;
 }
