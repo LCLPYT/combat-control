@@ -22,6 +22,7 @@ import work.lclpnet.combatctl.mixin.LivingEntityAccessor;
 import work.lclpnet.combatctl.type.ModifiablePacket;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.network.ServerSendPacketCallback;
+import work.lclpnet.kibu.hook.util.PendingResult;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,31 +42,31 @@ public class SwordBlockingHandler {
         hooks.unload();
     }
 
-    private boolean onServerSendPacket(Packet<?> packet, ServerCommonNetworkHandler handler) {
+    private PendingResult<Packet<?>> onServerSendPacket(Packet<?> packet, ServerCommonNetworkHandler handler) {
         if (!(packet instanceof ModifiablePacket modifiablePacket)
                 || modifiablePacket.combatControl$isModified()
                 || !(handler instanceof ServerPlayNetworkHandler networkHandler)) {
-            return false;
+            return PendingResult.pass();
         }
 
         ServerPlayerEntity player = networkHandler.player;
         var control = CombatControl.get(player.getServer());
 
         if (control.hasModInstalled(player)) {
-            return false;
+            return PendingResult.pass();
         }
 
         ServerPlayerEntity related = relatedPlayer(player, packet);
 
         if (related == null) {
-            return false;
+            return PendingResult.pass();
         }
 
         return switch (packet) {
             //noinspection DataFlowIssue
             case EntityTrackerUpdateS2CPacket orig -> modifyEntityTrackerPacket(handler, orig);
-            case EntityEquipmentUpdateS2CPacket orig -> modifyEquipmentPacket(handler, orig, related);
-            default -> false;
+            case EntityEquipmentUpdateS2CPacket orig -> modifyEquipmentPacket(orig, related);
+            default -> PendingResult.pass();
         };
     }
 
@@ -95,7 +96,7 @@ public class SwordBlockingHandler {
         return related;
     }
 
-    private boolean modifyEquipmentPacket(ServerCommonNetworkHandler handler, EntityEquipmentUpdateS2CPacket orig, ServerPlayerEntity related) {
+    private PendingResult<Packet<?>> modifyEquipmentPacket(EntityEquipmentUpdateS2CPacket orig, ServerPlayerEntity related) {
         // make sure that the vanilla player holds a shield in their other hand, so that the blocking animation can be displayed
         EquipmentSlot slot = otherHandSlot(related);
 
@@ -105,7 +106,7 @@ public class SwordBlockingHandler {
                 .orElse(null);
 
         if (entry != null && entry.getSecond().isOf(Items.SHIELD)) {
-            return false;
+            return PendingResult.pass();
         }
 
         var list = new ArrayList<>(orig.getEquipmentList());
@@ -116,16 +117,14 @@ public class SwordBlockingHandler {
 
         list.add(Pair.of(slot, new ItemStack(Items.SHIELD)));
 
-        handler.sendPacket(modified(new EntityEquipmentUpdateS2CPacket(orig.getEntityId(), list)));
-
-        return true;
+        return PendingResult.of(new EntityEquipmentUpdateS2CPacket(orig.getEntityId(), list));
     }
 
     private static @NotNull EquipmentSlot otherHandSlot(ServerPlayerEntity related) {
         return related.getActiveHand() == Hand.MAIN_HAND ? EquipmentSlot.OFFHAND : EquipmentSlot.MAINHAND;
     }
 
-    private static boolean modifyEntityTrackerPacket(ServerCommonNetworkHandler handler, EntityTrackerUpdateS2CPacket orig) {
+    private static PendingResult<Packet<?>> modifyEntityTrackerPacket(ServerCommonNetworkHandler handler, EntityTrackerUpdateS2CPacket orig) {
         var entries = orig.trackedValues();
 
         // search living flags entry to invert the offhand flag, as the player will hold a fake shield in their other hand
@@ -137,12 +136,12 @@ public class SwordBlockingHandler {
             byte flags = (byte) entry.value();
             flags ^= (byte) OFF_HAND_ACTIVE_FLAG;
 
-            handler.sendPacket(modifiedTrackerPacket(orig.id(), entries, i, DataTracker.SerializedEntry.of(LIVING_FLAGS, flags)));
+            var modified = modifiedTrackerPacket(orig.id(), entries, i, DataTracker.SerializedEntry.of(LIVING_FLAGS, flags));
 
-            return true;
+            return PendingResult.of(modified);
         }
 
-        return false;
+        return PendingResult.pass();
     }
 
     private static EntityTrackerUpdateS2CPacket modifiedTrackerPacket(int entityId, List<DataTracker.SerializedEntry<?>> entries, int idx, DataTracker.SerializedEntry<Byte> newEntry) {
@@ -161,7 +160,7 @@ public class SwordBlockingHandler {
             newEntries.add(entries.get(idx));
         }
 
-        return modified(new EntityTrackerUpdateS2CPacket(entityId, newEntries));
+        return new EntityTrackerUpdateS2CPacket(entityId, newEntries);
     }
 
     private static <T extends Packet<?>> T modified(T packet) {

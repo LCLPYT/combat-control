@@ -41,7 +41,7 @@
 		"java": ">=21",
 		"fabric-api": "*",
 		"fabric-permissions-api-v0": "*",
-		"kibu-hooks": "*",
+		"kibu-hooks": ">=0.57.0",
 		"kibu-networking-api": "*",
 		"kibu-config-api": "*",
 		"kibu-scheduler-api": "*"
