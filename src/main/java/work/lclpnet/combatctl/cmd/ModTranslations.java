@@ -69,10 +69,6 @@ public class ModTranslations {
     public MutableText fallback(String key, Object... args) {
         String fallback = defaultTranslations.getOrDefault(key, null);
 
-        if (fallback != null) {
-            fallback = fallback.formatted(args);
-        }
-
         return Text.translatableWithFallback(key, fallback, args);
     }
 
