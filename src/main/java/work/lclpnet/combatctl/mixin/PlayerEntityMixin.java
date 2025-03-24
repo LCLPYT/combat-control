@@ -188,7 +188,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         this.setFlag(3, false);
     }
 
-    // TODO compare injection point with prev version
     // combatControl$resetAttackSprintState is taken from GoldenAgeCombat
     @ModifyVariable(
             method = "attack",
