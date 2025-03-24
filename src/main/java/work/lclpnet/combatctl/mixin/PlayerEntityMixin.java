@@ -12,7 +12,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.tag.DamageTypeTags;
@@ -23,7 +22,6 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.config.PlayerConfig;
+import work.lclpnet.combatctl.type.ToolInfo;
 
 @SuppressWarnings("UnreachableCode")
 @Mixin(PlayerEntity.class)
@@ -63,10 +62,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             method = "attack",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"
+                    target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/Entity;DDDLnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V"
             )
     )
-    public boolean combatControl$playCombatSoundsIfEnabled(World world, @Nullable PlayerEntity except, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
+    public boolean combatControl$playCombatSoundsIfEnabled(World instance, Entity source, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return true;
 
         PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
@@ -172,7 +171,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
             method = "attack",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/PlayerEntity;DDDLnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V",
+                    target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/Entity;DDDLnet/minecraft/sound/SoundEvent;Lnet/minecraft/sound/SoundCategory;FF)V",
                     ordinal = 0,
                     shift = At.Shift.AFTER
             ))
@@ -189,6 +188,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         this.setFlag(3, false);
     }
 
+    // TODO compare injection point with prev version
     // combatControl$resetAttackSprintState is taken from GoldenAgeCombat
     @ModifyVariable(
             method = "attack",
@@ -196,7 +196,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
                     value = "STORE",
                     ordinal = 0
             ),
-            index = 11  // inject after first ISTORE 11 instruction (LVT index 11 is boolean bl4) = after line 1212 in version 1.21.4
+            index = 11  // inject after first ISTORE 11 instruction bl4 = false (LVT index 11 is boolean bl4) around line 1212 in version 1.21.4
     )
     public boolean combatControl$resetAttackSprintState(boolean b, @Share("sprintDuringAttack") LocalBooleanRef sprintDuringAttack) {
         // reset to original sprinting value for rest of attack method
@@ -247,7 +247,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         ItemStack stack = self.getActiveItem();
 
-        if (stack == null || !(stack.getItem() instanceof SwordItem)) {
+        if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()) {
             return amount;
         }
 

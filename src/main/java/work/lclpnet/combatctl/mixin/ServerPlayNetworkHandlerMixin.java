@@ -4,13 +4,11 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Hand;
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,6 +19,7 @@ import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.impl.PingHandler;
 import work.lclpnet.combatctl.impl.SwordBlockingHandler;
 import work.lclpnet.combatctl.type.CCServerPlayNetworkHandler;
+import work.lclpnet.combatctl.type.ToolInfo;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public class ServerPlayNetworkHandlerMixin implements CCServerPlayNetworkHandler {
@@ -33,9 +32,8 @@ public class ServerPlayNetworkHandlerMixin implements CCServerPlayNetworkHandler
     @Inject(
             method = "onUpdateSelectedSlot",
             at = @At(
-                    value = "FIELD",
-                    target = "Lnet/minecraft/entity/player/PlayerInventory;selectedSlot:I",
-                    opcode = Opcodes.GETFIELD
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/player/PlayerInventory;getSelectedSlot()I"
             )
     )
     public void combatControl$capturePrevSelectedSlot(UpdateSelectedSlotC2SPacket packet, CallbackInfo ci,
@@ -47,7 +45,7 @@ public class ServerPlayNetworkHandlerMixin implements CCServerPlayNetworkHandler
 
         ItemStack stack = player.getActiveItem();
 
-        if (stack == null || !(stack.getItem() instanceof SwordItem)) {
+        if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()) {
             wasSwordBlocking.set(false);
             return;
         }
@@ -62,7 +60,7 @@ public class ServerPlayNetworkHandlerMixin implements CCServerPlayNetworkHandler
         if (modded) return;
 
         int slot = offHand
-                ? player.getInventory().selectedSlot
+                ? player.getInventory().getSelectedSlot()
                 : PlayerInventory.OFF_HAND_SLOT;
 
         player.networkHandler.sendPacket(player.getInventory().createSlotSetPacket(slot));

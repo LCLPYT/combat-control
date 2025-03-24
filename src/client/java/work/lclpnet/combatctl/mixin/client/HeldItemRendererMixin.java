@@ -10,7 +10,6 @@ import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
@@ -21,6 +20,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControlClient;
+import work.lclpnet.combatctl.type.ToolInfo;
 
 @Mixin(HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
@@ -83,7 +83,7 @@ public abstract class HeldItemRendererMixin {
             )
     )
     private UseAction combatControl$getUseAction(ItemStack instance, Operation<UseAction> original) {
-        if (CombatControlClient.get().abilities().swordBlocking && instance.getItem() instanceof SwordItem) {
+        if (CombatControlClient.get().abilities().swordBlocking && ToolInfo.of(instance).filter(ToolInfo::isSword).isPresent()) {
             return UseAction.BLOCK;
         }
 

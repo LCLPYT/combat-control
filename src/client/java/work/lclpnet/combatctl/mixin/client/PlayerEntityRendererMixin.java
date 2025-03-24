@@ -4,11 +4,11 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.consume.UseAction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import work.lclpnet.combatctl.api.CombatControlClient;
+import work.lclpnet.combatctl.type.ToolInfo;
 
 @Mixin(PlayerEntityRenderer.class)
 public class PlayerEntityRendererMixin {
@@ -21,7 +21,7 @@ public class PlayerEntityRendererMixin {
             )
     )
     private static UseAction combatControl$getUseAction(ItemStack instance, Operation<UseAction> original) {
-        if (CombatControlClient.get().abilities().swordBlocking && instance.getItem() instanceof SwordItem) {
+        if (CombatControlClient.get().abilities().swordBlocking && ToolInfo.of(instance).filter(ToolInfo::isSword).isPresent()) {
             return UseAction.BLOCK;
         }
 

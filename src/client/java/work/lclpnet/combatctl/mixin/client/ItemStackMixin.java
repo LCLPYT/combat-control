@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.TooltipDisplayComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -14,7 +15,6 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
 import net.minecraft.item.consume.UseAction;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.screen.ScreenTexts;
@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import work.lclpnet.combatctl.api.CombatControlClient;
 import work.lclpnet.combatctl.impl.SwordBlockingHandler;
+import work.lclpnet.combatctl.type.ToolInfo;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -45,11 +46,11 @@ public abstract class ItemStackMixin {
 
     // combatControl$wrapAppendAttributeModifiersTooltip is originally taken from GoldenAgeCombat
     @WrapMethod(method = "appendAttributeModifiersTooltip")
-    private void combatControl$wrapAppendAttributeModifiersTooltip(Consumer<Text> tooltipAdder, @Nullable PlayerEntity player, Operation<Void> operation,
-                                                               @Share("modifierSlots") LocalRef<Set<AttributeModifierSlot>> ref) {
+    private void combatControl$wrapAppendAttributeModifiersTooltip(Consumer<Text> textConsumer, TooltipDisplayComponent displayComponent, @Nullable PlayerEntity player, Operation<Void> original,
+                                                                   @Share("modifierSlots") LocalRef<Set<AttributeModifierSlot>> ref) {
 
         if (!CombatControlClient.get().config().isOldAttributeStyle()) {
-            operation.call(tooltipAdder, player);
+            original.call(textConsumer, displayComponent, player);
             return;
         }
 
@@ -59,7 +60,7 @@ public abstract class ItemStackMixin {
 
         // we replace the component consumer with our own list, so we can later perform actions on all attribute lines
         // without having to filter them from all tooltip lines
-        operation.call((Consumer<Text>) tooltipLines::add, player);
+        original.call((Consumer<Text>) tooltipLines::add, displayComponent, player);
 
         // this removes the equipment slot group lines when there are only attributes for a single group,
         // like attack damage and speed for the main hand
@@ -80,7 +81,7 @@ public abstract class ItemStackMixin {
             }
         }
 
-        tooltipLines.forEach(tooltipAdder);
+        tooltipLines.forEach(textConsumer);
     }
 
     // combatControl$appendAttributeModifiersTooltip is originally taken from GoldenAgeCombat
@@ -128,8 +129,12 @@ public abstract class ItemStackMixin {
             )
     )
     private ActionResult combatControl$useClient(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
-        if (!(instance instanceof SwordItem) || !world.isClient || !CombatControlClient.get().abilities().swordBlocking
-                || SwordBlockingHandler.shieldTakesPrecence(user, hand)) {
+        ItemStack self = (ItemStack) (Object) this;
+
+        if (!world.isClient
+                || !CombatControlClient.get().abilities().swordBlocking
+                || SwordBlockingHandler.shieldTakesPrecedence(user, hand)
+                || ToolInfo.of(self).filter(ToolInfo::isSword).isEmpty()) {
             return original.call(instance, world, user, hand);
         }
 
@@ -141,7 +146,9 @@ public abstract class ItemStackMixin {
 
     @WrapMethod(method = "getMaxUseTime")
     private int combatControl$getMaxUseTimeClient(LivingEntity user, Operation<Integer> original) {
-        if (!(getItem() instanceof SwordItem) || user == null) {
+        ItemStack self = (ItemStack) (Object) this;
+
+        if (user == null || ToolInfo.of(self).filter(ToolInfo::isSword).isEmpty()) {
             return original.call(user);
         }
 
@@ -156,7 +163,9 @@ public abstract class ItemStackMixin {
 
     @WrapMethod(method = "getUseAction")
     private UseAction combatControl$getUseActionClient(Operation<UseAction> original) {
-        if (!(getItem() instanceof SwordItem) || !CombatControlClient.get().abilities().swordBlocking) {
+        ItemStack self = (ItemStack) (Object) this;
+
+        if (!CombatControlClient.get().abilities().swordBlocking || ToolInfo.of(self).filter(ToolInfo::isSword).isEmpty()) {
             return original.call();
         }
 

@@ -137,11 +137,11 @@ public abstract class FishingBobberEntityMixin {
 
         float yaw = (float) (MathHelper.atan2(vx, vz) * 180.0D / Math.PI);
         self.setYaw(yaw);
-        self.prevYaw = yaw;
+        self.lastYaw = yaw;
 
         float pitch = (float)(MathHelper.atan2(vy, len2d) * 180.0D / Math.PI);
         self.setPitch(pitch);
-        self.prevPitch = pitch;
+        self.lastPitch = pitch;
     }
 
     @WrapWithCondition(

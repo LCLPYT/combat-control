@@ -6,9 +6,12 @@ import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.item.*;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
-import work.lclpnet.combatctl.type.ToolMaterialCapture;
+import work.lclpnet.combatctl.type.ToolInfo;
+import work.lclpnet.combatctl.type.ToolInfoCapture;
+import work.lclpnet.combatctl.type.ToolType;
 
 import java.util.Map;
 
@@ -16,7 +19,14 @@ import java.util.Map;
  * @implNote This implementation is taken from GoldenAgeCombat and remapped into yarn mappings.
  */
 public class AttackAttributeHandler {
-    private static final Map<Class<? extends Item>, Double> ATTACK_DAMAGE_BONUS_OVERRIDES = ImmutableMap.of(SwordItem.class, 3.0, AxeItem.class, 2.0, PickaxeItem.class, 1.0, ShovelItem.class, 0.0, HoeItem.class, 0.0);
+
+    private static final Map<ToolType, Double> ATTACK_DAMAGE_BONUS_OVERRIDES = ImmutableMap.of(
+            ToolType.SWORD, 3.0,
+            ToolType.AXE, 2.0,
+            ToolType.PICKAXE, 1.0,
+            ToolType.SHOVEL, 0.0,
+            ToolType.HOE, 0.0
+    );
 
     @ApiStatus.Internal
     public static void _modifyAttackDamageAttribute(ItemStack stack) {
@@ -29,22 +39,21 @@ public class AttackAttributeHandler {
     }
 
     public static void setClassicAttackDamage(ItemStack stack) {
-        for (Map.Entry<Class<? extends Item>, Double> entry : ATTACK_DAMAGE_BONUS_OVERRIDES.entrySet()) {
-            if (!entry.getKey().isInstance(stack.getItem())) continue;
+        ToolInfo info = ((ToolInfoCapture) stack.getItem()).combatControl$getToolInfo();
 
-            double newValue = entry.getValue();
-            Item item = stack.getItem();
+        if (info == null) return;
 
-            if (!(item instanceof HoeItem) && item instanceof ToolMaterialCapture capture) {
-                ToolMaterial material = capture.combatControl$getToolMaterial();
-                newValue += material.attackDamageBonus();
-            }
+        double newValue = ATTACK_DAMAGE_BONUS_OVERRIDES.getOrDefault(info.type(), Double.NaN);
 
-            AttributeModifiersComponent component = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            AttributeModifiersComponent modified = modifyComponent(component, newValue);
-            stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, modified);
-            break;
+        if (Double.isNaN(newValue)) return;
+
+        if (info.type() != ToolType.HOE) {
+            newValue += info.material().attackDamageBonus();
         }
+
+        AttributeModifiersComponent component = stack.getOrDefault(DataComponentTypes.ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
+        AttributeModifiersComponent modified = modifyComponent(component, newValue);
+        stack.set(DataComponentTypes.ATTRIBUTE_MODIFIERS, modified);
     }
 
     private static boolean attackDamageModified(ItemStack stack) {

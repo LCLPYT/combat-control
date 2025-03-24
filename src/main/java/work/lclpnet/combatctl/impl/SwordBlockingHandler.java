@@ -10,7 +10,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket;
@@ -24,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.mixin.LivingEntityAccessor;
 import work.lclpnet.combatctl.type.ModifiablePacket;
+import work.lclpnet.combatctl.type.ToolInfo;
 import work.lclpnet.kibu.hook.HookContainer;
 import work.lclpnet.kibu.hook.network.ServerSendPacketCallback;
 import work.lclpnet.kibu.hook.util.PendingResult;
@@ -93,7 +93,7 @@ public class SwordBlockingHandler {
 
         ItemStack stack = related.getActiveItem();
 
-        if (stack == null || !(stack.getItem() instanceof SwordItem)) {
+        if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()) {
             return null;
         }
 
@@ -211,11 +211,11 @@ public class SwordBlockingHandler {
     public static ActionResult useItem(Item item, PlayerEntity user, Hand hand) {
         ItemStack stack = user.getActiveItem();
 
-        if (stack != null && stack.getItem() instanceof SwordItem && hand != user.getActiveHand()) {
+        if (stack != null && ToolInfo.of(stack).filter(ToolInfo::isSword).isPresent() && hand != user.getActiveHand()) {
             return ActionResult.FAIL;
         }
 
-        if (!(item instanceof SwordItem) || !(user instanceof ServerPlayerEntity player) || shieldTakesPrecence(player, hand)) {
+        if (ToolInfo.of(item).filter(ToolInfo::isSword).isEmpty() || !(user instanceof ServerPlayerEntity player) || shieldTakesPrecedence(player, hand)) {
             return ActionResult.PASS;
         }
 
@@ -235,7 +235,7 @@ public class SwordBlockingHandler {
     }
 
     public static boolean stopUsing(Item item, LivingEntity user) {
-        if (!(item instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
+        if (ToolInfo.of(item).filter(ToolInfo::isSword).isEmpty() || !(user instanceof ServerPlayerEntity player)) {
             return false;
         }
 
@@ -252,14 +252,14 @@ public class SwordBlockingHandler {
     }
 
     public static boolean canBlockWith(LivingEntity user, Item item) {
-        if (!(item instanceof SwordItem) || !(user instanceof ServerPlayerEntity player)) {
+        if (ToolInfo.of(item).filter(ToolInfo::isSword).isEmpty() || !(user instanceof ServerPlayerEntity player)) {
             return false;
         }
 
         return CombatControl.get(player.getServer()).playerConfig(player).isSwordBlocking();
     }
 
-    public static boolean shieldTakesPrecence(PlayerEntity player, Hand hand) {
+    public static boolean shieldTakesPrecedence(PlayerEntity player, Hand hand) {
         return hand == Hand.MAIN_HAND && player.getOffHandStack().isOf(Items.SHIELD);
     }
 }
