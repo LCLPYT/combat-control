@@ -3,6 +3,7 @@
   "package": "work.lclpnet.combatctl.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "ConsumableComponentMixin",
     "DamageTrackerAccessor",
     "EnchantmentMixin",
     "EntityMixin",
