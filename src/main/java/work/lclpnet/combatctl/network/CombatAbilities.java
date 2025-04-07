@@ -21,8 +21,6 @@ public class CombatAbilities {
     public boolean renderArmSwingWhileUsing;
     /** Skip equip animation when using items (e.g. shield) */
     public boolean noReequipWhenUsing;
-    /** Whether sword blocking is allowed */
-    public boolean swordBlocking;
     /** Whether the classic bobbing animation should be disabled */
     public boolean disableOldBobbing;
 
@@ -31,7 +29,6 @@ public class CombatAbilities {
         attackWhileUsing = false;
         renderArmSwingWhileUsing = false;
         noReequipWhenUsing = false;
-        swordBlocking = false;
         disableOldBobbing = false;
     }
 
@@ -40,7 +37,6 @@ public class CombatAbilities {
         attackWhileUsing = buf.readBoolean();
         renderArmSwingWhileUsing = buf.readBoolean();
         noReequipWhenUsing = buf.readBoolean();
-        swordBlocking = buf.readBoolean();
         disableOldBobbing = buf.readBoolean();
     }
 
@@ -49,7 +45,6 @@ public class CombatAbilities {
         buf.writeBoolean(attackWhileUsing);
         buf.writeBoolean(renderArmSwingWhileUsing);
         buf.writeBoolean(noReequipWhenUsing);
-        buf.writeBoolean(swordBlocking);
         buf.writeBoolean(disableOldBobbing);
     }
 
@@ -58,7 +53,6 @@ public class CombatAbilities {
         this.attackWhileUsing = abilities.attackWhileUsing;
         this.renderArmSwingWhileUsing = abilities.renderArmSwingWhileUsing;
         this.noReequipWhenUsing = abilities.noReequipWhenUsing;
-        this.swordBlocking = abilities.swordBlocking;
         this.disableOldBobbing = abilities.disableOldBobbing;
     }
 
@@ -96,13 +90,6 @@ public class CombatAbilities {
 
         if (b != noReequipWhenUsing) {
             noReequipWhenUsing = b;
-            changed = true;
-        }
-
-        b = config.isSwordBlocking();
-
-        if (b != swordBlocking) {
-            swordBlocking = b;
             changed = true;
         }
 

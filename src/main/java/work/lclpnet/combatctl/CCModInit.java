@@ -18,7 +18,6 @@ import work.lclpnet.combatctl.config.CombatControlConfig;
 import work.lclpnet.combatctl.impl.CombatControlImpl;
 import work.lclpnet.combatctl.impl.PingHandler;
 import work.lclpnet.combatctl.impl.StaticCombatControl;
-import work.lclpnet.combatctl.impl.SwordBlockingHandler;
 import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.type.CombatControlServer;
 import work.lclpnet.kibu.config.ConfigManager;
@@ -45,7 +44,6 @@ public class CCModInit implements ModInitializer {
 		var networking = new CombatControlNetworking(LOGGER);
 		networking.init();
 
-		var swordBlockingHandler = new SwordBlockingHandler();
 
 		ServerLifecycleEvents.SERVER_STARTING.register(server -> {
 			var control = new CombatControlImpl(server, configManager, networking);
@@ -53,15 +51,11 @@ public class CCModInit implements ModInitializer {
 
 			configManager.onChanged(control::updatePlayers);
 
-			swordBlockingHandler.init();
-
 			PingHandler.get(server).init(LOGGER);
 		});
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             configManager.onChanged(null);
-
-			swordBlockingHandler.destroy();
 
 			PingHandler.get(server).destroy();
         });

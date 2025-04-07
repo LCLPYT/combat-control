@@ -125,7 +125,7 @@ public class DynamicItemHandler {
     }
 
     public enum Property {
-        SWORD_BLOCKING;
+        SWORD_BLOCKING
     }
 
     private static class Holder {
