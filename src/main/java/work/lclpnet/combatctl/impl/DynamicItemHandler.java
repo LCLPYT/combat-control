@@ -32,6 +32,12 @@ public class DynamicItemHandler {
 
     private DynamicItemHandler() {}
 
+    public void update(ServerPlayerEntity player) {
+        for (ItemStack stack : player.getInventory()) {
+            adjustStackFor(stack, player);
+        }
+    }
+
     /**
      * Adjusts a given item stack for a given player, according to their config.
      * This method modifies item stack components, lore etc.
