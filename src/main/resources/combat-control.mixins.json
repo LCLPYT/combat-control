@@ -5,6 +5,7 @@
   "mixins": [
     "ConsumableComponentMixin",
     "DamageTrackerAccessor",
+    "DefaultedListMixin",
     "EnchantmentMixin",
     "EntityMixin",
     "FishingBobberEntityMixin",
@@ -17,6 +18,7 @@
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "PlayerEntityMixin",
+    "PlayerInventoryMixin",
     "ServerCommonNetworkHandlerAccessor",
     "ServerCommonNetworkHandlerMixin",
     "ServerPlayerEntityMixin",

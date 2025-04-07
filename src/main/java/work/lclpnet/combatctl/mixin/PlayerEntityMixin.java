@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.config.PlayerConfig;
+import work.lclpnet.combatctl.impl.DynamicItemHandler;
 import work.lclpnet.combatctl.type.ToolInfo;
 
 @SuppressWarnings("UnreachableCode")
@@ -246,7 +247,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         ItemStack stack = self.getActiveItem();
 
-        if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()) {
+
+        if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()
+                || !DynamicItemHandler.getInstance().isHandled(stack, DynamicItemHandler.Property.SWORD_BLOCKING)) {
             return amount;
         }
 
