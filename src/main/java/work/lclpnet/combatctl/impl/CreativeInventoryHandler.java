@@ -18,8 +18,8 @@ public class CreativeInventoryHandler {
     private final Set<Entry> entries = new HashSet<>();
 
     public void init() {
-        // when putting items from the creative inventory into the player inventory, a de-sync can happen
-        // therefore, sync the slot at the end of the server tick
+        // When putting items from the creative inventory into the player inventory, a de-sync can happen with dynamic items.
+        // Therefore, sync the slot at the end of the server tick
 
         PlayerInventoryHooks.MODIFIED_CREATIVE_INVENTORY.register(event
                 -> entries.add(new Entry(event.player().networkHandler, event.slot())));

@@ -249,7 +249,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
 
         if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()
-                || !DynamicItemHandler.getInstance().isHandled(stack, DynamicItemHandler.Property.SWORD_BLOCKING)) {
+                || DynamicItemHandler.getInstance().unhandled(stack, DynamicItemHandler.Property.SWORD_BLOCKING)) {
             return amount;
         }
 

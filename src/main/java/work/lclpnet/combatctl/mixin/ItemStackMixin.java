@@ -2,37 +2,22 @@ package work.lclpnet.combatctl.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.minecraft.component.MergedComponentMap;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.config.PlayerConfig;
-import work.lclpnet.combatctl.impl.AttackAttributeHandler;
 import work.lclpnet.combatctl.type.ToolInfo;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
 
     @Shadow public abstract Item getItem();
-
-    @Inject(
-            method = "<init>(Lnet/minecraft/item/ItemConvertible;ILnet/minecraft/component/MergedComponentMap;)V",
-            at = @At("TAIL")
-    )
-    public void combatControl$applyAttributeModifiers(ItemConvertible item, int count, MergedComponentMap components, CallbackInfo ci) {
-        ItemStack self = (ItemStack) (Object) this;
-
-        AttackAttributeHandler._modifyAttackDamageAttribute(self);
-    }
 
     @WrapOperation(
             method = "postDamageEntity",
