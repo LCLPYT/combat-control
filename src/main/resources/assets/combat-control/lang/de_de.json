@@ -85,5 +85,7 @@
   "combat-control.config.title.client.noFlashingHearts": "Blinkende Herzen deaktivieren",
   "combat-control.config.desc.client.noFlashingHearts": "Entfernt das Blinken der Herzen in der Lebensanzeige, wenn man Schaden bekommt. Das macht es leichter die aktuellen Leben zu sehen.",
   "combat-control.config.title.client.serverBobbingOverride": "Änderung der Kopfbewegung zulassen",
-  "combat-control.config.desc.client.serverBobbingOverride": "Erlaubt es dem Server, die klassische Kopfbewegung vorübergehend auszuschalten (empfohlen)."
+  "combat-control.config.desc.client.serverBobbingOverride": "Erlaubt es dem Server, die klassische Kopfbewegung vorübergehend auszuschalten (empfohlen).",
+  "combat-control.config.title.client.potionGlint": "Verzauberte Tränke",
+  "combat-control.config.desc.client.potionGlint": "Fügt den Verzauberungseffekt auf Trank-Items wieder hinzu, wie in der 1.19.3 und davor."
 }

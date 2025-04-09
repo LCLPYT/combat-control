@@ -21,9 +21,12 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControlClient;
+import work.lclpnet.combatctl.impl.PotionGlintHandler;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -107,5 +110,18 @@ public abstract class ItemStackMixin {
     private boolean combatControl$addModifierTooltip(boolean baseId) {
         // block the green tooltip formatting style for legacy type
         return baseId && !CombatControlClient.get().config().isOldAttributeStyle();
+    }
+
+    @Inject(
+            method = "hasGlint",
+            at = @At("RETURN"),
+            cancellable = true
+    )
+    private void combatControl$overrideEnchantmentGlint(CallbackInfoReturnable<Boolean> cir) {
+        if (cir.getReturnValueZ()) return;
+
+        if (PotionGlintHandler.shouldHaveGlint((ItemStack) (Object) this)) {
+            cir.setReturnValue(true);
+        }
     }
 }

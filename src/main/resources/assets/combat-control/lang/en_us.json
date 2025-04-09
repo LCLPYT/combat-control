@@ -85,5 +85,7 @@
   "combat-control.config.title.client.noFlashingHearts": "Disable flashing hearts",
   "combat-control.config.desc.client.noFlashingHearts": "Disables flashing effect of hearts when taking damage. This makes it easier to see your current health.",
   "combat-control.config.title.client.serverBobbingOverride": "Allow temporary bobbing overrides",
-  "combat-control.config.desc.client.serverBobbingOverride": "Allow servers to temporarily disable the classic bobbing setting (recommended)."
+  "combat-control.config.desc.client.serverBobbingOverride": "Allow servers to temporarily disable the classic bobbing setting (recommended).",
+  "combat-control.config.title.client.potionGlint": "Enchanted potions",
+  "combat-control.config.desc.client.potionGlint": "Puts the enchantment glint back on potion items, like in 1.19.3 and earlier."
 }

@@ -16,14 +16,17 @@ public class ClientConfig {
     private boolean instantEyeHeight = false;
 
     @SerdeComment("Displays attributes like in earlier versions. Recognizable by the blue text.")
-    private boolean oldAttributeStyle = false;
+    private boolean oldAttributeStyle = true;
 
     @SerdeComment("Renders the classic bobbing effect, with a slight head tilt when jumping. Will only work if view bobbing is enabled.")
     private boolean oldBobbing = false;
 
     @SerdeComment("Disables flashing effect of hearts when taking damage. This makes it easier to see your current health.")
-    private boolean noFlashingHearts = false;
+    private boolean noFlashingHearts = true;
 
     @SerdeComment("Allow servers to temporarily override the old bobbing setting (recommended).")
     private boolean serverBobbingOverride = true;
+
+    @SerdeComment("Puts an enchantment glint on potion items, like in 1.19.3 and earlier.")
+    private boolean potionGlint = true;
 }
