@@ -2,10 +2,14 @@ package work.lclpnet.combatctl.mixin.client;
 
 import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.TooltipDisplayComponent;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
@@ -110,6 +114,39 @@ public abstract class ItemStackMixin {
     private boolean combatControl$addModifierTooltip(boolean baseId) {
         // block the green tooltip formatting style for legacy type
         return baseId && !CombatControlClient.get().config().isOldAttributeStyle();
+    }
+
+    @WrapOperation(
+            method = "appendAttributeModifierTooltip",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/entity/player/PlayerEntity;getAttributeBaseValue(Lnet/minecraft/registry/entry/RegistryEntry;)D",
+                    ordinal = 0
+            )
+    )
+    private double combatControl$addSharpnessDamage(PlayerEntity instance, RegistryEntry<?> registryEntry, Operation<Double> original) {
+        double base = original.call(instance, registryEntry);
+        ItemStack stack = (ItemStack) (Object) this;
+
+        var component = stack.getOrDefault(DataComponentTypes.ENCHANTMENTS, ItemEnchantmentsComponent.DEFAULT);
+        var sharpness = component.getEnchantmentEntries()
+                .stream()
+                .filter(entry -> entry.getKey().matchesKey(Enchantments.SHARPNESS))
+                .findAny()
+                .orElse(null);
+
+        if (sharpness == null) {
+            return base;
+        }
+
+        int level = sharpness.getIntValue();
+
+        // damage formula doesn't respect custom damage enchantment definitions from datapacks
+        double bonusDamage = CombatControlClient.get().abilities().modernSharpness
+                ? (1 + 0.5 * (level - 1))
+                : (1.25 * level);
+
+        return base + bonusDamage;
     }
 
     @Inject(

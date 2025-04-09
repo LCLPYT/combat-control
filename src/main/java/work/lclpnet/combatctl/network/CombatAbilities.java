@@ -23,6 +23,8 @@ public class CombatAbilities {
     public boolean noReequipWhenUsing;
     /** Whether the classic bobbing animation should be disabled */
     public boolean disableOldBobbing;
+    /** Whether to use the new sharpness bonus damage formula or the classic one. */
+    public boolean modernSharpness;
 
     public CombatAbilities() {
         attackCooldown = true;
@@ -30,6 +32,7 @@ public class CombatAbilities {
         renderArmSwingWhileUsing = false;
         noReequipWhenUsing = false;
         disableOldBobbing = false;
+        modernSharpness = true;
     }
 
     public CombatAbilities(PacketByteBuf buf) {
@@ -38,6 +41,7 @@ public class CombatAbilities {
         renderArmSwingWhileUsing = buf.readBoolean();
         noReequipWhenUsing = buf.readBoolean();
         disableOldBobbing = buf.readBoolean();
+        modernSharpness = buf.readBoolean();
     }
 
     public void write(PacketByteBuf buf) {
@@ -46,6 +50,7 @@ public class CombatAbilities {
         buf.writeBoolean(renderArmSwingWhileUsing);
         buf.writeBoolean(noReequipWhenUsing);
         buf.writeBoolean(disableOldBobbing);
+        buf.writeBoolean(modernSharpness);
     }
 
     public void copy(CombatAbilities abilities) {
@@ -54,6 +59,7 @@ public class CombatAbilities {
         this.renderArmSwingWhileUsing = abilities.renderArmSwingWhileUsing;
         this.noReequipWhenUsing = abilities.noReequipWhenUsing;
         this.disableOldBobbing = abilities.disableOldBobbing;
+        this.modernSharpness = abilities.modernSharpness;
     }
 
     /**
@@ -97,6 +103,13 @@ public class CombatAbilities {
 
         if (b != disableOldBobbing) {
             disableOldBobbing = b;
+            changed = true;
+        }
+
+        b = config.isModernSharpness();
+
+        if (b != modernSharpness) {
+            modernSharpness = b;
             changed = true;
         }
 
