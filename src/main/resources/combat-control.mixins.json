@@ -12,7 +12,6 @@
     "HungerManagerMixin",
     "ItemMixin",
     "ItemSettingsMixin",
-    "ItemStackMixin",
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "PlayerEntityMixin",

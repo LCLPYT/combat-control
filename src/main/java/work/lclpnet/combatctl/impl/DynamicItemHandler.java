@@ -5,9 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.component.ComponentType;
-import net.minecraft.component.type.AttributeModifiersComponent;
-import net.minecraft.component.type.BlocksAttacksComponent;
-import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.*;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtOps;
@@ -41,16 +39,7 @@ public class DynamicItemHandler {
             ToolType.HOE, 0.0
     );
 
-    private DynamicItemHandler() {}
-
-    private boolean attackDamagedChanged(AttributeModifiersComponent component) {
-        for (var modifier : component.modifiers()) {
-            if (modifier.attribute() == ATTACK_DAMAGE) {
-                return true;
-            }
-        }
-
-        return false;
+    private DynamicItemHandler() {
     }
 
     public void update(ServerPlayerEntity player) {
@@ -62,7 +51,8 @@ public class DynamicItemHandler {
     /**
      * Adjusts a given item stack for a given player, according to their config.
      * This method modifies item stack components, lore etc.
-     * @param stack The item stack to modify.
+     *
+     * @param stack  The item stack to modify.
      * @param player The player to modify the item stack for.
      */
     public void adjustStackFor(ItemStack stack, ServerPlayerEntity player) {
@@ -72,6 +62,12 @@ public class DynamicItemHandler {
         if (info != null) {
             applyBlocking(config, info, stack);
             adjustAttackDamage(config, info, stack);
+
+            if (info.isSword()) {
+                adjustSwordDurabilityDamage(config, stack);
+            } else {
+                adjustToolDurabilityDamage(config, stack);
+            }
         }
     }
 
@@ -137,14 +133,78 @@ public class DynamicItemHandler {
         }
     }
 
+    private void adjustSwordDurabilityDamage(PlayerConfig config, ItemStack stack) {
+        if (!config.isModernItemDurability()) {
+            if (componentChanged(TOOL, stack, c -> c.damagePerBlock() != 2)) return;
+
+            ToolComponent tool = stack.get(TOOL);
+
+            if (tool == null) return;
+
+            var component = new ToolComponent(tool.rules(), tool.defaultMiningSpeed(), 1, tool.canDestroyBlocksInCreative());
+
+            stack.set(TOOL, component);
+            setHandled(stack, Property.DURABILITY_DAMAGE);
+        } else {
+            if (unhandled(stack, Property.DURABILITY_DAMAGE)) return;
+
+            ToolComponent tool = stack.get(TOOL);
+
+            if (tool == null) return;
+
+            var component = new ToolComponent(tool.rules(), tool.defaultMiningSpeed(), 2, tool.canDestroyBlocksInCreative());
+
+            stack.set(TOOL, component);
+
+            unsetHandled(stack, Property.DURABILITY_DAMAGE);
+        }
+    }
+
+    private void adjustToolDurabilityDamage(PlayerConfig config, ItemStack stack) {
+        if (!config.isModernItemDurability()) {
+            if (componentChanged(WEAPON, stack, c -> c.itemDamagePerAttack() != 2)) return;
+
+            WeaponComponent weapon = stack.get(WEAPON);
+
+            if (weapon == null) return;
+
+            var component = new WeaponComponent(1, weapon.disableBlockingForSeconds());
+
+            stack.set(WEAPON, component);
+            setHandled(stack, Property.DURABILITY_DAMAGE);
+        } else {
+            if (unhandled(stack, Property.DURABILITY_DAMAGE)) return;
+
+            WeaponComponent weapon = stack.get(WEAPON);
+
+            if (weapon == null) return;
+
+            var component = new WeaponComponent(2, weapon.disableBlockingForSeconds());
+
+            stack.set(WEAPON, component);
+
+            unsetHandled(stack, Property.DURABILITY_DAMAGE);
+        }
+    }
+
     private <T> boolean componentChanged(ComponentType<T> type, ItemStack stack) {
         return componentChanged(type, stack, t -> true);
     }
-    
+
     private <T> boolean componentChanged(ComponentType<T> type, ItemStack stack, Predicate<T> predicate) {
         var optComponent = stack.getComponentChanges().get(type);
 
         return optComponent != null && optComponent.isPresent() && predicate.test(optComponent.get());
+    }
+
+    private boolean attackDamagedChanged(AttributeModifiersComponent component) {
+        for (var modifier : component.modifiers()) {
+            if (modifier.attribute() == ATTACK_DAMAGE) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void setHandled(ItemStack stack, Property property) {
@@ -187,7 +247,8 @@ public class DynamicItemHandler {
 
     public enum Property {
         SWORD_BLOCKING,
-        ATTACK_DAMAGE
+        ATTACK_DAMAGE,
+        DURABILITY_DAMAGE
     }
 
     public record State(Set<Property> handled, Optional<Double> originalDamage) {
