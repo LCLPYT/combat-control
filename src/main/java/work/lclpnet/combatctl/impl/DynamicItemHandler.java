@@ -7,7 +7,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.type.*;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +35,7 @@ import static net.minecraft.item.Item.BASE_ATTACK_DAMAGE_MODIFIER_ID;
 public class DynamicItemHandler {
 
     private static final MapCodec<State> STATE_CODEC = State.CODEC.fieldOf(CCModInit.identifier("state").toString());
+
     private static final Map<ToolType, Double> ATTACK_DAMAGE_BONUS_OVERRIDES = ImmutableMap.of(
             ToolType.SWORD, 3.0,
             ToolType.AXE, 2.0,
@@ -38,6 +43,15 @@ public class DynamicItemHandler {
             ToolType.SHOVEL, 0.0,
             ToolType.HOE, 0.0
     );
+
+    private static final ConsumableComponent CLASSIC_ENCHANTED_GOLDEN_APPLE = ConsumableComponents.food()
+            .consumeEffect(new ApplyEffectsConsumeEffect(List.of(
+                    new StatusEffectInstance(StatusEffects.REGENERATION, 600, 4),
+                    new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 0),
+                    new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0),
+                    new StatusEffectInstance(StatusEffects.ABSORPTION, 2400, 0)
+            )))
+            .build();
 
     private DynamicItemHandler() {
     }
@@ -60,20 +74,22 @@ public class DynamicItemHandler {
         ToolInfo info = ToolInfo.of(stack).orElse(null);
 
         if (info != null) {
-            applyBlocking(config, info, stack);
             adjustAttackDamage(config, info, stack);
 
             if (info.isSword()) {
+                adjustBlocking(config, stack);
                 adjustSwordDurabilityDamage(config, stack);
             } else {
                 adjustToolDurabilityDamage(config, stack);
             }
         }
+
+        if (stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) {
+            adjustNotchApple(config, stack);
+        }
     }
 
-    private void applyBlocking(PlayerConfig config, ToolInfo info, ItemStack stack) {
-        if (!info.isSword()) return;
-
+    private void adjustBlocking(PlayerConfig config, ItemStack stack) {
         if (config.isSwordBlocking()) {
             // don't replace existing blocking component - e.g. from other mods
             if (componentChanged(BLOCKS_ATTACKS, stack)) return;
@@ -155,7 +171,6 @@ public class DynamicItemHandler {
             var component = new ToolComponent(tool.rules(), tool.defaultMiningSpeed(), 2, tool.canDestroyBlocksInCreative());
 
             stack.set(TOOL, component);
-
             unsetHandled(stack, Property.DURABILITY_DAMAGE);
         }
     }
@@ -182,8 +197,21 @@ public class DynamicItemHandler {
             var component = new WeaponComponent(2, weapon.disableBlockingForSeconds());
 
             stack.set(WEAPON, component);
-
             unsetHandled(stack, Property.DURABILITY_DAMAGE);
+        }
+    }
+
+    private void adjustNotchApple(PlayerConfig config, ItemStack stack) {
+        if (!config.isModernNotchApple()) {
+            if (componentChanged(CONSUMABLE, stack, c -> !c.equals(ConsumableComponents.ENCHANTED_GOLDEN_APPLE))) return;
+
+            stack.set(CONSUMABLE, CLASSIC_ENCHANTED_GOLDEN_APPLE);
+            setHandled(stack, Property.NOTCH_APPLE);
+        } else {
+            if (unhandled(stack, Property.NOTCH_APPLE)) return;
+
+            stack.set(CONSUMABLE, ConsumableComponents.ENCHANTED_GOLDEN_APPLE);
+            unsetHandled(stack, Property.NOTCH_APPLE);
         }
     }
 
@@ -248,7 +276,8 @@ public class DynamicItemHandler {
     public enum Property {
         SWORD_BLOCKING,
         ATTACK_DAMAGE,
-        DURABILITY_DAMAGE
+        DURABILITY_DAMAGE,
+        NOTCH_APPLE
     }
 
     public record State(Set<Property> handled, Optional<Double> originalDamage) {
