@@ -114,6 +114,8 @@ public class CombatControlImpl implements CombatControl {
         } else {
             updateVanillaPlayer(player);
         }
+
+        DynamicItemHandler.getInstance().update(player);
     }
 
     @Override

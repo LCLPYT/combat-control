@@ -3,7 +3,6 @@
   "package": "work.lclpnet.combatctl.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ConsumableComponentMixin",
     "DamageTrackerAccessor",
     "EnchantmentMixin",
     "EntityMixin",
@@ -13,16 +12,15 @@
     "ItemMixin",
     "ItemSettingsMixin",
     "ItemStackMixin",
-    "LivingEntityAccessor",
     "LivingEntityMixin",
     "MinecraftServerMixin",
     "PlayerEntityMixin",
+    "PlayerInventoryMixin",
+    "ScreenHandlerAccessor",
     "ServerCommonNetworkHandlerAccessor",
     "ServerCommonNetworkHandlerMixin",
     "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin",
-    "packet.EntityEquipmentUpdateS2CPacketMixin",
-    "packet.EntityTrackerUpdateS2CPacketMixin"
+    "ServerPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

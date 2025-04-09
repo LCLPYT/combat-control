@@ -112,9 +112,9 @@ public abstract class FishingBobberEntityMixin {
 
         double len = Math.sqrt(vx * vx + vz * vz + vy * vy);
 
-        vx = (vx / len + velocityRandom.nextGaussian() * 0.007499999832361937D * amplifier) * strength;
-        vz = (vz / len + velocityRandom.nextGaussian() * 0.007499999832361937D * amplifier) * strength;
-        vy = (vy / len + velocityRandom.nextGaussian() * 0.007499999832361937D * amplifier) * strength;
+        vx = (vx / len + velocityRandom.nextGaussian() * 0.0075D * amplifier) * strength;
+        vz = (vz / len + velocityRandom.nextGaussian() * 0.0075D * amplifier) * strength;
+        vy = (vy / len + velocityRandom.nextGaussian() * 0.0075D * amplifier) * strength;
 
         Vec3d vel = new Vec3d(vx, vz, vy);
         self.setVelocity(vel);

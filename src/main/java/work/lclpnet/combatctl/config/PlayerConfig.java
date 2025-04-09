@@ -79,6 +79,9 @@ public class PlayerConfig implements Cloneable {
     @SerdeComment("Determines how the player receives knockback.")
     private KnockbackVariant knockbackVariant = KnockbackVariant.DEFAULT;
 
+    @SerdeComment("If enabled, tools like axes will deal the modern amount of damage that takes cooldown into account. If disabled, damage values will be reverted / adapted to 1.8 and previous versions")
+    private boolean modernDamageValues = true;
+
     private transient boolean disableOldBobbing = false;
 
     /* ----- */

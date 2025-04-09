@@ -58,11 +58,11 @@ public class CombatStyles {
             player.setFishingRodPull(modern);
             player.setSwordBlocking(!modern);
             player.setKnockbackVariant(modern ? KnockbackVariant.DEFAULT : KnockbackVariant.NO_SCALING);
+            player.setModernDamageValues(modern);
         }
 
         @Override
         public void configure(GlobalConfig global) {
-            global.setModernDamageValues(modern);
             global.setLargerHitboxes(!modern);
         }
     }
