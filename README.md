@@ -12,7 +12,7 @@ The mod is **only required on the server**, but having the mod installed on your
 
 ## Features
 - remove the attack cooldown
-- reintroduce sword blocking
+- reintroduce sword blocking (vanilla-compatible since 1.21.5)
 - axes and other tools deal less damage, like in 1.8.9
 - revert food mechanics and fast regeneration
 - make snowballs inflict knockback again
@@ -37,27 +37,34 @@ The mod is **only required on the server**, but having the mod installed on your
 - instant sneak animation
 - old attribute style on weapons
 - remove flashing hearts animation
+- reintroduce potion enchantment glint
 
 ## Showcase
-Sword blocking
+All features showcased here can be toggled individually in the mod settings.
+
+- sword blocking
 
 ![Sword blocking](img/sword-blocking.jpg)
 
-Classic bobbing animation
+- enchanted potions (the glint effect)
+
+![Enchanted Potions](img/enchanted-potions.jpg)
+
+- classic attribute style
+
+![Attribute style](img/attributes.jpg)
+
+- classic bobbing animation
 
 ![Bobbing comparison](img/bobbing.gif)
 
-Reduced heart flashing (lost hearts no longer flash in light red)
+- reduced heart flashing (lost hearts no longer flash in light red)
 
 ![Health display](img/flashing-hearts.gif)
 
-Instant sneak animation
+- instant sneak animation
 
 ![Instant sneak](img/instant-sneak.gif)
-
-Old attribute display
-
-![Attribute style](img/attributes.jpg)
 
 ## Requirements
 - [Fabric API](https://modrinth.com/mod/fabric-api)
