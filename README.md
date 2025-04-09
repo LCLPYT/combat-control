@@ -13,6 +13,7 @@ The mod is **only required on the server**, but having the mod installed on your
 ## Features
 - remove the attack cooldown
 - reintroduce sword blocking (vanilla-compatible since 1.21.5)
+- block-hitting with swords
 - axes and other tools deal less damage, like in 1.8.9
 - revert food mechanics and fast regeneration
 - make snowballs inflict knockback again
@@ -38,6 +39,7 @@ The mod is **only required on the server**, but having the mod installed on your
 - old attribute style on weapons
 - remove flashing hearts animation
 - reintroduce potion enchantment glint
+- display sharpness damage in the item tooltip again (fixes [MC-271840](https://bugs.mojang.com/browse/MC/issues/MC-271840))
 
 ## Showcase
 All features showcased here can be toggled individually in the mod settings.
@@ -66,9 +68,14 @@ All features showcased here can be toggled individually in the mod settings.
 
 ![Instant sneak](img/instant-sneak.gif)
 
+- classic sharpness bonus damage (also fixes [MC-271840](https://bugs.mojang.com/browse/MC/issues/MC-271840))
+
+![Sharpness Enchantment Fix](img/sharpness.jpg)
+
 ## Requirements
 - [Fabric API](https://modrinth.com/mod/fabric-api)
 - [Cloth Config](https://modrinth.com/mod/cloth-config) (client only)
+- [Mod Menu](https://modrinth.com/mod/modmenu) (client only, to access the config screen)
 
 ## Commands
 Change the combat style with the `/combat style` command:
