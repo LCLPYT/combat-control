@@ -125,7 +125,7 @@ tasks.register("github", GithubDeploymentTask) {
 
     release {
         title = "[$project.minecraft_version] $project.name $project.version"
-        tag = project.mod_version
+        tag = project.version
     }
 
     assets.add(tasks.remapJar.archiveFile.get())
