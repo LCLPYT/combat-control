@@ -36,17 +36,16 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.5",
+		"fabricloader": ">=0.16.13",
+		"minecraft": "~1.21.6-rc.1",
 		"java": ">=21",
 		"fabric-api": "*",
 		"fabric-permissions-api-v0": "*",
 		"kibu-hook-api": "*",
-		"kibu-hooks": ">=0.58.0",
+		"kibu-hooks": ">=0.60.0",
 		"kibu-networking-api": "*",
 		"kibu-config-api": "*",
-		"kibu-scheduler-api": "*",
-		"cloth-config": "*"
+		"kibu-scheduler-api": "*"
 	},
 	"suggests": {}
 }

@@ -68,7 +68,7 @@ public abstract class HungerManagerMixin {
                 }
             }
         }
-        ServerWorld world = player.getServerWorld();
+        ServerWorld world = player.getWorld();
         boolean flag = world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (flag && this.foodLevel >= 18 && player.canFoodHeal()) {
             ++this.foodTickTimer;

@@ -1,7 +1,7 @@
 import work.lclpnet.build.task.GithubDeploymentTask
 
 plugins {
-	id 'fabric-loom' version '1.10-SNAPSHOT'
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 	id 'gradle-build-utils' version '1.7.0'
     id 'io.freefair.lombok' version '8.11'
@@ -20,6 +20,10 @@ base {
 repositories {
     maven {
         url "https://repo.lclpnet.work/repository/internal"
+    }
+
+    maven {
+        url "https://repo.lclpnet.work/repository/snapshots"
     }
 
     // ModMenu
@@ -76,11 +80,16 @@ dependencies {
     include(modImplementation("work.lclpnet.mods.kibu:kibu-scheduler-api:${project.kibu_scheduler_api_version}"))
     include(modImplementation("me.lucko:fabric-permissions-api:${project.permission_api_version}"))
 
-    modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+    def clothConfig = modCompileOnlyApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    modLocalRuntime(modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}"))
+    if (project.hasProperty("runtime_cloth_config")) modLocalRuntime(clothConfig)
+
+    def modMenu = modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}")
+
+    if (project.hasProperty("runtime_modmenu")) modLocalRuntime(modMenu)
+
 
     include(implementation('com.electronwill.night-config:core:3.8.1'))
     include(implementation('com.electronwill.night-config:toml:3.8.1'))
