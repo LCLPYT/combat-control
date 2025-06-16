@@ -45,7 +45,10 @@
 		"kibu-hooks": ">=0.60.0",
 		"kibu-networking-api": "*",
 		"kibu-config-api": "*",
-		"kibu-scheduler-api": "*"
+		"kibu-scheduler-api": "*",
+		"cloth-config": "*"
 	},
-	"suggests": {}
+	"suggests": {
+		"modmenu": "*"
+	}
 }
