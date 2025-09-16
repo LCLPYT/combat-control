@@ -59,6 +59,8 @@
   "combat-control.config.desc.player.fishingRodPull": "Whether reeling in an entity pulls it towards the player. Many PVP servers disabled this, however it was always enabled in vanilla",
   "combat-control.config.title.player.swordBlocking": "Blocking with swords",
   "combat-control.config.desc.player.swordBlocking": "Allows the player to block using a sword. Unlike when blocking with a shield, the damage is only reduced partially. Players without the mod can also use this feature, but will receive a temporary shield instead.",
+  "combat-control.config.title.player.dynamicProjectileMargin": "Dynamic projectile margin",
+  "combat-control.config.desc.player.dynamicProjectileMargin": "If enabled, projectiles shot by the player start of with no hitbox tolerance margin and will expand by 0.05 blocks per tick until the tolerance margin reaches 0.3. If disabled, a 0.3 is used all the time (behavior until 1.21.6).",
   "combat-control.config.title.player.knockbackVariant": "Knockback variant",
   "combat-control.config.desc.player.knockbackVariant": "Determines how the player receives knockback.",
   "combat-control.config.title.player.modernDamageValues": "Modern tool attack damage",

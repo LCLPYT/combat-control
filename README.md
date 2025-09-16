@@ -40,6 +40,7 @@ The mod is **only required on the server**, but having the mod installed on your
 - remove flashing hearts animation
 - reintroduce potion enchantment glint
 - display sharpness damage in the item tooltip again (fixes [MC-271840](https://bugs.mojang.com/browse/MC/issues/MC-271840))
+- revert the projectile tolerance margin to a constant 0.3 blocks (from before Minecraft 1.21.6)
 
 ## Showcase
 All features showcased here can be toggled individually in the mod settings.

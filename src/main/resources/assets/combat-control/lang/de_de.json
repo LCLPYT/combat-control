@@ -59,6 +59,8 @@
   "combat-control.config.desc.player.fishingRodPull": "Ob Angeln Spieler, Tiere und Monster heranziehen können. Viele 1.8 und 1.7 PvP-Server haben das ausgeschaltet, wobei es im Basisspiel immer eingeschaltet war.",
   "combat-control.config.title.player.swordBlocking": "Blocken mit Schwertern",
   "combat-control.config.desc.player.swordBlocking": "Erlaubt das Blocken mit Schwertern. Anders als beim Blocken mit einem Schild, bekommt ein Spieler nur verringerten Schaden. Spieler ohne die Mod können trotzdem mit Schwertern blocken, weil sie ein temporäres Schild in der zweiten Hand erhalten.",
+  "combat-control.config.title.player.dynamicProjectileMargin": "Dynamische Hitbox bei Projektilen",
+  "combat-control.config.desc.player.dynamicProjectileMargin": "Die Hitboxen von Projektilen haben am Anfang keine Vergrößerung, sondern wachsen um 0,05 Blöcke pro Tick, bis sie um 0,3 Blöcke angewachsen sind. Bei Deaktivierung werden die Hitboxen sofort um 0.3 vergrößert (wie vor Minecraft 1.21.6).",
   "combat-control.config.title.player.knockbackVariant": "Rückstoßverhalten",
   "combat-control.config.desc.player.knockbackVariant": "Kontrolliert den erhaltenen Rückstoß eines Spielers",
   "combat-control.config.title.player.modernDamageValues": "Neuer Angriffsschaden bei Werkzeugen",

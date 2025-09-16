@@ -59,6 +59,7 @@ public class CombatStyles {
             player.setSwordBlocking(!modern);
             player.setKnockbackVariant(modern ? KnockbackVariant.DEFAULT : KnockbackVariant.NO_SCALING);
             player.setModernDamageValues(modern);
+            player.setDynamicProjectileMargin(modern);
         }
 
         @Override

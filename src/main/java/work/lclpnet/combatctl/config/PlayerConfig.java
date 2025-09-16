@@ -82,6 +82,9 @@ public class PlayerConfig implements Cloneable {
     @SerdeComment("If enabled, tools like axes will deal the modern amount of damage that takes cooldown into account. If disabled, damage values will be reverted / adapted to 1.8 and previous versions")
     private boolean modernDamageValues = true;
 
+    @SerdeComment("If enabled, projectiles shot by the player start of with no hitbox tolerance margin and will expand by 0.05 blocks per tick until the tolerance margin reaches 0.3. If disabled, a 0.3 is used all the time (behavior until 1.21.6).")
+    private boolean dynamicProjectileMargin = true;
+
     private transient boolean disableOldBobbing = false;
 
     /* ----- */
