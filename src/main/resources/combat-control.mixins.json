@@ -16,6 +16,7 @@
     "MinecraftServerMixin",
     "PlayerEntityMixin",
     "PlayerInventoryMixin",
+    "ProjectileEntityMixin",
     "ProjectileUtilMixin",
     "ScreenHandlerAccessor",
     "ServerCommonNetworkHandlerAccessor",

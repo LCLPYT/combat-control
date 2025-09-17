@@ -41,6 +41,8 @@ The mod is **only required on the server**, but having the mod installed on your
 - reintroduce potion enchantment glint
 - display sharpness damage in the item tooltip again (fixes [MC-271840](https://bugs.mojang.com/browse/MC/issues/MC-271840))
 - revert the projectile tolerance margin to a constant 0.3 blocks (from before Minecraft 1.21.6)
+- allow projectile hits for entities that are intersecting with the owning player hitbox (changed in Minecraft 1.12.2)
+- use classic snowball particle on impact
 
 ## Showcase
 All features showcased here can be toggled individually in the mod settings.

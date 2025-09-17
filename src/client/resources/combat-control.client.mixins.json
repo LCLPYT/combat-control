@@ -6,15 +6,14 @@
     "defaultRequire": 1
   },
   "client": [
+    "AttributeModifiersComponent$Display$DefaultMixin",
     "CameraMixin",
     "GameRendererMixin",
     "HeldItemRendererMixin",
     "InGameHudMixin",
     "ItemStackMixin",
     "MinecraftClientMixin",
-    "PlayerEntityMixin"
-  ],
-  "mixins": [
-    "AttributeModifiersComponent$Display$DefaultMixin"
+    "PlayerEntityMixin",
+    "SnowballEntityMixin"
   ]
 }

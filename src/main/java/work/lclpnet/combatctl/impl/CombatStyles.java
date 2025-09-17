@@ -60,6 +60,7 @@ public class CombatStyles {
             player.setKnockbackVariant(modern ? KnockbackVariant.DEFAULT : KnockbackVariant.NO_SCALING);
             player.setModernDamageValues(modern);
             player.setDynamicProjectileMargin(modern);
+            player.setEarlyProjectileHits(!modern);
         }
 
         @Override

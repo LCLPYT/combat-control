@@ -29,4 +29,7 @@ public class ClientConfig {
 
     @SerdeComment("Puts an enchantment glint on potion items, like in 1.19.3 and earlier.")
     private boolean potionGlint = true;
+
+    @SerdeComment("Use classic snowball particle")
+    private boolean classicSnowballParticle = true;
 }

@@ -85,6 +85,9 @@ public class PlayerConfig implements Cloneable {
     @SerdeComment("If enabled, projectiles shot by the player start of with no hitbox tolerance margin and will expand by 0.05 blocks per tick until the tolerance margin reaches 0.3. If disabled, a 0.3 is used all the time (behavior until 1.21.6).")
     private boolean dynamicProjectileMargin = true;
 
+    @SerdeComment("Counts entities intersecting with the projectile owner hitbox as hits as well (behavior until 1.12.2).")
+    private boolean earlyProjectileHits = false;
+
     private transient boolean disableOldBobbing = false;
 
     /* ----- */

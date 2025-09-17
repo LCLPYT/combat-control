@@ -61,6 +61,8 @@
   "combat-control.config.desc.player.swordBlocking": "Allows the player to block using a sword. Unlike when blocking with a shield, the damage is only reduced partially. Players without the mod can also use this feature, but will receive a temporary shield instead.",
   "combat-control.config.title.player.dynamicProjectileMargin": "Dynamic projectile margin",
   "combat-control.config.desc.player.dynamicProjectileMargin": "If enabled, projectiles shot by the player start of with no hitbox tolerance margin and will expand by 0.05 blocks per tick until the tolerance margin reaches 0.3. If disabled, a 0.3 is used all the time (behavior until 1.21.6).",
+  "combat-control.config.title.player.earlyProjectileHits": "Early projectile hits",
+  "combat-control.config.desc.player.earlyProjectileHits": "Counts entities intersecting with the projectile owner hitbox as hits as well (behavior until 1.12.2).",
   "combat-control.config.title.player.knockbackVariant": "Knockback variant",
   "combat-control.config.desc.player.knockbackVariant": "Determines how the player receives knockback.",
   "combat-control.config.title.player.modernDamageValues": "Modern tool attack damage",
@@ -89,5 +91,7 @@
   "combat-control.config.title.client.serverBobbingOverride": "Allow temporary bobbing overrides",
   "combat-control.config.desc.client.serverBobbingOverride": "Allow servers to temporarily disable the classic bobbing setting (recommended).",
   "combat-control.config.title.client.potionGlint": "Enchanted potions",
-  "combat-control.config.desc.client.potionGlint": "Puts the enchantment glint back on potion items, like in 1.19.3 and earlier."
+  "combat-control.config.desc.client.potionGlint": "Puts the enchantment glint back on potion items, like in 1.19.3 and earlier.",
+  "combat-control.config.title.client.classicSnowballParticle": "Classic snowball particle",
+  "combat-control.config.desc.client.classicSnowballParticle": "Spawn classic snowball particle upon impact"
 }
