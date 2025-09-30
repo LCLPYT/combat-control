@@ -51,7 +51,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void combatControl$getAttackCooldownProgress(float baseTime, CallbackInfoReturnable<Float> cir) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         if (config.isAttackCooldown()) return;
 
@@ -69,7 +69,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public boolean combatControl$playCombatSoundsIfEnabled(World instance, Entity source, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return true;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         if (config.isModernHitSounds()) {
             return true;
@@ -94,7 +94,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public boolean combatControl$spawnCombatParticlesIfEnabled(ServerWorld world, ParticleEffect particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed) {
         if (particle != ParticleTypes.DAMAGE_INDICATOR || !((Object) this instanceof ServerPlayerEntity player)) return true;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         return config.isModernHitParticle();
     }
@@ -108,7 +108,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void combatControl$spawnSweepAttackParticles(CallbackInfo ci) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         // trigger sweep attack particle if enabled or when the player has the sweeping edge enchantment on their weapon
         if (config.isSweepAttack() || player.getAttributeValue(EntityAttributes.SWEEPING_DAMAGE_RATIO) > 0.0F) {
@@ -123,7 +123,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public boolean combatControl$modifySweepAttack(boolean original, Entity target) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return original;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         if (config.isSweepAttack()) return original;
 
@@ -149,13 +149,13 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void combatControl$onWeakDamage(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         // check if weak attacks are enabled or if fishing rod knock back is enabled
         if (config.isNoWeakAttackKnockBack()
             && (config.isNoFishingRodKnockBack() || !(source.getSource() instanceof FishingBobberEntity))) return;
 
-        if (Math.abs(amount) < 1e-9f && getWorld().getDifficulty() != Difficulty.PEACEFUL) {
+        if (Math.abs(amount) < 1e-9f && getEntityWorld().getDifficulty() != Difficulty.PEACEFUL) {
             callback.setReturnValue(super.damage(world, source, amount));
         }
     }
@@ -179,7 +179,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void combatControl$onCriticalHit(Entity target, CallbackInfo callback) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         // allow landing critical hits when sprint jumping like before 1.9 and in combat test snapshots
         // the injection point is fine despite being inside a few conditions as the same conditions must apply for critical hits
@@ -221,7 +221,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void combatControl$handleAttackSprinting(Entity target, CallbackInfo callback, @Share("sprintDuringAttack") LocalBooleanRef sprintDuringAttack) {
         if (!((Object) this instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         // don't disable sprinting when attacking a target
         // this is mainly nice to have since you always stop to swim when attacking creatures underwater

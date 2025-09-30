@@ -29,7 +29,7 @@ public class ProjectileUtilMixin {
     private static void combatControl$overrideToleranceMargin(Entity entity, CallbackInfoReturnable<Float> cir) {
         if (!(entity instanceof ProjectileEntity projectile) || !(projectile.getOwner() instanceof ServerPlayerEntity player)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         if (config.isDynamicProjectileMargin()) return;
 
@@ -49,7 +49,7 @@ public class ProjectileUtilMixin {
             return original.call(instance, from, to);
         }
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         if (config.isEarlyProjectileHits() && instance.contains(from)) {
             return Optional.of(from);

@@ -44,7 +44,7 @@ public class KnockbackHandler {
     public boolean applyKnockback(ServerPlayerEntity player, Vec3d velocity, Vec3d knockbackDir, double strength) {
         if (isMovementAffected(player)) return false;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         KnockbackVariant variant = config.getKnockbackVariant();
 
@@ -119,7 +119,7 @@ public class KnockbackHandler {
     private double serverGroundDist(ServerPlayerEntity player) {
         // ray-cast down from the player in order to determine the distance
         ShapeContext shapeCtx = ShapeContext.of(player);
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getEntityWorld();
         Box box = player.getBoundingBox();
         double y = player.getY();
 

@@ -61,7 +61,7 @@ public class CCModInit implements ModInitializer {
         });
 
 		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
-			var control = CombatControl.get(newPlayer.getServer());
+			var control = CombatControl.get(newPlayer.getEntityWorld().getServer());
 			control.copyData(oldPlayer, newPlayer);
 		});
 

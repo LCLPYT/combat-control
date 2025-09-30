@@ -242,7 +242,7 @@ public class CombatCommand {
 
     private PlayerConfig playerCfg(@Nullable ServerPlayerEntity player) {
         return player != null
-                ? CombatControl.get(player.getServer()).playerConfig(player)
+                ? CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player)
                 : config.player;
     }
 

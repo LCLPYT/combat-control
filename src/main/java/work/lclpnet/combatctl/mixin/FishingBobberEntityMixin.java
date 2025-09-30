@@ -43,7 +43,7 @@ public abstract class FishingBobberEntityMixin {
 
         // for players, this is a weak attack; handled in PlayerEntityMixin#combatControl$onWeakDamage()
         FishingBobberEntity self = (FishingBobberEntity) (Object) this;
-        entityHitResult.getEntity().damage(player.getWorld(), player.getDamageSources().thrown(self, this.getPlayerOwner()), 0.0F);
+        entityHitResult.getEntity().damage(player.getEntityWorld(), player.getDamageSources().thrown(self, this.getPlayerOwner()), 0.0F);
     }
 
     // combatControl$pullHookedEntity is taken from GoldenAgeCombat
@@ -172,6 +172,6 @@ public abstract class FishingBobberEntityMixin {
     private PlayerConfig combatConfig() {
         if (!(getPlayerOwner() instanceof ServerPlayerEntity player)) return null;
 
-        return CombatControl.get(player.getServer()).playerConfig(player);
+        return CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
     }
 }

@@ -28,12 +28,12 @@ public class FishingRodItemMixin {
     )
     public void combatControl$onPlaySound(World instance, Entity source, double x, double y, double z, SoundEvent sound, SoundCategory category, float volume, float pitch, Operation<Void> original, @Local(argsOnly = true) PlayerEntity user) {
 
-        if (instance.isClient || !(user instanceof ServerPlayerEntity player)) {
+        if (instance.isClient() || !(user instanceof ServerPlayerEntity player)) {
             original.call(instance, source, x, y, z, sound, category, volume, pitch);
             return;
         }
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         if (config.isModernFishingRodSounds()) {
             original.call(instance, source, x, y, z, sound, category, volume, pitch);

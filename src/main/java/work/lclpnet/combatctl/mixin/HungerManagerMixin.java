@@ -42,11 +42,11 @@ public abstract class HungerManagerMixin {
     public void combatControl$tick(ServerPlayerEntity player, CallbackInfo callback) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(serverPlayer);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(serverPlayer);
 
         if (config.isModernRegeneration()) return;
 
-        Difficulty difficulty = player.getWorld().getDifficulty();
+        Difficulty difficulty = player.getEntityWorld().getDifficulty();
         if (this.exhaustion > 4.0F) {
             float newExhaustion = this.exhaustion - 4.0F;
 
@@ -68,7 +68,7 @@ public abstract class HungerManagerMixin {
                 }
             }
         }
-        ServerWorld world = player.getWorld();
+        ServerWorld world = player.getEntityWorld();
         boolean flag = world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
         if (flag && this.foodLevel >= 18 && player.canFoodHeal()) {
             ++this.foodTickTimer;

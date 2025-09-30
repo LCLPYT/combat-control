@@ -1,6 +1,7 @@
 package work.lclpnet.combatctl.impl;
 
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -12,6 +13,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.jetbrains.annotations.NotNull;
@@ -70,7 +72,7 @@ public class DynamicItemHandler {
      * @param player The player to modify the item stack for.
      */
     public void adjustStackFor(ItemStack stack, ServerPlayerEntity player) {
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
         ToolInfo info = ToolInfo.of(stack).orElse(null);
 
         if (info != null) {
@@ -254,15 +256,18 @@ public class DynamicItemHandler {
     private State getState(ItemStack stack) {
         NbtComponent customData = stack.getOrDefault(CUSTOM_DATA, NbtComponent.DEFAULT);
 
-        return customData.get(STATE_CODEC).resultOrPartial().orElse(State.DEFAULT);
+        return STATE_CODEC.codec().decode(NbtOps.INSTANCE, customData.copyNbt())
+                .resultOrPartial()
+                .map(Pair::getFirst)
+                .orElse(State.DEFAULT);
     }
 
     private void setState(ItemStack stack, State state) {
         NbtComponent customData = stack.getOrDefault(CUSTOM_DATA, NbtComponent.DEFAULT);
 
-        customData.with(NbtOps.INSTANCE, STATE_CODEC, state)
-                .result()
-                .ifPresent(customDataNew -> stack.set(CUSTOM_DATA, customDataNew));
+        STATE_CODEC.codec().encode(state, NbtOps.INSTANCE, customData.copyNbt())
+                .resultOrPartial(error -> CCModInit.LOGGER.error("Failed to encode dynamic item state: {}", error))
+                .ifPresent(nbt -> NbtComponent.set(CUSTOM_DATA, stack, (NbtCompound) nbt));
     }
 
     public boolean unhandled(ItemStack stack, Property property) {

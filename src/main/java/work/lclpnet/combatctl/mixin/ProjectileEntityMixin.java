@@ -30,7 +30,7 @@ public abstract class ProjectileEntityMixin {
     private boolean combatControl$modifyLeftOwner(boolean leftOwner, @Local(argsOnly = true) Entity entity) {
         if (!(getOwner() instanceof ServerPlayerEntity player) || leftOwner) return leftOwner;
 
-        PlayerConfig config = CombatControl.get(player.getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
 
         // allow hitting other entities inside the owner hitbox
         return config.isEarlyProjectileHits() && entity != (Object) this && entity != player;

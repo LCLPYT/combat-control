@@ -25,7 +25,7 @@ public abstract class LivingEntityMixin {
                                               @Local(ordinal = 0, argsOnly = true) double strength) {
 
         if (!(instance instanceof ServerPlayerEntity player)
-                || !KnockbackHandler.get(player.getServer()).applyKnockback(player, velocity, knockbackDir, strength)) {
+                || !KnockbackHandler.get(player.getEntityWorld().getServer()).applyKnockback(player, velocity, knockbackDir, strength)) {
             original.call(instance, x, y, z);
         }
     }
