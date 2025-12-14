@@ -10,12 +10,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import it.unimi.dsi.fastutil.Pair;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
@@ -34,10 +34,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 
 import static me.lucko.fabric.api.permissions.v0.Permissions.require;
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-import static net.minecraft.util.Formatting.ITALIC;
-import static net.minecraft.util.Formatting.YELLOW;
+import static net.minecraft.ChatFormatting.ITALIC;
+import static net.minecraft.ChatFormatting.YELLOW;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static work.lclpnet.combatctl.CCModInit.permission;
 
 public class CombatCommand {
@@ -48,7 +48,7 @@ public class CombatCommand {
     private final CombatControlConfig config;
     private final List<ConfigOption.Instance> options;
     private final DynamicCommandExceptionType unknownStyleError;
-    private final Text missingPermission, invalidValue;
+    private final Component missingPermission, invalidValue;
 
     public CombatCommand(ModTranslations translations, ConfigAccess<CombatControlConfig> configManager) {
         this.translations = translations;
@@ -76,7 +76,7 @@ public class CombatCommand {
         invalidValue = translations.fallback("error.combat-control.invalid_value");
     }
 
-    public void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+    public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("combat")
                 .requires(require(permission("command.combat"), 2))
                 .then(thenEach(literal("set")
@@ -87,7 +87,7 @@ public class CombatCommand {
                                                 .suggests(inst.option().suggestions())
                                                 .executes(ctx -> setGlobalOpt(ctx, inst)),
                                         inst.option().srcClass() == PlayerConfig.class,
-                                        argument("targets", EntityArgumentType.players())
+                                        argument("targets", EntityArgument.players())
                                                 .executes(ctx -> setOpt(ctx, inst)))))))
                 .then(thenEach(literal("get")
                         .requires(require(permission("command.combat.get"), 2)), options, inst -> Optional.of(thenIf(
@@ -95,84 +95,84 @@ public class CombatCommand {
                                 .requires(require(permission("command.combat.get." + inst.option().field().getName()), 2))
                                 .executes(ctx -> getGlobalOpt(ctx, inst)),
                         inst.option().srcClass() == PlayerConfig.class,
-                        argument("target", EntityArgumentType.player())
+                        argument("target", EntityArgument.player())
                                 .executes(ctx -> getOpt(ctx, inst))))))
                 .then(literal("style")
                         .requires(require(permission("command.combat.style"), 2))
-                        .then(argument("style", IdentifierArgumentType.identifier())
+                        .then(argument("style", ResourceLocationArgument.id())
                                 .suggests(CombatCommand::suggestStyles)
                                 .executes(this::applyGlobalStyle)
-                                .then(argument("targets", EntityArgumentType.players())
+                                .then(argument("targets", EntityArgument.players())
                                         .executes(this::applyStyle)))));
     }
 
-    private int applyGlobalStyle(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private int applyGlobalStyle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if (!Permissions.check(ctx.getSource(), permission("command.combat.style.global"), 2)) {
-            ctx.getSource().sendError(missingPermission);
+            ctx.getSource().sendFailure(missingPermission);
             return 0;
         }
 
         var style = combatStyleArg(ctx);
 
         CombatControl.get(ctx.getSource().getServer()).setStyle(style.value());
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.style.global", style.key().toString()), true);
+        ctx.getSource().sendSuccess(() -> translations.fallback("commands.combat.style.global", style.key().toString()), true);
 
         return 1;
     }
 
-    private int applyStyle(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
+    private int applyStyle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         var style = combatStyleArg(ctx);
-        var players = EntityArgumentType.getPlayers(ctx, "targets");
+        var players = EntityArgument.getPlayers(ctx, "targets");
 
         CombatControl cc = CombatControl.get(ctx.getSource().getServer());
 
         players.forEach(player -> cc.setStyle(player, style.value()));
 
-        ctx.getSource().sendFeedback(() -> players.size() == 1
-                ? translations.fallback("commands.combat.style.single", Text.literal(players.iterator().next().getNameForScoreboard()).formatted(YELLOW), style.key().toString())
+        ctx.getSource().sendSuccess(() -> players.size() == 1
+                ? translations.fallback("commands.combat.style.single", Component.literal(players.iterator().next().getScoreboardName()).withStyle(YELLOW), style.key().toString())
                 : translations.fallback("commands.combat.style.multiple", players.size(), style.key().toString()), true);
 
         return 1;
     }
 
-    private int getGlobalOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) {
+    private int getGlobalOpt(CommandContext<CommandSourceStack> ctx, ConfigOption.Instance inst) {
         ConfigOption opt = inst.option();
         Object value = get(inst, null);
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get",
-                translations.optionTitle(inst).formatted(ITALIC),
-                opt.asText(value, inst, translations).formatted(ITALIC)), false);
+        ctx.getSource().sendSuccess(() -> translations.fallback("commands.combat.get",
+                translations.optionTitle(inst).withStyle(ITALIC),
+                opt.asText(value, inst, translations).withStyle(ITALIC)), false);
 
         return code(value);
     }
 
-    private int getOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) throws CommandSyntaxException {
-        ServerPlayerEntity player = EntityArgumentType.getPlayer(ctx, "target");
+    private int getOpt(CommandContext<CommandSourceStack> ctx, ConfigOption.Instance inst) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
         ConfigOption opt = inst.option();
 
         Object value = get(inst, player);
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.get.player",
-                translations.optionTitle(inst).formatted(ITALIC),
-                Text.literal(player.getNameForScoreboard()).formatted(YELLOW),
-                opt.asText(value, inst, translations).formatted(ITALIC)), false);
+        ctx.getSource().sendSuccess(() -> translations.fallback("commands.combat.get.player",
+                translations.optionTitle(inst).withStyle(ITALIC),
+                Component.literal(player.getScoreboardName()).withStyle(YELLOW),
+                opt.asText(value, inst, translations).withStyle(ITALIC)), false);
 
         return code(value);
     }
 
-    private int setGlobalOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) {
+    private int setGlobalOpt(CommandContext<CommandSourceStack> ctx, ConfigOption.Instance inst) {
         ConfigOption opt = inst.option();
         String name = opt.field().getName();
 
         if (!Permissions.check(ctx.getSource(), permission("command.combat.set.global." + name), 2)) {
-            ctx.getSource().sendError(missingPermission);
+            ctx.getSource().sendFailure(missingPermission);
             return 0;
         }
 
         Object value = opt.argumentValue(ctx, VALUE_NAME);
 
         if (value == null) {
-            ctx.getSource().sendError(invalidValue);
+            ctx.getSource().sendFailure(invalidValue);
             return 0;
         }
 
@@ -181,49 +181,49 @@ public class CombatCommand {
 
         // set online player configs
         if (opt.srcClass() == PlayerConfig.class) {
-            for (ServerPlayerEntity player : PlayerLookup.all(ctx.getSource().getServer())) {
+            for (ServerPlayer player : PlayerLookup.all(ctx.getSource().getServer())) {
                 set(inst, value, player);
             }
         }
 
         CombatControl.get(ctx.getSource().getServer()).update();
 
-        ctx.getSource().sendFeedback(() -> translations.fallback("commands.combat.set",
-                translations.optionTitle(inst).formatted(ITALIC),
-                opt.asText(value, inst, translations).formatted(ITALIC)), false);
+        ctx.getSource().sendSuccess(() -> translations.fallback("commands.combat.set",
+                translations.optionTitle(inst).withStyle(ITALIC),
+                opt.asText(value, inst, translations).withStyle(ITALIC)), false);
 
         return 1;
     }
 
-    private int setOpt(CommandContext<ServerCommandSource> ctx, ConfigOption.Instance inst) throws CommandSyntaxException {
-        var players = EntityArgumentType.getPlayers(ctx, "targets");
+    private int setOpt(CommandContext<CommandSourceStack> ctx, ConfigOption.Instance inst) throws CommandSyntaxException {
+        var players = EntityArgument.getPlayers(ctx, "targets");
 
         ConfigOption opt = inst.option();
         Object value = opt.argumentValue(ctx, VALUE_NAME);
 
         if (value == null) {
-            ctx.getSource().sendError(invalidValue);
+            ctx.getSource().sendFailure(invalidValue);
             return 0;
         }
 
         var control = CombatControl.get(ctx.getSource().getServer());
 
-        for (ServerPlayerEntity player : players) {
+        for (ServerPlayer player : players) {
             set(inst, value, player);
             control.update(player);
         }
 
-        var name = translations.optionTitle(inst).formatted(ITALIC);
-        var val = opt.asText(value, inst, translations).formatted(ITALIC);
+        var name = translations.optionTitle(inst).withStyle(ITALIC);
+        var val = opt.asText(value, inst, translations).withStyle(ITALIC);
 
-        ctx.getSource().sendFeedback(() -> players.size() == 1
-                ? translations.fallback("commands.combat.set.single", name, Text.literal(players.iterator().next().getNameForScoreboard()).formatted(YELLOW), val)
+        ctx.getSource().sendSuccess(() -> players.size() == 1
+                ? translations.fallback("commands.combat.set.single", name, Component.literal(players.iterator().next().getScoreboardName()).withStyle(YELLOW), val)
                 : translations.fallback("commands.combat.set.multiple", name, players.size(), val), false);
 
         return 1;
     }
 
-    private void set(ConfigOption.Instance inst, Object val, @Nullable ServerPlayerEntity player) {
+    private void set(ConfigOption.Instance inst, Object val, @Nullable ServerPlayer player) {
         if (inst.option().srcClass() != PlayerConfig.class) {
             inst.set(config, val);
             return;
@@ -232,7 +232,7 @@ public class CombatCommand {
         inst.set(playerCfg(player), val);
     }
 
-    private Object get(ConfigOption.Instance inst, @Nullable ServerPlayerEntity player) {
+    private Object get(ConfigOption.Instance inst, @Nullable ServerPlayer player) {
         if (inst.option().srcClass() != PlayerConfig.class) {
             return inst.get(config);
         }
@@ -240,9 +240,9 @@ public class CombatCommand {
         return inst.get(playerCfg(player));
     }
 
-    private PlayerConfig playerCfg(@Nullable ServerPlayerEntity player) {
+    private PlayerConfig playerCfg(@Nullable ServerPlayer player) {
         return player != null
-                ? CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player)
+                ? CombatControl.get(player.level().getServer()).playerConfig(player)
                 : config.player;
     }
 
@@ -262,8 +262,8 @@ public class CombatCommand {
         return parent;
     }
 
-    private Pair<Identifier, CombatStyle> combatStyleArg(CommandContext<ServerCommandSource> ctx) throws CommandSyntaxException {
-        Identifier id = IdentifierArgumentType.getIdentifier(ctx, "style");
+    private Pair<ResourceLocation, CombatStyle> combatStyleArg(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ResourceLocation id = ResourceLocationArgument.getId(ctx, "style");
 
         CombatStyle style = CombatStyles.registry().getOrDefault(id, null);
 
@@ -281,9 +281,9 @@ public class CombatCommand {
         };
     }
 
-    private static CompletableFuture<Suggestions> suggestStyles(CommandContext<ServerCommandSource> ctx, SuggestionsBuilder builder) {
+    private static CompletableFuture<Suggestions> suggestStyles(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         CombatStyles.registry().keySet().stream()
-                .map(Identifier::toString)
+                .map(ResourceLocation::toString)
                 .forEach(builder::suggest);
 
         return builder.buildFuture();

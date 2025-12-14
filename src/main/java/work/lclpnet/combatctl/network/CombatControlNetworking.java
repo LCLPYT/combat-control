@@ -1,7 +1,7 @@
 package work.lclpnet.combatctl.network;
 
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import work.lclpnet.combatctl.CCModInit;
@@ -26,7 +26,7 @@ public class CombatControlNetworking {
         PayloadTypeRegistry.playS2C().register(CombatAbilitiesS2CPacket.ID, CombatAbilitiesS2CPacket.CODEC);
     }
 
-    public boolean understands(ServerPlayerEntity player) {
+    public boolean understands(ServerPlayer player) {
         return protocolHandler != null && protocolHandler.understands(player);
     }
 }

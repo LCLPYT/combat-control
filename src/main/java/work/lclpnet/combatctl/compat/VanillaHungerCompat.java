@@ -1,21 +1,21 @@
 package work.lclpnet.combatctl.compat;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 class VanillaHungerCompat implements HungerCompat {
 
     @Override
-    public boolean onHungerLevelChange(PlayerEntity player, int from, int to) {
+    public boolean onHungerLevelChange(Player player, int from, int to) {
         return false;
     }
 
     @Override
-    public boolean onSaturationChange(PlayerEntity player, float from, float to) {
+    public boolean onSaturationChange(Player player, float from, float to) {
         return false;
     }
 
     @Override
-    public boolean onExhaustionChange(PlayerEntity player, float from, float to) {
+    public boolean onExhaustionChange(Player player, float from, float to) {
         return false;
     }
 }

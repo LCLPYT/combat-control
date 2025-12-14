@@ -1,7 +1,7 @@
 package work.lclpnet.combatctl.network;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import work.lclpnet.combatctl.config.PlayerConfig;
 
 /**
@@ -11,7 +11,7 @@ import work.lclpnet.combatctl.config.PlayerConfig;
  */
 public class CombatAbilities {
 
-    public static final PacketCodec<PacketByteBuf, CombatAbilities> PACKET_CODEC = PacketCodec.of(CombatAbilities::write, CombatAbilities::new);
+    public static final StreamCodec<FriendlyByteBuf, CombatAbilities> PACKET_CODEC = StreamCodec.ofMember(CombatAbilities::write, CombatAbilities::new);
 
     /** Whether attack cooldown should be enabled */
     public boolean attackCooldown;
@@ -35,7 +35,7 @@ public class CombatAbilities {
         modernSharpness = true;
     }
 
-    public CombatAbilities(PacketByteBuf buf) {
+    public CombatAbilities(FriendlyByteBuf buf) {
         attackCooldown = buf.readBoolean();
         attackWhileUsing = buf.readBoolean();
         renderArmSwingWhileUsing = buf.readBoolean();
@@ -44,7 +44,7 @@ public class CombatAbilities {
         modernSharpness = buf.readBoolean();
     }
 
-    public void write(PacketByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeBoolean(attackCooldown);
         buf.writeBoolean(attackWhileUsing);
         buf.writeBoolean(renderArmSwingWhileUsing);

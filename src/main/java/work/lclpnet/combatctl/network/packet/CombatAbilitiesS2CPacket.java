@@ -1,21 +1,21 @@
 package work.lclpnet.combatctl.network.packet;
 
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import work.lclpnet.combatctl.CCModInit;
 import work.lclpnet.combatctl.network.CombatAbilities;
 
-public record CombatAbilitiesS2CPacket(CombatAbilities abilities) implements CustomPayload {
+public record CombatAbilitiesS2CPacket(CombatAbilities abilities) implements CustomPacketPayload {
 
-    public static final Id<CombatAbilitiesS2CPacket> ID = new Id<>(CCModInit.identifier("abilities"));
+    public static final Type<CombatAbilitiesS2CPacket> ID = new Type<>(CCModInit.identifier("abilities"));
 
-    public static final PacketCodec<PacketByteBuf, CombatAbilitiesS2CPacket> CODEC = PacketCodec.tuple(
+    public static final StreamCodec<FriendlyByteBuf, CombatAbilitiesS2CPacket> CODEC = StreamCodec.composite(
             CombatAbilities.PACKET_CODEC, CombatAbilitiesS2CPacket::abilities,
             CombatAbilitiesS2CPacket::new);
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

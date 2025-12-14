@@ -2,10 +2,10 @@ package work.lclpnet.combatctl.impl;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import org.jetbrains.annotations.ApiStatus;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
@@ -39,7 +39,7 @@ public class CombatControlImpl implements CombatControl {
     public void configurePlayers(Consumer<PlayerConfig> action) {
         action.accept(defaultConfig.player);
 
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+        for (ServerPlayer player : PlayerLookup.all(server)) {
             action.accept(playerConfig(player));
         }
 
@@ -47,7 +47,7 @@ public class CombatControlImpl implements CombatControl {
     }
 
     @Override
-    public void configurePlayer(ServerPlayerEntity player, Consumer<PlayerConfig> action) {
+    public void configurePlayer(ServerPlayer player, Consumer<PlayerConfig> action) {
         action.accept(playerConfig(player));
         update(player);
     }
@@ -57,7 +57,7 @@ public class CombatControlImpl implements CombatControl {
         style.configure(defaultConfig.global);
         style.configure(defaultConfig.player);
 
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+        for (ServerPlayer player : PlayerLookup.all(server)) {
             style.configure(playerConfig(player));
         }
 
@@ -75,7 +75,7 @@ public class CombatControlImpl implements CombatControl {
     }
 
     @Override
-    public PlayerConfig playerConfig(ServerPlayerEntity player) {
+    public PlayerConfig playerConfig(ServerPlayer player) {
         var ccPlayer = (CombatControlPlayer) player;
         PlayerConfig config = ccPlayer.combatControl$getConfig();
 
@@ -102,13 +102,13 @@ public class CombatControlImpl implements CombatControl {
     }
 
     public void updatePlayers() {
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+        for (ServerPlayer player : PlayerLookup.all(server)) {
             update(player);
         }
     }
 
     @Override
-    public void update(ServerPlayerEntity player) {
+    public void update(ServerPlayer player) {
         if (hasModInstalled(player)) {
             updateModdedPlayer(player);
         } else {
@@ -119,29 +119,29 @@ public class CombatControlImpl implements CombatControl {
     }
 
     @Override
-    public synchronized void resetPlayerConfig(ServerPlayerEntity player) {
+    public synchronized void resetPlayerConfig(ServerPlayer player) {
         ((CombatControlPlayer) player).combatControl$setConfig(defaultConfig.player.clone());
     }
 
     @Override
-    public boolean hasModInstalled(ServerPlayerEntity player) {
+    public boolean hasModInstalled(ServerPlayer player) {
         return networking.understands(player);
     }
 
     @Override
-    public void copyData(ServerPlayerEntity source, ServerPlayerEntity target) {
+    public void copyData(ServerPlayer source, ServerPlayer target) {
         PlayerConfig config = ((CombatControlPlayer) source).combatControl$getConfig();
 
         synchronized (this) {
             ((CombatControlPlayer) target).combatControl$setConfig(config);
         }
 
-        if (source.networkHandler != target.networkHandler) {
+        if (source.connection != target.connection) {
             update(target);
         }
     }
 
-    private CombatAbilities getAbilities(ServerPlayerEntity player) {
+    private CombatAbilities getAbilities(ServerPlayer player) {
         var ccPlayer = (CombatControlPlayer) player;
         CombatAbilities abilities = ccPlayer.combatControl$getAbilities();
 
@@ -153,19 +153,19 @@ public class CombatControlImpl implements CombatControl {
         return abilities;
     }
 
-    private void updateVanillaPlayer(ServerPlayerEntity player) {
+    private void updateVanillaPlayer(ServerPlayer player) {
         PlayerConfig config = playerConfig(player);
 
         // adjust the attack speed for vanilla players so that they know there is no cooldown
-        EntityAttributeInstance attackSpeed = player.getAttributeInstance(EntityAttributes.ATTACK_SPEED);
+        AttributeInstance attackSpeed = player.getAttribute(Attributes.ATTACK_SPEED);
 
         if (attackSpeed != null) {
-            double value = config.isAttackCooldown() ? EntityAttributes.ATTACK_SPEED.value().getDefaultValue() : 1024;
+            double value = config.isAttackCooldown() ? Attributes.ATTACK_SPEED.value().getDefaultValue() : 1024;
             attackSpeed.setBaseValue(value);
         }
     }
 
-    private void updateModdedPlayer(ServerPlayerEntity player) {
+    private void updateModdedPlayer(ServerPlayer player) {
         PlayerConfig config = playerConfig(player);
         CombatAbilities abilities = getAbilities(player);
 
@@ -176,10 +176,10 @@ public class CombatControlImpl implements CombatControl {
 
         // reset attack speed, if player was not modded anytime before
         if (config.isAttackCooldown()) {
-            EntityAttributeInstance attr = player.getAttributeInstance(EntityAttributes.ATTACK_SPEED);
+            AttributeInstance attr = player.getAttribute(Attributes.ATTACK_SPEED);
 
             if (attr != null) {
-                attr.setBaseValue(EntityAttributes.ATTACK_SPEED.value().getDefaultValue());
+                attr.setBaseValue(Attributes.ATTACK_SPEED.value().getDefaultValue());
             }
         }
     }

@@ -1,6 +1,6 @@
 package work.lclpnet.combatctl.mixin;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -11,7 +11,7 @@ import work.lclpnet.combatctl.impl.StaticCombatControl;
 public class EntityMixin {
 
     @Inject(
-            method = "getTargetingMargin",
+            method = "getPickRadius",
             at = @At("HEAD"),
             cancellable = true
     )

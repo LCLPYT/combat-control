@@ -1,14 +1,14 @@
 package work.lclpnet.combatctl.impl;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Consumer;
 
-public record ItemStackTextConsumer(ItemStack stack, Consumer<Text> delegate) implements Consumer<Text> {
+public record ItemStackTextConsumer(ItemStack stack, Consumer<Component> delegate) implements Consumer<Component> {
 
     @Override
-    public void accept(Text text) {
+    public void accept(Component text) {
         delegate.accept(text);
     }
 }

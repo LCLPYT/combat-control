@@ -3,18 +3,14 @@ package work.lclpnet.combatctl.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentLevelBasedValue;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.enchantment.effect.EnchantmentEffectEntry;
-import net.minecraft.enchantment.effect.EnchantmentValueEffect;
-import net.minecraft.enchantment.effect.value.AddEnchantmentEffect;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.item.enchantment.*;
+import net.minecraft.world.item.enchantment.effects.AddValue;
+import net.minecraft.world.item.enchantment.effects.EnchantmentValueEffect;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,50 +25,50 @@ import java.util.Optional;
 public class EnchantmentMixin {
 
     @Unique
-    private final List<EnchantmentEffectEntry<EnchantmentValueEffect>> oldSharpnessEffect = List.of(
-            new EnchantmentEffectEntry<>(
+    private final List<ConditionalEffect<EnchantmentValueEffect>> oldSharpnessEffect = List.of(
+            new ConditionalEffect<>(
                     // 1.25 * level
-                    new AddEnchantmentEffect(EnchantmentLevelBasedValue.linear(1.25f)),
+                    new AddValue(LevelBasedValue.perLevel(1.25f)),
                     // no requirements
                     Optional.empty()
             )
     );
 
     @WrapOperation(
-            method = "modifyValue(Lnet/minecraft/component/ComponentType;Lnet/minecraft/server/world/ServerWorld;ILnet/minecraft/item/ItemStack;Lnet/minecraft/entity/Entity;Lnet/minecraft/entity/damage/DamageSource;Lorg/apache/commons/lang3/mutable/MutableFloat;)V",
+            method = "modifyDamageFilteredValue(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/server/level/ServerLevel;ILnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/damagesource/DamageSource;Lorg/apache/commons/lang3/mutable/MutableFloat;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/enchantment/Enchantment;getEffect(Lnet/minecraft/component/ComponentType;)Ljava/util/List;"
+                    target = "Lnet/minecraft/world/item/enchantment/Enchantment;getEffects(Lnet/minecraft/core/component/DataComponentType;)Ljava/util/List;"
             )
     )
-    public List<EnchantmentEffectEntry<EnchantmentValueEffect>> combatControl$modifySharpnessEffect(
-            Enchantment instance, ComponentType<List<EnchantmentEffectEntry<EnchantmentValueEffect>>> type,
-            Operation<List<EnchantmentEffectEntry<EnchantmentValueEffect>>> original,
-            @Local(argsOnly = true) ServerWorld world,
+    public List<ConditionalEffect<EnchantmentValueEffect>> combatControl$modifySharpnessEffect(
+            Enchantment instance, DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> type,
+            Operation<List<ConditionalEffect<EnchantmentValueEffect>>> original,
+            @Local(argsOnly = true) ServerLevel world,
             @Local(argsOnly = true) DamageSource damageSource
     ) {
         // filter for player user
-        if (!(damageSource.getAttacker() instanceof ServerPlayerEntity player)) {
+        if (!(damageSource.getEntity() instanceof ServerPlayer player)) {
             return original.call(instance, type);
         }
 
         // filter for damage component type
-        if (!EnchantmentEffectComponentTypes.DAMAGE.equals(type)) {
+        if (!EnchantmentEffectComponents.DAMAGE.equals(type)) {
             return original.call(instance, type);
         }
 
         // filter user with old sharpness
-        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
 
         if (config.isModernSharpness()) {
             return original.call(instance, type);
         }
 
         // filter for sharpness enchantment
-        var registry = world.getRegistryManager().getOrThrow(RegistryKeys.ENCHANTMENT);
+        var registry = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         Enchantment self = (Enchantment) (Object) this;
 
-        if (registry.get(Enchantments.SHARPNESS) != self) {
+        if (registry.getValue(Enchantments.SHARPNESS) != self) {
             return original.call(instance, type);
         }
 

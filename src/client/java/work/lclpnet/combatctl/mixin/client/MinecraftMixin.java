@@ -1,16 +1,16 @@
 package work.lclpnet.combatctl.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
@@ -22,29 +22,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControlClient;
 
-@Mixin(MinecraftClient.class)
-public class MinecraftClientMixin {
+@Mixin(Minecraft.class)
+public class MinecraftMixin {
 
-    @Shadow @Nullable public ClientPlayerEntity player;
+    @Shadow @Nullable public LocalPlayer player;
 
-    @Shadow @Final public GameOptions options;
+    @Shadow @Final public Options options;
 
-    @Shadow public int attackCooldown;
+    @Shadow public int missTime;
 
-    @Shadow @Nullable public HitResult crosshairTarget;
+    @Shadow @Nullable public HitResult hitResult;
 
     @Shadow @Final private static Logger LOGGER;
 
-    @Shadow @Nullable public ClientPlayerInteractionManager interactionManager;
+    @Shadow @Nullable public MultiPlayerGameMode gameMode;
 
-    @Shadow @Nullable public ClientWorld world;
+    @Shadow @Nullable public ClientLevel level;
 
     // combatControl$handleInputEvents is taken from GoldenAgeCombat
     @Inject(
-            method = "handleInputEvents",
+            method = "handleKeybinds",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z",
+                    target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z",
                     ordinal = 0
             )
     )
@@ -53,7 +53,7 @@ public class MinecraftClientMixin {
         // it is actually enabled by a different patch below, this just makes sure breaking particles show correctly (which only works sometimes otherwise)
         if (!CombatControlClient.get().abilities().attackWhileUsing || this.player == null || !this.player.isUsingItem()) return;
 
-        while (this.options.attackKey.wasPressed()) {
+        while (this.options.keyAttack.consumeClick()) {
             this.combatControl$startBlockAttack();
         }
     }
@@ -61,44 +61,44 @@ public class MinecraftClientMixin {
     // combatControl$startBlockAttack is taken from GoldenAgeCombat
     @Unique
     private void combatControl$startBlockAttack() {
-        if (this.attackCooldown > 0) return;
+        if (this.missTime > 0) return;
 
-        if (this.crosshairTarget == null) {
+        if (this.hitResult == null) {
             LOGGER.error("Null returned as 'hitResult', this shouldn't happen!");
 
-            if (this.interactionManager != null && this.interactionManager.hasLimitedAttackSpeed()) {
-                this.attackCooldown = 10;
+            if (this.gameMode != null && this.gameMode.hasMissTime()) {
+                this.missTime = 10;
             }
 
             return;
         }
 
-        if (this.player == null || this.world == null) return;
+        if (this.player == null || this.level == null) return;
 
-        ItemStack stack = this.player.getStackInHand(Hand.MAIN_HAND);
-        if (!stack.isItemEnabled(this.world.getEnabledFeatures()) || this.player.isRiding()) return;
+        ItemStack stack = this.player.getItemInHand(InteractionHand.MAIN_HAND);
+        if (!stack.isItemEnabled(this.level.enabledFeatures()) || this.player.isHandsBusy()) return;
 
-        if (this.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
+        if (this.hitResult.getType() != HitResult.Type.BLOCK) return;
 
-        BlockHitResult blockhitresult = (BlockHitResult) this.crosshairTarget;
+        BlockHitResult blockhitresult = (BlockHitResult) this.hitResult;
         BlockPos blockpos = blockhitresult.getBlockPos();
 
-        if (!this.world.isAir(blockpos)) {
-            if (this.interactionManager != null) {
-                this.interactionManager.attackBlock(blockpos, blockhitresult.getSide());
+        if (!this.level.isEmptyBlock(blockpos)) {
+            if (this.gameMode != null) {
+                this.gameMode.startDestroyBlock(blockpos, blockhitresult.getDirection());
             }
 
             return;
         }
 
-        this.player.swingHand(Hand.MAIN_HAND);
+        this.player.swing(InteractionHand.MAIN_HAND);
     }
 
     @ModifyExpressionValue(
-            method = "handleBlockBreaking",
+            method = "continueAttack",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"
+                    target = "Lnet/minecraft/client/player/LocalPlayer;isUsingItem()Z"
             )
     )
     public boolean combatControl$handleBlockBreaking(boolean original) {
@@ -108,10 +108,10 @@ public class MinecraftClientMixin {
     }
 
     @ModifyExpressionValue(
-            method = "doItemUse",
+            method = "startUseItem",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;isBreakingBlock()Z"
+                    target = "Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;isDestroying()Z"
             )
     )
     public boolean combatControl$startUseItem(boolean original) {

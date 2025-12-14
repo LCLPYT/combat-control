@@ -1,7 +1,7 @@
 package work.lclpnet.combatctl.cmd;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import work.lclpnet.combatctl.CCModInit;
@@ -66,17 +66,17 @@ public class ModTranslations {
         }
     }
 
-    public MutableText fallback(String key, Object... args) {
+    public MutableComponent fallback(String key, Object... args) {
         String fallback = defaultTranslations.getOrDefault(key, null);
 
-        return Text.translatableWithFallback(key, fallback, args);
+        return Component.translatableWithFallback(key, fallback, args);
     }
 
-    public MutableText enumName(Enum<?> enumVal, ConfigOption.Instance inst) {
+    public MutableComponent enumName(Enum<?> enumVal, ConfigOption.Instance inst) {
         return fallback(enumNameKey(enumVal, inst.path()));
     }
 
-    public MutableText optionTitle(ConfigOption.Instance inst) {
+    public MutableComponent optionTitle(ConfigOption.Instance inst) {
         return fallback(optionTitleKey(inst.path()));
     }
 

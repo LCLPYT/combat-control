@@ -5,17 +5,17 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.component.ComponentType;
-import net.minecraft.component.type.*;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.consume.ApplyEffectsConsumeEffect;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.*;
+import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.combatctl.CCModInit;
 import work.lclpnet.combatctl.api.CombatControl;
@@ -28,11 +28,11 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import static net.minecraft.component.DataComponentTypes.*;
-import static net.minecraft.component.type.AttributeModifierSlot.MAINHAND;
-import static net.minecraft.entity.attribute.EntityAttributeModifier.Operation.ADD_VALUE;
-import static net.minecraft.entity.attribute.EntityAttributes.ATTACK_DAMAGE;
-import static net.minecraft.item.Item.BASE_ATTACK_DAMAGE_MODIFIER_ID;
+import static net.minecraft.core.component.DataComponents.*;
+import static net.minecraft.world.entity.EquipmentSlotGroup.MAINHAND;
+import static net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE;
+import static net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE;
+import static net.minecraft.world.item.Item.BASE_ATTACK_DAMAGE_ID;
 
 public class DynamicItemHandler {
 
@@ -46,19 +46,19 @@ public class DynamicItemHandler {
             ToolType.HOE, 0.0
     );
 
-    private static final ConsumableComponent CLASSIC_ENCHANTED_GOLDEN_APPLE = ConsumableComponents.food()
-            .consumeEffect(new ApplyEffectsConsumeEffect(List.of(
-                    new StatusEffectInstance(StatusEffects.REGENERATION, 600, 4),
-                    new StatusEffectInstance(StatusEffects.RESISTANCE, 6000, 0),
-                    new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 6000, 0),
-                    new StatusEffectInstance(StatusEffects.ABSORPTION, 2400, 0)
+    private static final Consumable CLASSIC_ENCHANTED_GOLDEN_APPLE = Consumables.defaultFood()
+            .onConsume(new ApplyStatusEffectsConsumeEffect(List.of(
+                    new MobEffectInstance(MobEffects.REGENERATION, 600, 4),
+                    new MobEffectInstance(MobEffects.RESISTANCE, 6000, 0),
+                    new MobEffectInstance(MobEffects.FIRE_RESISTANCE, 6000, 0),
+                    new MobEffectInstance(MobEffects.ABSORPTION, 2400, 0)
             )))
             .build();
 
     private DynamicItemHandler() {
     }
 
-    public void update(ServerPlayerEntity player) {
+    public void update(ServerPlayer player) {
         for (ItemStack stack : player.getInventory()) {
             adjustStackFor(stack, player);
         }
@@ -71,8 +71,8 @@ public class DynamicItemHandler {
      * @param stack  The item stack to modify.
      * @param player The player to modify the item stack for.
      */
-    public void adjustStackFor(ItemStack stack, ServerPlayerEntity player) {
-        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
+    public void adjustStackFor(ItemStack stack, ServerPlayer player) {
+        PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
         ToolInfo info = ToolInfo.of(stack).orElse(null);
 
         if (info != null) {
@@ -86,7 +86,7 @@ public class DynamicItemHandler {
             }
         }
 
-        if (stack.isOf(Items.ENCHANTED_GOLDEN_APPLE)) {
+        if (stack.is(Items.ENCHANTED_GOLDEN_APPLE)) {
             adjustNotchApple(config, stack);
         }
     }
@@ -98,9 +98,9 @@ public class DynamicItemHandler {
 
             // no damage reduction here, as the 1.7.10 formula doesn't fit into base + dmg * factor
             // reduction is applied in PlayerEntityMixin::combatControl$modifySwordBlockingDamage instead
-            var damageReductions = List.<BlocksAttacksComponent.DamageReduction>of();
-            var itemDamage = new BlocksAttacksComponent.ItemDamage(0, 0, 0);
-            var component = new BlocksAttacksComponent(0.f, 1.f, damageReductions, itemDamage,
+            var damageReductions = List.<BlocksAttacks.DamageReduction>of();
+            var itemDamage = new BlocksAttacks.ItemDamageFunction(0, 0, 0);
+            var component = new BlocksAttacks(0.f, 1.f, damageReductions, itemDamage,
                     Optional.empty(), Optional.empty(), Optional.empty());
 
             stack.set(BLOCKS_ATTACKS, component);
@@ -126,25 +126,25 @@ public class DynamicItemHandler {
                 newValue += info.material().attackDamageBonus();
             }
 
-            var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-            var modifier = new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, newValue, ADD_VALUE);
+            var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+            var modifier = new AttributeModifier(BASE_ATTACK_DAMAGE_ID, newValue, ADD_VALUE);
 
             Optional<Double> originalDamage = component.modifiers().stream()
-                    .filter(entry -> entry.matches(ATTACK_DAMAGE, BASE_ATTACK_DAMAGE_MODIFIER_ID))
+                    .filter(entry -> entry.matches(ATTACK_DAMAGE, BASE_ATTACK_DAMAGE_ID))
                     .findAny()
-                    .map(AttributeModifiersComponent.Entry::modifier)
-                    .map(EntityAttributeModifier::value);
+                    .map(ItemAttributeModifiers.Entry::modifier)
+                    .map(AttributeModifier::amount);
 
-            stack.set(ATTRIBUTE_MODIFIERS, component.with(ATTACK_DAMAGE, modifier, MAINHAND));
+            stack.set(ATTRIBUTE_MODIFIERS, component.withModifierAdded(ATTACK_DAMAGE, modifier, MAINHAND));
             editState(stack, state -> state.withHandled(Property.ATTACK_DAMAGE).withOriginalDamage(originalDamage));
         } else {
             if (unhandled(stack, Property.ATTACK_DAMAGE)) return;
 
             getState(stack).originalDamage().ifPresent(originalDamage -> {
-                var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, AttributeModifiersComponent.DEFAULT);
-                var modifier = new EntityAttributeModifier(BASE_ATTACK_DAMAGE_MODIFIER_ID, originalDamage, ADD_VALUE);
+                var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+                var modifier = new AttributeModifier(BASE_ATTACK_DAMAGE_ID, originalDamage, ADD_VALUE);
 
-                stack.set(ATTRIBUTE_MODIFIERS, component.with(ATTACK_DAMAGE, modifier, MAINHAND));
+                stack.set(ATTRIBUTE_MODIFIERS, component.withModifierAdded(ATTACK_DAMAGE, modifier, MAINHAND));
             });
 
             unsetHandled(stack, Property.ATTACK_DAMAGE);
@@ -155,22 +155,22 @@ public class DynamicItemHandler {
         if (!config.isModernItemDurability()) {
             if (componentChanged(TOOL, stack, c -> c.damagePerBlock() != 2)) return;
 
-            ToolComponent tool = stack.get(TOOL);
+            Tool tool = stack.get(TOOL);
 
             if (tool == null) return;
 
-            var component = new ToolComponent(tool.rules(), tool.defaultMiningSpeed(), 1, tool.canDestroyBlocksInCreative());
+            var component = new Tool(tool.rules(), tool.defaultMiningSpeed(), 1, tool.canDestroyBlocksInCreative());
 
             stack.set(TOOL, component);
             setHandled(stack, Property.DURABILITY_DAMAGE);
         } else {
             if (unhandled(stack, Property.DURABILITY_DAMAGE)) return;
 
-            ToolComponent tool = stack.get(TOOL);
+            Tool tool = stack.get(TOOL);
 
             if (tool == null) return;
 
-            var component = new ToolComponent(tool.rules(), tool.defaultMiningSpeed(), 2, tool.canDestroyBlocksInCreative());
+            var component = new Tool(tool.rules(), tool.defaultMiningSpeed(), 2, tool.canDestroyBlocksInCreative());
 
             stack.set(TOOL, component);
             unsetHandled(stack, Property.DURABILITY_DAMAGE);
@@ -181,22 +181,22 @@ public class DynamicItemHandler {
         if (!config.isModernItemDurability()) {
             if (componentChanged(WEAPON, stack, c -> c.itemDamagePerAttack() != 2)) return;
 
-            WeaponComponent weapon = stack.get(WEAPON);
+            Weapon weapon = stack.get(WEAPON);
 
             if (weapon == null) return;
 
-            var component = new WeaponComponent(1, weapon.disableBlockingForSeconds());
+            var component = new Weapon(1, weapon.disableBlockingForSeconds());
 
             stack.set(WEAPON, component);
             setHandled(stack, Property.DURABILITY_DAMAGE);
         } else {
             if (unhandled(stack, Property.DURABILITY_DAMAGE)) return;
 
-            WeaponComponent weapon = stack.get(WEAPON);
+            Weapon weapon = stack.get(WEAPON);
 
             if (weapon == null) return;
 
-            var component = new WeaponComponent(2, weapon.disableBlockingForSeconds());
+            var component = new Weapon(2, weapon.disableBlockingForSeconds());
 
             stack.set(WEAPON, component);
             unsetHandled(stack, Property.DURABILITY_DAMAGE);
@@ -205,29 +205,29 @@ public class DynamicItemHandler {
 
     private void adjustNotchApple(PlayerConfig config, ItemStack stack) {
         if (!config.isModernNotchApple()) {
-            if (componentChanged(CONSUMABLE, stack, c -> !c.equals(ConsumableComponents.ENCHANTED_GOLDEN_APPLE))) return;
+            if (componentChanged(CONSUMABLE, stack, c -> !c.equals(Consumables.ENCHANTED_GOLDEN_APPLE))) return;
 
             stack.set(CONSUMABLE, CLASSIC_ENCHANTED_GOLDEN_APPLE);
             setHandled(stack, Property.NOTCH_APPLE);
         } else {
             if (unhandled(stack, Property.NOTCH_APPLE)) return;
 
-            stack.set(CONSUMABLE, ConsumableComponents.ENCHANTED_GOLDEN_APPLE);
+            stack.set(CONSUMABLE, Consumables.ENCHANTED_GOLDEN_APPLE);
             unsetHandled(stack, Property.NOTCH_APPLE);
         }
     }
 
-    private <T> boolean componentChanged(ComponentType<T> type, ItemStack stack) {
+    private <T> boolean componentChanged(DataComponentType<T> type, ItemStack stack) {
         return componentChanged(type, stack, t -> true);
     }
 
-    private <T> boolean componentChanged(ComponentType<T> type, ItemStack stack, Predicate<T> predicate) {
-        var optComponent = stack.getComponentChanges().get(type);
+    private <T> boolean componentChanged(DataComponentType<T> type, ItemStack stack, Predicate<T> predicate) {
+        var optComponent = stack.getComponentsPatch().get(type);
 
         return optComponent != null && optComponent.isPresent() && predicate.test(optComponent.get());
     }
 
-    private boolean attackDamagedChanged(AttributeModifiersComponent component) {
+    private boolean attackDamagedChanged(ItemAttributeModifiers component) {
         for (var modifier : component.modifiers()) {
             if (modifier.attribute() == ATTACK_DAMAGE) {
                 return true;
@@ -254,20 +254,20 @@ public class DynamicItemHandler {
     }
 
     private State getState(ItemStack stack) {
-        NbtComponent customData = stack.getOrDefault(CUSTOM_DATA, NbtComponent.DEFAULT);
+        CustomData customData = stack.getOrDefault(CUSTOM_DATA, CustomData.EMPTY);
 
-        return STATE_CODEC.codec().decode(NbtOps.INSTANCE, customData.copyNbt())
+        return STATE_CODEC.codec().decode(NbtOps.INSTANCE, customData.copyTag())
                 .resultOrPartial()
                 .map(Pair::getFirst)
                 .orElse(State.DEFAULT);
     }
 
     private void setState(ItemStack stack, State state) {
-        NbtComponent customData = stack.getOrDefault(CUSTOM_DATA, NbtComponent.DEFAULT);
+        CustomData customData = stack.getOrDefault(CUSTOM_DATA, CustomData.EMPTY);
 
-        STATE_CODEC.codec().encode(state, NbtOps.INSTANCE, customData.copyNbt())
+        STATE_CODEC.codec().encode(state, NbtOps.INSTANCE, customData.copyTag())
                 .resultOrPartial(error -> CCModInit.LOGGER.error("Failed to encode dynamic item state: {}", error))
-                .ifPresent(nbt -> NbtComponent.set(CUSTOM_DATA, stack, (NbtCompound) nbt));
+                .ifPresent(nbt -> CustomData.set(CUSTOM_DATA, stack, (CompoundTag) nbt));
     }
 
     public boolean unhandled(ItemStack stack, Property property) {

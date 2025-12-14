@@ -1,13 +1,13 @@
 package work.lclpnet.combatctl.impl;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerSyncHandler;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
-import work.lclpnet.combatctl.mixin.ScreenHandlerAccessor;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerSynchronizer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import work.lclpnet.combatctl.mixin.AbstractContainerMenuAccessor;
 import work.lclpnet.kibu.hook.player.PlayerInventoryHooks;
 
 import java.util.HashSet;
@@ -22,33 +22,33 @@ public class CreativeInventoryHandler {
         // Therefore, sync the slot at the end of the server tick
 
         PlayerInventoryHooks.MODIFIED_CREATIVE_INVENTORY.register(event
-                -> entries.add(new Entry(event.player().networkHandler, event.slot())));
+                -> entries.add(new Entry(event.player().connection, event.slot())));
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             if (entries.isEmpty()) return;
 
             for (var entry : entries) {
-                ServerPlayerEntity player = entry.handler.player;
+                ServerPlayer player = entry.handler.player;
 
                 if (player == null) continue;
 
-                ScreenHandler screenHandler = player.playerScreenHandler;
+                AbstractContainerMenu screenHandler = player.inventoryMenu;
 
                 if (screenHandler == null) continue;
 
-                ScreenHandlerSyncHandler syncHandler = ((ScreenHandlerAccessor) screenHandler).getSyncHandler();
+                ContainerSynchronizer syncHandler = ((AbstractContainerMenuAccessor) screenHandler).getSynchronizer();
                 Slot slot = screenHandler.getSlot(entry.slot);
 
-                if (slot == null || slot.inventory != player.getInventory()) continue;
+                if (slot == null || slot.container != player.getInventory()) continue;
 
-                ItemStack stack = player.getInventory().getStack(slot.getIndex());
+                ItemStack stack = player.getInventory().getItem(slot.getContainerSlot());
 
-                syncHandler.updateSlot(screenHandler, entry.slot, stack);
+                syncHandler.sendSlotChange(screenHandler, entry.slot, stack);
             }
 
             entries.clear();
         });
     }
 
-    private record Entry(ServerPlayNetworkHandler handler, int slot) {}
+    private record Entry(ServerGamePacketListenerImpl handler, int slot) {}
 }

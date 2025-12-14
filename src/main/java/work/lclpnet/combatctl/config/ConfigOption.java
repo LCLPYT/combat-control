@@ -3,8 +3,8 @@ package work.lclpnet.combatctl.config;
 import com.mojang.brigadier.arguments.*;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.MutableText;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.cmd.ModTranslations;
 
@@ -13,8 +13,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static net.minecraft.text.Text.literal;
-import static net.minecraft.util.Formatting.*;
+import static net.minecraft.ChatFormatting.*;
+import static net.minecraft.network.chat.Component.literal;
 
 public class ConfigOption {
 
@@ -60,7 +60,7 @@ public class ConfigOption {
         return Optional.empty();
     }
 
-    public @Nullable SuggestionProvider<ServerCommandSource> suggestions() {
+    public @Nullable SuggestionProvider<CommandSourceStack> suggestions() {
         Class<?> type = field.getType();
 
         if (type.isEnum()) {
@@ -128,20 +128,20 @@ public class ConfigOption {
         } catch (ReflectiveOperationException ignored) {}
     }
 
-    public MutableText asText(Object val, Instance inst, ModTranslations translations) {
+    public MutableComponent asText(Object val, Instance inst, ModTranslations translations) {
         var type = field.getType();
 
         if (type == boolean.class) {
             boolean bool = val instanceof Boolean b && b;
-            return literal(Boolean.toString(bool)).formatted(bool ? GREEN : RED);
+            return literal(Boolean.toString(bool)).withStyle(bool ? GREEN : RED);
         }
 
         if (type == double.class && val instanceof Number n) {
-            return literal(String.format("%.2f", n.doubleValue())).formatted(AQUA);
+            return literal(String.format("%.2f", n.doubleValue())).withStyle(AQUA);
         }
 
         if (type == int.class && val instanceof Number n) {
-            return literal(Integer.toString(n.intValue())).formatted(AQUA);
+            return literal(Integer.toString(n.intValue())).withStyle(AQUA);
         }
 
         if (type.isEnum() && val instanceof Enum<?> enumVal) {

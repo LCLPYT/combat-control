@@ -1,11 +1,11 @@
 package work.lclpnet.combatctl.mixin.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,22 +18,22 @@ import work.lclpnet.combatctl.type.CombatControlClientPlayer;
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final private Minecraft minecraft;
 
     @Inject(
             method = "bobView",
             at = @At("TAIL")
     )
-    public void combatControl$bobView(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
+    public void combatControl$bobView(PoseStack matrices, float tickDelta, CallbackInfo ci) {
         var control = CombatControlClient.get();
         var config = control.config();
 
         if (!config.isOldBobbing() || (config.isServerBobbingOverride() && control.abilities().disableOldBobbing)) return;
 
-        if (this.client.getCameraEntity() instanceof AbstractClientPlayerEntity player) {
+        if (this.minecraft.getCameraEntity() instanceof AbstractClientPlayer player) {
             var cccPlayer = (CombatControlClientPlayer) player;
-            float rot = MathHelper.lerp(tickDelta, cccPlayer.combatControl$getPrevCameraPitch(), cccPlayer.combatControl$getCameraPitch());
-            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rot));
+            float rot = Mth.lerp(tickDelta, cccPlayer.combatControl$getPrevCameraPitch(), cccPlayer.combatControl$getCameraPitch());
+            matrices.mulPose(Axis.XP.rotationDegrees(rot));
         }
     }
 }

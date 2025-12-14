@@ -6,8 +6,8 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,14 +61,14 @@ public class CCModInit implements ModInitializer {
         });
 
 		ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
-			var control = CombatControl.get(newPlayer.getEntityWorld().getServer());
+			var control = CombatControl.get(newPlayer.level().getServer());
 			control.copyData(oldPlayer, newPlayer);
 		});
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			var control = CombatControl.get(server);
 
-			ServerPlayerEntity player = handler.player;
+			ServerPlayer player = handler.player;
 
 			if (player != null) {
 				control.update(player);
@@ -100,8 +100,8 @@ public class CCModInit implements ModInitializer {
 	 * @param path The path.
 	 * @return An identifier of this mod with the given path.
 	 */
-	public static Identifier identifier(String path) {
-		return Identifier.of(MOD_ID, path);
+	public static ResourceLocation identifier(String path) {
+		return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
 	}
 
 	public static String permission(String suffix) {

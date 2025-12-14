@@ -1,11 +1,11 @@
 package work.lclpnet.combatctl.mixin;
 
-import net.minecraft.server.network.ServerCommonNetworkHandler;
+import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ServerCommonNetworkHandler.class)
-public interface ServerCommonNetworkHandlerAccessor {
+@Mixin(ServerCommonPacketListenerImpl.class)
+public interface ServerCommonPacketListenerImplAccessor {
 
     @Accessor
     void setLatency(int latencyMs);

@@ -1,10 +1,10 @@
 package work.lclpnet.combatctl.mixin.client;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.option.AttackIndicator;
-import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.client.AttackIndicatorStatus;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,29 +17,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControlClient;
 import work.lclpnet.combatctl.network.CombatAbilities;
 
-@Mixin(InGameHud.class)
-public abstract class InGameHudMixin {
+@Mixin(Gui.class)
+public abstract class GuiMixin {
 
-    @Shadow @Final private MinecraftClient client;
+    @Shadow @Final private Minecraft minecraft;
 
     @Unique
     private final CombatAbilities combatAbilities = CombatControlClient.get().abilities();
     @Unique
     @Nullable
-    private static AttackIndicator attackIndicator = null;
+    private static AttackIndicatorStatus attackIndicator = null;
 
     @Inject(
             method = "renderCrosshair",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderCrossHair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    public void combatControl$beforeRenderCrossHair(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
         if (attackIndicator == null) {
-            var option = client.options.getAttackIndicator();
-            attackIndicator = option.getValue();
-            option.setValue(AttackIndicator.OFF);
+            var option = minecraft.options.attackIndicator();
+            attackIndicator = option.get();
+            option.set(AttackIndicatorStatus.OFF);
         }
     }
 
@@ -47,44 +47,44 @@ public abstract class InGameHudMixin {
             method = "renderCrosshair",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderCrossHair(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    public void combatControl$afterRenderCrossHair(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
-            client.options.getAttackIndicator().setValue(attackIndicator);
+            minecraft.options.attackIndicator().set(attackIndicator);
             attackIndicator = null;
         }
     }
 
     @Inject(
-            method = "renderHotbar",
+            method = "renderItemHotbar",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderHotBar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    public void combatControl$beforeRenderHotBar(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
         if (attackIndicator == null) {
-            var option = client.options.getAttackIndicator();
-            attackIndicator = option.getValue();
-            option.setValue(AttackIndicator.OFF);
+            var option = minecraft.options.attackIndicator();
+            attackIndicator = option.get();
+            option.set(AttackIndicatorStatus.OFF);
         }
     }
 
     @Inject(
-            method = "renderHotbar",
+            method = "renderItemHotbar",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderHotBar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+    public void combatControl$afterRenderHotBar(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
-            client.options.getAttackIndicator().setValue(attackIndicator);
+            minecraft.options.attackIndicator().set(attackIndicator);
             attackIndicator = null;
         }
     }
 
     // combatControl$modifyRegeneratingHeartIndex is taken from GoldenAgeCombat
     @ModifyVariable(
-            method = "renderHealthBar",
+            method = "renderHearts",
             at = @At("HEAD"),
             ordinal = 5,
             argsOnly = true

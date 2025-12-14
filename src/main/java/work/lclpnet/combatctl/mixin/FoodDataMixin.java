@@ -1,10 +1,10 @@
 package work.lclpnet.combatctl.mixin;
 
-import net.minecraft.entity.player.HungerManager;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.GameRules;
+import net.minecraft.world.food.FoodData;
+import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,39 +19,39 @@ import work.lclpnet.combatctl.config.PlayerConfig;
 /**
  * @implNote Mixin copied from GoldenAgeCombat and adapted to yarn mappings
  */
-@Mixin(HungerManager.class)
-public abstract class HungerManagerMixin {
+@Mixin(FoodData.class)
+public abstract class FoodDataMixin {
 
     @Shadow
     private int foodLevel = 20;
     @Shadow
     private float saturationLevel;
     @Shadow
-    private float exhaustion;
+    private float exhaustionLevel;
     @Shadow
-    private int foodTickTimer;
+    private int tickTimer;
 
     @Unique
     private final HungerCompat hungerCompat = CompatManager.get().getHungerCompat();
 
     @Inject(
-            method = "update",
+            method = "tick",
             at = @At("HEAD"),
             cancellable = true
     )
-    public void combatControl$tick(ServerPlayerEntity player, CallbackInfo callback) {
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
+    public void combatControl$tick(ServerPlayer player, CallbackInfo callback) {
+        if (!(player instanceof ServerPlayer serverPlayer)) return;
 
-        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(serverPlayer);
+        PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(serverPlayer);
 
         if (config.isModernRegeneration()) return;
 
-        Difficulty difficulty = player.getEntityWorld().getDifficulty();
-        if (this.exhaustion > 4.0F) {
-            float newExhaustion = this.exhaustion - 4.0F;
+        Difficulty difficulty = player.level().getDifficulty();
+        if (this.exhaustionLevel > 4.0F) {
+            float newExhaustion = this.exhaustionLevel - 4.0F;
 
-            if (!hungerCompat.onExhaustionChange(player, this.exhaustion, newExhaustion)) {
-                this.exhaustion = newExhaustion;
+            if (!hungerCompat.onExhaustionChange(player, this.exhaustionLevel, newExhaustion)) {
+                this.exhaustionLevel = newExhaustion;
             }
 
             if (this.saturationLevel > 0.0F) {
@@ -68,25 +68,25 @@ public abstract class HungerManagerMixin {
                 }
             }
         }
-        ServerWorld world = player.getEntityWorld();
-        boolean flag = world.getGameRules().getBoolean(GameRules.NATURAL_REGENERATION);
-        if (flag && this.foodLevel >= 18 && player.canFoodHeal()) {
-            ++this.foodTickTimer;
-            if (this.foodTickTimer >= 80) {
+        ServerLevel world = player.level();
+        boolean flag = world.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+        if (flag && this.foodLevel >= 18 && player.isHurt()) {
+            ++this.tickTimer;
+            if (this.tickTimer >= 80) {
                 player.heal(1.0F);
                 this.addExhaustion(3.0F);
-                this.foodTickTimer = 0;
+                this.tickTimer = 0;
             }
         } else if (this.foodLevel <= 0) {
-            ++this.foodTickTimer;
-            if (this.foodTickTimer >= 80) {
+            ++this.tickTimer;
+            if (this.tickTimer >= 80) {
                 if (player.getHealth() > 10.0F || difficulty == Difficulty.HARD || player.getHealth() > 1.0F && difficulty == Difficulty.NORMAL) {
-                    player.damage(world, player.getDamageSources().starve(), 1.0F);
+                    player.hurtServer(world, player.damageSources().starve(), 1.0F);
                 }
-                this.foodTickTimer = 0;
+                this.tickTimer = 0;
             }
         } else {
-            this.foodTickTimer = 0;
+            this.tickTimer = 0;
         }
         callback.cancel();
     }

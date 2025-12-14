@@ -1,16 +1,16 @@
 package work.lclpnet.combatctl.impl;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket;
-import net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket;
+import net.minecraft.network.protocol.common.ClientboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.KnockbackVariant;
-import work.lclpnet.combatctl.mixin.ServerCommonNetworkHandlerAccessor;
+import work.lclpnet.combatctl.mixin.ServerCommonPacketListenerImplAccessor;
 import work.lclpnet.combatctl.type.CCServerPlayNetworkHandler;
 import work.lclpnet.combatctl.type.CombatControlServer;
 import work.lclpnet.kibu.scheduler.KibuScheduling;
@@ -53,21 +53,21 @@ public class PingHandler {
     private void tick() {
         if (++time % combatControl.globalConfig().getPingUpdateTicks() != 0) return;
 
-        for (ServerPlayerEntity player : PlayerLookup.all(server)) {
+        for (ServerPlayer player : PlayerLookup.all(server)) {
             if (combatControl.playerConfig(player).getKnockbackVariant() != KnockbackVariant.PING_ADJUSTED) continue;
 
             requestPing(player);
         }
     }
 
-    public void requestPing(ServerPlayerEntity player) {
+    public void requestPing(ServerPlayer player) {
         if (!data(player).offerPingRequest(nanoTime())) return;
 
         // KeepAliveS2CPacket is handled immediately by the client in contrast to CommonPingS2CPacket
-        player.networkHandler.sendPacket(new KeepAliveS2CPacket(CC_PING_ID));
+        player.connection.send(new ClientboundKeepAlivePacket(CC_PING_ID));
     }
 
-    public boolean receivePing(ServerPlayNetworkHandler handler, KeepAliveC2SPacket packet) {
+    public boolean receivePing(ServerGamePacketListenerImpl handler, ServerboundKeepAlivePacket packet) {
         if (packet.getId() != CC_PING_ID) return false;
 
         Data data = data(handler);
@@ -82,7 +82,7 @@ public class PingHandler {
         boolean spike = data.pingMs - data.prevPingMs > max(1.d, combatControl.globalConfig().getPingSpikeMs());
         data.cleanedPingMs = spike ? (data.prevPingMs * 3.d + data.pingMs) * .25d : data.pingMs;
 
-        ((ServerCommonNetworkHandlerAccessor) handler).setLatency((int) Math.round(data.cleanedPingMs));
+        ((ServerCommonPacketListenerImplAccessor) handler).setLatency((int) Math.round(data.cleanedPingMs));
 
         return true;
     }
@@ -92,15 +92,15 @@ public class PingHandler {
      * @param player The player.
      * @return Ping (round trip) in ms
      */
-    public static double pingOf(ServerPlayerEntity player) {
+    public static double pingOf(ServerPlayer player) {
         return data(player).cleanedPingMs;
     }
 
-    public static @NotNull Data data(ServerPlayerEntity player) {
-        return data(player.networkHandler);
+    public static @NotNull Data data(ServerPlayer player) {
+        return data(player.connection);
     }
 
-    public static @NotNull Data data(ServerPlayNetworkHandler handler) {
+    public static @NotNull Data data(ServerGamePacketListenerImpl handler) {
         return ((CCServerPlayNetworkHandler) handler).combatControl$getPingData();
     }
 

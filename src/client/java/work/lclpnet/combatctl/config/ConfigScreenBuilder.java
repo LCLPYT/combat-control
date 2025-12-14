@@ -6,13 +6,13 @@ import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.StringVisitable;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.MutableComponent;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.kibu.config.ConfigManager;
@@ -23,8 +23,8 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.lang.String.join;
-import static net.minecraft.text.Text.translatable;
-import static net.minecraft.text.Text.translatableWithFallback;
+import static net.minecraft.network.chat.Component.translatable;
+import static net.minecraft.network.chat.Component.translatableWithFallback;
 import static work.lclpnet.combatctl.cmd.ModTranslations.*;
 
 public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
@@ -39,8 +39,8 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
     }
 
     private void save() {
-        MinecraftClient client = MinecraftClient.getInstance();
-        IntegratedServer server = client.getServer();
+        Minecraft client = Minecraft.getInstance();
+        IntegratedServer server = client.getSingleplayerServer();
 
         if (server != null) {
             var control = CombatControl.get(server);
@@ -60,10 +60,10 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
 
         addCategory("client", builder);
 
-        ClientPlayNetworkHandler networkHandler = MinecraftClient.getInstance().getNetworkHandler();
+        ClientPacketListener networkHandler = Minecraft.getInstance().getConnection();
 
         // when not connected to a multiplayer server, show player and global
-        if (networkHandler == null || networkHandler.getServerInfo() == null) {
+        if (networkHandler == null || networkHandler.getServerData() == null) {
             addCategory("player", builder);
             addCategory("global", builder);
         }
@@ -85,7 +85,7 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
         String comment = ConfigManager.comment(field);
 
         if (comment != null) {
-            category.setDescription(new StringVisitable[] {
+            category.setDescription(new FormattedText[] {
                     translatableWithFallback(optionDescKey(name), comment)
             });
         }
@@ -189,22 +189,22 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
                     try {
                         field = data.type().getField(val.name());
                     } catch (NoSuchFieldException e) {
-                        return Optional.ofNullable(data.tooltip).map(t -> new Text[] {t});
+                        return Optional.ofNullable(data.tooltip).map(t -> new Component[] {t});
                     }
 
                     String comment = ConfigManager.comment(field);
 
                     if (comment == null) {
-                        return Optional.ofNullable(data.tooltip).map(t -> new Text[] {t});
+                        return Optional.ofNullable(data.tooltip).map(t -> new Component[] {t});
                     }
 
-                    Text desc = data.enumName(val)
+                    Component desc = data.enumName(val)
                             .append(": ")
                             .append(translatableWithFallback(enumDescKey(val, data.path), comment));
 
                     return data.tooltip == null
-                            ? Optional.of(new Text[]{desc})
-                            : Optional.of(new Text[]{data.tooltip, desc});
+                            ? Optional.of(new Component[]{desc})
+                            : Optional.of(new Component[]{data.tooltip, desc});
                 })
                 .setEnumNameProvider(data::enumName)
                 .setSaveConsumer(data.saveConsumer::accept)
@@ -216,11 +216,11 @@ public class ConfigScreenBuilder implements ConfigScreenFactory<Screen> {
             Class<?> type, Object value,
             Object defaultValue,
             Consumer<Object> saveConsumer,
-            Text label,
+            Component label,
             String path,
-            @Nullable Text tooltip) {
+            @Nullable Component tooltip) {
 
-        public MutableText enumName(Enum<?> val) {
+        public MutableComponent enumName(Enum<?> val) {
             return translatableWithFallback(enumNameKey(val, path), val.name());
         }
     }

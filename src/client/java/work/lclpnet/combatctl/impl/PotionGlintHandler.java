@@ -1,9 +1,9 @@
 package work.lclpnet.combatctl.impl;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PotionItem;
+import net.minecraft.world.item.alchemy.PotionContents;
 import work.lclpnet.combatctl.api.CombatControlClient;
 
 public class PotionGlintHandler {
@@ -15,13 +15,13 @@ public class PotionGlintHandler {
             return false;
         }
 
-        Boolean override = stack.getOrDefault(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE, null);
+        Boolean override = stack.getOrDefault(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, null);
 
         if (override != null) {
             return false;
         }
 
-        var potions = stack.getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
+        var potions = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
 
         return potions.hasEffects();
     }

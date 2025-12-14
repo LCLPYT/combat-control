@@ -1,28 +1,28 @@
 package work.lclpnet.combatctl.impl;
 
 import it.unimi.dsi.fastutil.ints.IntDoublePair;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.config.PlayerConfig;
-import work.lclpnet.combatctl.mixin.DamageTrackerAccessor;
+import work.lclpnet.combatctl.mixin.CombatTrackerAccessor;
 import work.lclpnet.combatctl.type.CombatControlServer;
 
 import java.util.Optional;
@@ -30,7 +30,7 @@ import java.util.OptionalInt;
 
 import static java.lang.Math.min;
 import static java.lang.Math.round;
-import static net.minecraft.entity.attribute.EntityAttributes.GRAVITY;
+import static net.minecraft.world.entity.ai.attributes.Attributes.GRAVITY;
 import static work.lclpnet.combatctl.impl.PingHandler.pingOf;
 
 public class KnockbackHandler {
@@ -41,19 +41,19 @@ public class KnockbackHandler {
 
     private static final int MAX_SOLVER_TICKS = 35;
 
-    public boolean applyKnockback(ServerPlayerEntity player, Vec3d velocity, Vec3d knockbackDir, double strength) {
+    public boolean applyKnockback(ServerPlayer player, Vec3 velocity, Vec3 knockbackDir, double strength) {
         if (isMovementAffected(player)) return false;
 
-        PlayerConfig config = CombatControl.get(player.getEntityWorld().getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
 
         KnockbackVariant variant = config.getKnockbackVariant();
 
-        if (variant != KnockbackVariant.DEFAULT && player.maxHurtTime != player.hurtTime) {
-            var recentDamage = ((DamageTrackerAccessor) player.getDamageTracker()).getRecentDamage();
+        if (variant != KnockbackVariant.DEFAULT && player.hurtDuration != player.hurtTime) {
+            var recentDamage = ((CombatTrackerAccessor) player.getCombatTracker()).getEntries();
 
             // do not apply knockback when attacked in damage grace period
             // this occurs if an attack in the grace period is stronger than the initial attack that caused the grace period
-            if (recentDamage.isEmpty() || !recentDamage.getLast().damageSource().isIn(DamageTypeTags.BYPASSES_COOLDOWN)) {
+            if (recentDamage.isEmpty() || !recentDamage.getLast().source().is(DamageTypeTags.BYPASSES_COOLDOWN)) {
                 return true;
             }
         }
@@ -64,7 +64,7 @@ public class KnockbackHandler {
                 return true;
             }
             case PING_ADJUSTED -> {
-                if (player.hasStatusEffect(StatusEffects.LEVITATION)) return false;
+                if (player.hasEffect(MobEffects.LEVITATION)) return false;
 
                 // functionality heavily inspired by KnockbackSync
                 double groundDist = serverGroundDist(player);
@@ -87,8 +87,8 @@ public class KnockbackHandler {
         }
     }
 
-    private static void setSimulatedKnockback(ServerPlayerEntity player, Vec3d velocity, Vec3d knockbackDir, SimulationState state) {
-        state.vy = player.getVelocity().getY();
+    private static void setSimulatedKnockback(ServerPlayer player, Vec3 velocity, Vec3 knockbackDir, SimulationState state) {
+        state.vy = player.getDeltaMovement().y();
 
         double grav = player.getAttributeValue(GRAVITY);
         int forwardTicks = (int) round(pingOf(player) * 0.5 * PING_TICK_COEFFICIENT);
@@ -97,30 +97,30 @@ public class KnockbackHandler {
             eulerStep(state, grav);
         }
 
-        player.setVelocity(velocity.x / 2.0 - knockbackDir.x,
+        player.setDeltaMovement(velocity.x / 2.0 - knockbackDir.x,
                 state.vy,
                 velocity.z / 2.0 - knockbackDir.z);
     }
 
-    private static void setRisingKnockback(ServerPlayerEntity player, Vec3d velocity, Vec3d knockbackDir, double strength) {
-        player.setVelocity(velocity.x / 2.0 - knockbackDir.x,
+    private static void setRisingKnockback(ServerPlayer player, Vec3 velocity, Vec3 knockbackDir, double strength) {
+        player.setDeltaMovement(velocity.x / 2.0 - knockbackDir.x,
                 Math.min(0.4, velocity.y / 2.0 + strength),
                 velocity.z / 2.0 - knockbackDir.z);
     }
 
-    private static boolean isMovementAffected(ServerPlayerEntity player) {
-        if (player.isGliding() || player.isInFluid()) return true;
+    private static boolean isMovementAffected(ServerPlayer player) {
+        if (player.isFallFlying() || player.isInLiquid()) return true;
 
-        BlockState state = player.getBlockStateAtPos();
+        BlockState state = player.getInBlockState();
 
-        return state.isOf(Blocks.COBWEB) || state.isOf(Blocks.SCAFFOLDING);
+        return state.is(Blocks.COBWEB) || state.is(Blocks.SCAFFOLDING);
     }
 
-    private double serverGroundDist(ServerPlayerEntity player) {
+    private double serverGroundDist(ServerPlayer player) {
         // ray-cast down from the player in order to determine the distance
-        ShapeContext shapeCtx = ShapeContext.of(player);
-        ServerWorld world = player.getEntityWorld();
-        Box box = player.getBoundingBox();
+        CollisionContext shapeCtx = CollisionContext.of(player);
+        ServerLevel world = player.level();
+        AABB box = player.getBoundingBox();
         double y = player.getY();
 
         double maxDist = 10.d;
@@ -133,27 +133,27 @@ public class KnockbackHandler {
         return maxDist;
     }
 
-    private double rayCastDown(ShapeContext shapeCtx, BlockView world, double x, double y, double z, double maxDist) {
-        Vec3d start = new Vec3d(x, y, z), end = start.subtract(0, maxDist, 0);
+    private double rayCastDown(CollisionContext shapeCtx, BlockGetter world, double x, double y, double z, double maxDist) {
+        Vec3 start = new Vec3(x, y, z), end = start.subtract(0, maxDist, 0);
 
-        BlockHitResult res = BlockView.raycast(start, end, null, (_ctx, pos) -> {
+        BlockHitResult res = BlockGetter.traverseBlocks(start, end, null, (_ctx, pos) -> {
             BlockState state = world.getBlockState(pos);
-            VoxelShape shape = RaycastContext.ShapeType.COLLIDER.get(state, world, pos, shapeCtx);
+            VoxelShape shape = ClipContext.Block.COLLIDER.get(state, world, pos, shapeCtx);
 
-            return world.raycastBlock(start, end, pos, shape, state);
-        }, _ctx -> BlockHitResult.createMissed(end, Direction.DOWN, BlockPos.ofFloored(end)));
+            return world.clipWithInteractionOverride(start, end, pos, shape, state);
+        }, _ctx -> BlockHitResult.miss(end, Direction.DOWN, BlockPos.containing(end)));
 
         if (res.getType() != HitResult.Type.BLOCK) {
             return maxDist;
         }
 
-        return res.getPos().distanceTo(start);
+        return res.getLocation().distanceTo(start);
     }
 
-    private boolean simulateIsOnGround(ServerPlayerEntity player, double groundDist, SimulationState sim) {
-        if (groundDist > 1.3d || (player.hasNoGravity() && groundDist > 2.e-2)) return false;
+    private boolean simulateIsOnGround(ServerPlayer player, double groundDist, SimulationState sim) {
+        if (groundDist > 1.3d || (player.isNoGravity() && groundDist > 2.e-2)) return false;
 
-        double vy = player.getVelocity().getY();
+        double vy = player.getDeltaMovement().y();
         double grav = player.getAttributeValue(GRAVITY);
 
         var inAirTicks = inAirTicks(groundDist, vy, grav, sim);
