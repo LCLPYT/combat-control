@@ -1,6 +1,6 @@
 package work.lclpnet.combatctl.impl;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import work.lclpnet.combatctl.api.CombatStyle;
 import work.lclpnet.combatctl.api.KnockbackVariant;
 import work.lclpnet.combatctl.config.GlobalConfig;
@@ -14,21 +14,21 @@ import java.util.Objects;
 public class CombatStyles {
 
     public static final CombatStyle CLASSIC = new ModernStyle(false), MODERN = new ModernStyle(true);
-    private static final Map<ResourceLocation, CombatStyle> registry = new HashMap<>();
+    private static final Map<Identifier, CombatStyle> registry = new HashMap<>();
 
     static {
-        register(ResourceLocation.withDefaultNamespace("classic"), CLASSIC);
-        register(ResourceLocation.withDefaultNamespace("modern"), MODERN);
+        register(Identifier.withDefaultNamespace("classic"), CLASSIC);
+        register(Identifier.withDefaultNamespace("modern"), MODERN);
     }
 
-    public static void register(ResourceLocation id, CombatStyle style) {
+    public static void register(Identifier id, CombatStyle style) {
         Objects.requireNonNull(id);
         Objects.requireNonNull(style);
 
         registry.put(id, style);
     }
 
-    public static Map<ResourceLocation, CombatStyle> registry() {
+    public static Map<Identifier, CombatStyle> registry() {
         return Collections.unmodifiableMap(registry);
     }
 

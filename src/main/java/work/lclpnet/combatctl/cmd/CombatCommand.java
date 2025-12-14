@@ -12,9 +12,9 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
@@ -99,7 +99,7 @@ public class CombatCommand {
                                 .executes(ctx -> getOpt(ctx, inst))))))
                 .then(literal("style")
                         .requires(require(permission("command.combat.style"), 2))
-                        .then(argument("style", ResourceLocationArgument.id())
+                        .then(argument("style", IdentifierArgument.id())
                                 .suggests(CombatCommand::suggestStyles)
                                 .executes(this::applyGlobalStyle)
                                 .then(argument("targets", EntityArgument.players())
@@ -262,8 +262,8 @@ public class CombatCommand {
         return parent;
     }
 
-    private Pair<ResourceLocation, CombatStyle> combatStyleArg(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ResourceLocation id = ResourceLocationArgument.getId(ctx, "style");
+    private Pair<Identifier, CombatStyle> combatStyleArg(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Identifier id = IdentifierArgument.getId(ctx, "style");
 
         CombatStyle style = CombatStyles.registry().getOrDefault(id, null);
 
@@ -283,7 +283,7 @@ public class CombatCommand {
 
     private static CompletableFuture<Suggestions> suggestStyles(CommandContext<CommandSourceStack> ctx, SuggestionsBuilder builder) {
         CombatStyles.registry().keySet().stream()
-                .map(ResourceLocation::toString)
+                .map(Identifier::toString)
                 .forEach(builder::suggest);
 
         return builder.buildFuture();

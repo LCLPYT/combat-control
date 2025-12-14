@@ -4,7 +4,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.food.FoodData;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -69,7 +69,7 @@ public abstract class FoodDataMixin {
             }
         }
         ServerLevel world = player.level();
-        boolean flag = world.getGameRules().getBoolean(GameRules.RULE_NATURAL_REGENERATION);
+        boolean flag = world.getGameRules().get(GameRules.NATURAL_HEALTH_REGENERATION);
         if (flag && this.foodLevel >= 18 && player.isHurt()) {
             ++this.tickTimer;
             if (this.tickTimer >= 80) {
