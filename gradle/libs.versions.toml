@@ -1,0 +1,42 @@
+[versions]
+minecraft = "26.1.2"
+fabric-api = "0.147.0+26.1.2"
+fabric-loader = "0.19.2"
+fabric-loom = "1.16-SNAPSHOT"
+gradle-build-tools = "1.7.0"
+java = "25"
+modrinth-minotaur = "2.4.3"
+lombok = "9.4.0"
+kibu-hook-api = "1.4.0"
+kibu-hooks = "0.64.0+1.21.11"
+kibu-networking-api = "0.1.0+1.21.11"
+kibu-config-api = "0.1.1"
+kibu-scheduler-api = "0.10.0+1.21.11"
+permission-api = "0.6.1"
+cloth-config = "26.1.154"
+modmenu = "18.0.0-alpha.8"
+night-config = "3.8.1"
+json = "20250107"
+
+[plugins]
+fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
+maven-publish = { id = "maven-publish" }
+gradle-build-utils = { id = "gradle-build-utils", version.ref = "gradle-build-tools" }
+modrinth-minotaur = { id = "com.modrinth.minotaur", version.ref = "modrinth-minotaur" }
+lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
+
+[libraries]
+minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
+fabric-api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric-api" }
+fabric-loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric-loader" }
+kibu-hook-api = { module = "work.lclpnet.mods.kibu:kibu-hook-api", version.ref = "kibu-hook-api" }
+kibu-hooks = { module = "work.lclpnet.mods.kibu:kibu-hooks", version.ref = "kibu-hooks" }
+kibu-networking-api = { module = "work.lclpnet.mods.kibu:kibu-networking-api", version.ref = "kibu-networking-api" }
+kibu-config-api = { module = "work.lclpnet.mods.kibu:kibu-config-api", version.ref = "kibu-config-api" }
+kibu-scheduler-api = { module = "work.lclpnet.mods.kibu:kibu-scheduler-api", version.ref = "kibu-scheduler-api" }
+permission-api = { module = "me.lucko:fabric-permissions-api", version.ref = "permission-api" }
+cloth-config = { module = "me.shedaniel.cloth:cloth-config-fabric", version.ref = "cloth-config" }
+modmenu = { module = "com.terraformersmc:modmenu", version.ref = "modmenu" }
+night-config-core = { module = "com.electronwill.night-config:core", version.ref = "night-config" }
+night-config-toml = { module = "com.electronwill.night-config:toml", version.ref = "night-config" }
+json = { module = "org.json:json", version.ref = "json" }
