@@ -218,11 +218,11 @@ public class DynamicItemHandler {
     }
 
     private <T> boolean componentChanged(DataComponentType<T> type, ItemStack stack) {
-        return componentChanged(type, stack, t -> true);
+        return componentChanged(type, stack, _ -> true);
     }
 
     private <T> boolean componentChanged(DataComponentType<T> type, ItemStack stack, Predicate<T> predicate) {
-        var component = stack.getComponentsPatch().get(stack, type);
+        var component = stack.getComponentsPatch().get(EmptyDataComponentGetter.getInstance(), type);
 
         return component != null && predicate.test(component);
     }
