@@ -23,10 +23,10 @@ import java.util.function.Consumer;
 public class ItemAttributeModifiers$Display$DefaultMixin {
 
     // combatControl$addModifierTooltip is originally taken from GoldenAgeCombat
-    @ModifyVariable(method = "apply", at = @At("LOAD"), ordinal = 0)
-    private boolean combatControl$addModifierTooltip(boolean baseId) {
+    @ModifyVariable(method = "apply", at = @At("LOAD"), name = "displayWithBase")
+    private boolean combatControl$addModifierTooltip(boolean displayWithBase) {
         // block the green tooltip formatting style for legacy type
-        return baseId && !CombatControlClient.get().config().isOldAttributeStyle();
+        return displayWithBase && !CombatControlClient.get().config().isOldAttributeStyle();
     }
 
     @WrapOperation(
@@ -38,15 +38,15 @@ public class ItemAttributeModifiers$Display$DefaultMixin {
             )
     )
     private double combatControl$addSharpnessDamage(Player instance, Holder<?> registryEntry, Operation<Double> original,
-                                                    @Local(argsOnly = true) Consumer<Component> textConsumer) {
+                                                    @Local(argsOnly = true, name = "consumer") Consumer<Component> consumer) {
 
         double base = original.call(instance, registryEntry);
 
-        if (!(textConsumer instanceof ItemStackTextConsumer consumer)) {
+        if (!(consumer instanceof ItemStackTextConsumer stackConsumer)) {
             return base;
         }
 
-        ItemStack stack = consumer.stack();
+        ItemStack stack = stackConsumer.stack();
 
         var component = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
         var sharpness = component.entrySet()

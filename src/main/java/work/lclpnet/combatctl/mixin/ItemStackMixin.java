@@ -23,14 +23,14 @@ public class ItemStackMixin {
                     target = "Lnet/minecraft/world/item/Item;use(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
             )
     )
-    private InteractionResult combatControl$prioritizeOffHandBlocking(Item instance, Level world, Player user, InteractionHand hand, Operation<InteractionResult> original) {
+    private InteractionResult combatControl$prioritizeOffHandBlocking(Item instance, Level level, Player player, InteractionHand hand, Operation<InteractionResult> original) {
         ItemStack self = (ItemStack) (Object) this;
 
         // if the player blocks with a combat-control-handled sword the main hand, give priority to the off-hand item if it can block
         if (hand == InteractionHand.OFF_HAND
-                || user.getOffhandItem().getOrDefault(DataComponents.BLOCKS_ATTACKS, null) == null
+                || !player.getOffhandItem().has(DataComponents.BLOCKS_ATTACKS)
                 || DynamicItemHandler.getInstance().unhandled(self, DynamicItemHandler.Property.SWORD_BLOCKING)) {
-            return original.call(instance, world, user, hand);
+            return original.call(instance, level, player, hand);
         }
 
         return InteractionResult.PASS;

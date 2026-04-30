@@ -24,13 +24,14 @@ public class InventoryMixin {
                     "setItem"
             },
             at = @At("HEAD"),
-            argsOnly = true
+            argsOnly = true,
+            name = "itemStack"
     )
-    private ItemStack combatControl$modifyIncomingStack(ItemStack stack) {
+    private ItemStack combatControl$modifyIncomingStack(ItemStack itemStack) {
         if (player instanceof ServerPlayer serverPlayer) {
-            DynamicItemHandler.getInstance().adjustStackFor(stack, serverPlayer);
+            DynamicItemHandler.getInstance().adjustStackFor(itemStack, serverPlayer);
         }
 
-        return stack;
+        return itemStack;
     }
 }

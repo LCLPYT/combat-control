@@ -26,7 +26,7 @@ public class ItemSettingsMixin implements ToolInfoCapture {
             method = "sword",
             at = @At("HEAD")
     )
-    public void combatControl$captureSwordInfo(ToolMaterial material, float attackDamage, float attackSpeed, CallbackInfoReturnable<Item.Properties> cir) {
+    public void combatControl$captureSwordInfo(ToolMaterial material, float attackDamageBaseline, float attackSpeedBaseline, CallbackInfoReturnable<Item.Properties> cir) {
         toolInfo = new ToolInfo(ToolType.SWORD, material);
     }
 
@@ -34,7 +34,7 @@ public class ItemSettingsMixin implements ToolInfoCapture {
             method = "pickaxe",
             at = @At("HEAD")
     )
-    public void combatControl$capturePickaxeInfo(ToolMaterial material, float attackDamage, float attackSpeed, CallbackInfoReturnable<Item.Properties> cir) {
+    public void combatControl$capturePickaxeInfo(ToolMaterial material, float attackDamageBaseline, float attackSpeedBaseline, CallbackInfoReturnable<Item.Properties> cir) {
         toolInfo = new ToolInfo(ToolType.PICKAXE, material);
     }
 
@@ -42,7 +42,7 @@ public class ItemSettingsMixin implements ToolInfoCapture {
             method = "axe",
             at = @At("HEAD")
     )
-    public void combatControl$captureAxeInfo(ToolMaterial material, float attackDamage, float attackSpeed, CallbackInfoReturnable<Item.Properties> cir) {
+    public void combatControl$captureAxeInfo(ToolMaterial material, float attackDamageBaseline, float attackSpeedBaseline, CallbackInfoReturnable<Item.Properties> cir) {
         toolInfo = new ToolInfo(ToolType.AXE, material);
     }
 
@@ -50,7 +50,7 @@ public class ItemSettingsMixin implements ToolInfoCapture {
             method = "hoe",
             at = @At("HEAD")
     )
-    public void combatControl$captureHoeInfo(ToolMaterial material, float attackDamage, float attackSpeed, CallbackInfoReturnable<Item.Properties> cir) {
+    public void combatControl$captureHoeInfo(ToolMaterial material, float attackDamageBaseline, float attackSpeedBaseline, CallbackInfoReturnable<Item.Properties> cir) {
         toolInfo = new ToolInfo(ToolType.HOE, material);
     }
 
@@ -58,7 +58,7 @@ public class ItemSettingsMixin implements ToolInfoCapture {
             method = "shovel",
             at = @At("HEAD")
     )
-    public void combatControl$captureShovelInfo(ToolMaterial material, float attackDamage, float attackSpeed, CallbackInfoReturnable<Item.Properties> cir) {
+    public void combatControl$captureShovelInfo(ToolMaterial material, float attackDamageBaseline, float attackSpeedBaseline, CallbackInfoReturnable<Item.Properties> cir) {
         toolInfo = new ToolInfo(ToolType.SHOVEL, material);
     }
 }

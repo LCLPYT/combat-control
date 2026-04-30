@@ -20,12 +20,18 @@ public abstract class LivingEntityMixin {
                     target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(DDD)V"
             )
     )
-    private void combatControl$modifyVelocity(LivingEntity instance, double x, double y, double z, Operation<Void> original,
-                                              @Local(ordinal = 0) Vec3 velocity, @Local(ordinal = 1) Vec3 knockbackDir,
-                                              @Local(ordinal = 0, argsOnly = true) double strength) {
-
+    private void combatControl$modifyVelocity(
+            LivingEntity instance,
+            double x,
+            double y,
+            double z,
+            Operation<Void> original,
+            @Local(name = "deltaMovement") Vec3 deltaMovement,
+            @Local(name = "deltaVector") Vec3 deltaVector,
+            @Local(argsOnly = true, name = "power") double power
+    ) {
         if (!(instance instanceof ServerPlayer player)
-                || !KnockbackHandler.get(player.level().getServer()).applyKnockback(player, velocity, knockbackDir, strength)) {
+                || !KnockbackHandler.get(player.level().getServer()).applyKnockback(player, deltaMovement, deltaVector, power)) {
             original.call(instance, x, y, z);
         }
     }

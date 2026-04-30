@@ -23,7 +23,7 @@ public class CombatControlNetworking {
         protocolHandler = new ServerProtocolHandler(PROTOCOL, logger);
         protocolHandler.register();
 
-        PayloadTypeRegistry.playS2C().register(CombatAbilitiesS2CPacket.ID, CombatAbilitiesS2CPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(CombatAbilitiesS2CPacket.ID, CombatAbilitiesS2CPacket.CODEC);
     }
 
     public boolean understands(ServerPlayer player) {

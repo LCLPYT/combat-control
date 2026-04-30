@@ -222,9 +222,9 @@ public class DynamicItemHandler {
     }
 
     private <T> boolean componentChanged(DataComponentType<T> type, ItemStack stack, Predicate<T> predicate) {
-        var optComponent = stack.getComponentsPatch().get(type);
+        var component = stack.getComponentsPatch().get(stack, type);
 
-        return optComponent != null && optComponent.isPresent() && predicate.test(optComponent.get());
+        return component != null && predicate.test(component);
     }
 
     private boolean attackDamagedChanged(ItemAttributeModifiers component) {

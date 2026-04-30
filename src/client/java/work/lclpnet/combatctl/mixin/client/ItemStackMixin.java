@@ -42,11 +42,11 @@ public abstract class ItemStackMixin {
 
     // combatControl$wrapAppendAttributeModifiersTooltip is originally taken from GoldenAgeCombat
     @WrapMethod(method = "addAttributeTooltips")
-    private void combatControl$wrapAppendAttributeModifiersTooltip(Consumer<Component> textConsumer, TooltipDisplay displayComponent, @Nullable Player player, Operation<Void> original,
+    private void combatControl$wrapAppendAttributeModifiersTooltip(Consumer<Component> consumer, TooltipDisplay display, @Nullable Player player, Operation<Void> original,
                                                                    @Share("modifierSlots") LocalRef<Set<EquipmentSlotGroup>> ref) {
 
         if (!CombatControlClient.get().config().isOldAttributeStyle()) {
-            original.call(textConsumer, displayComponent, player);
+            original.call(consumer, display, player);
             return;
         }
 
@@ -57,7 +57,7 @@ public abstract class ItemStackMixin {
         // we replace the component consumer with our own list, so we can later perform actions on all attribute lines
         // without having to filter them from all tooltip lines
         var stack = (ItemStack) (Object) this;
-        original.call(new ItemStackTextConsumer(stack, tooltipLines::add), displayComponent, player);
+        original.call(new ItemStackTextConsumer(stack, tooltipLines::add), display, player);
 
         // this removes the equipment slot group lines when there are only attributes for a single group,
         // like attack damage and speed for the main hand
@@ -78,7 +78,7 @@ public abstract class ItemStackMixin {
             }
         }
 
-        tooltipLines.forEach(textConsumer);
+        tooltipLines.forEach(consumer);
     }
 
     // combatControl$appendAttributeModifiersTooltip is originally taken from GoldenAgeCombat
@@ -118,7 +118,7 @@ public abstract class ItemStackMixin {
             at = @At("HEAD")
     )
     private void combatControl$injectStackTextConsumer(Item.TooltipContext context, TooltipDisplay displayComponent, @Nullable Player player, TooltipFlag type, Consumer<Component> textConsumer, CallbackInfo ci,
-                                                       @Local(argsOnly = true) LocalRef<Consumer<Component>> textConsumerRef) {
+                                                       @Local(argsOnly = true, name = "builder") LocalRef<Consumer<Component>> textConsumerRef) {
 
         var stack = (ItemStack) (Object) this;
 

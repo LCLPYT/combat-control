@@ -273,27 +273,28 @@ public abstract class PlayerMixin extends LivingEntity {
                     value = "LOAD",
                     ordinal = 0
             ),
-            argsOnly = true
+            argsOnly = true,
+            name = "dmg"
     )
-    private float combatControl$modifySwordBlockingDamage(float amount, @Local(argsOnly = true) DamageSource source) {
+    private float combatControl$modifySwordBlockingDamage(float dmg, @Local(argsOnly = true, name = "source") DamageSource source) {
         Player self = (Player) (Object) this;
 
         if (!self.isUsingItem()) {
-            return amount;
+            return dmg;
         }
 
         ItemStack stack = self.getUseItem();
 
         if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()
                 || DynamicItemHandler.getInstance().unhandled(stack, DynamicItemHandler.Property.SWORD_BLOCKING)) {
-            return amount;
+            return dmg;
         }
 
         // damage reduction from 1.7.10
-        if (!source.is(DamageTypeTags.BYPASSES_ARMOR) && amount > 0.0F) {
-            return (1.0F + amount) * 0.5F;
+        if (!source.is(DamageTypeTags.BYPASSES_ARMOR) && dmg > 0.0F) {
+            return (1.0F + dmg) * 0.5F;
         }
 
-        return amount;
+        return dmg;
     }
 }

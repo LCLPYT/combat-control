@@ -16,6 +16,7 @@ import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.PermissionLevel;
 import org.jetbrains.annotations.Nullable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.api.CombatStyle;
@@ -78,11 +79,11 @@ public class CombatCommand {
 
     public void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(literal("combat")
-                .requires(require(permission("command.combat"), 2))
+                .requires(require(permission("command.combat"), PermissionLevel.GAMEMASTERS))
                 .then(thenEach(literal("set")
-                        .requires(require(permission("command.combat.set"), 2)), options, inst -> inst.option().argumentType()
+                        .requires(require(permission("command.combat.set"), PermissionLevel.GAMEMASTERS)), options, inst -> inst.option().argumentType()
                         .map(arg -> literal(inst.option().field().getName())
-                                .requires(require(permission("command.combat.set." + inst.option().field().getName()), 2))
+                                .requires(require(permission("command.combat.set." + inst.option().field().getName()), PermissionLevel.GAMEMASTERS))
                                 .then(thenIf(argument(VALUE_NAME, arg)
                                                 .suggests(inst.option().suggestions())
                                                 .executes(ctx -> setGlobalOpt(ctx, inst)),
@@ -90,15 +91,15 @@ public class CombatCommand {
                                         argument("targets", EntityArgument.players())
                                                 .executes(ctx -> setOpt(ctx, inst)))))))
                 .then(thenEach(literal("get")
-                        .requires(require(permission("command.combat.get"), 2)), options, inst -> Optional.of(thenIf(
+                        .requires(require(permission("command.combat.get"), PermissionLevel.GAMEMASTERS)), options, inst -> Optional.of(thenIf(
                         literal(inst.option().field().getName())
-                                .requires(require(permission("command.combat.get." + inst.option().field().getName()), 2))
+                                .requires(require(permission("command.combat.get." + inst.option().field().getName()), PermissionLevel.GAMEMASTERS))
                                 .executes(ctx -> getGlobalOpt(ctx, inst)),
                         inst.option().srcClass() == PlayerConfig.class,
                         argument("target", EntityArgument.player())
                                 .executes(ctx -> getOpt(ctx, inst))))))
                 .then(literal("style")
-                        .requires(require(permission("command.combat.style"), 2))
+                        .requires(require(permission("command.combat.style"), PermissionLevel.GAMEMASTERS))
                         .then(argument("style", IdentifierArgument.id())
                                 .suggests(CombatCommand::suggestStyles)
                                 .executes(this::applyGlobalStyle)
@@ -107,7 +108,7 @@ public class CombatCommand {
     }
 
     private int applyGlobalStyle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if (!Permissions.check(ctx.getSource(), permission("command.combat.style.global"), 2)) {
+        if (!Permissions.check(ctx.getSource(), permission("command.combat.style.global"), PermissionLevel.GAMEMASTERS)) {
             ctx.getSource().sendFailure(missingPermission);
             return 0;
         }
@@ -164,7 +165,7 @@ public class CombatCommand {
         ConfigOption opt = inst.option();
         String name = opt.field().getName();
 
-        if (!Permissions.check(ctx.getSource(), permission("command.combat.set.global." + name), 2)) {
+        if (!Permissions.check(ctx.getSource(), permission("command.combat.set.global." + name), PermissionLevel.GAMEMASTERS)) {
             ctx.getSource().sendFailure(missingPermission);
             return 0;
         }

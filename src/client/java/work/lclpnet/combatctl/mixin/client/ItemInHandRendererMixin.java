@@ -23,7 +23,7 @@ import work.lclpnet.combatctl.api.CombatControlClient;
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererMixin {
 
-    @Shadow protected abstract void applyItemArmAttackTransform(PoseStack matrices, HumanoidArm arm, float swingProgress);
+    @Shadow protected abstract void applyItemArmAttackTransform(PoseStack poseStack, HumanoidArm arm, float attackValue);
 
     @Shadow @Final private Minecraft minecraft;
 
@@ -35,14 +35,14 @@ public abstract class ItemInHandRendererMixin {
                     shift = At.Shift.AFTER
             )
     )
-    public void combatControl$onRenderFirstPersonItem(AbstractClientPlayer player, float tickProgress, float pitch, InteractionHand hand, float swingProgress, ItemStack stack, float equipProgress, PoseStack matrices, SubmitNodeCollector orderedRenderCommandQueue, int light, CallbackInfo ci) {
+    public void combatControl$onRenderFirstPersonItem(AbstractClientPlayer player, float frameInterp, float xRot, InteractionHand hand, float attack, ItemStack itemStack, float inverseArmHeight, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, CallbackInfo ci) {
         if (!CombatControlClient.get().abilities().renderArmSwingWhileUsing
-                || stack.isEmpty() || stack.is(Items.FILLED_MAP) || !player.isUsingItem()
+                || itemStack.isEmpty() || itemStack.is(Items.FILLED_MAP) || !player.isUsingItem()
                 || player.getUseItemRemainingTicks() <= 0 || player.getUsedItemHand() != hand)
             return;
 
         HumanoidArm arm = hand == InteractionHand.MAIN_HAND ? player.getMainArm() : player.getMainArm().getOpposite();
-        applyItemArmAttackTransform(matrices, arm, swingProgress);
+        applyItemArmAttackTransform(poseStack, arm, attack);
     }
 
     @WrapOperation(

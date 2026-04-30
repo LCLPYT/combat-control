@@ -27,7 +27,7 @@ public abstract class ProjectileMixin {
                     opcode = Opcodes.GETFIELD
             )
     )
-    private boolean combatControl$modifyLeftOwner(boolean leftOwner, @Local(argsOnly = true) Entity entity) {
+    private boolean combatControl$modifyLeftOwner(boolean leftOwner, @Local(argsOnly = true, name = "entity") Entity entity) {
         if (!(getOwner() instanceof ServerPlayer player) || leftOwner) return leftOwner;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);

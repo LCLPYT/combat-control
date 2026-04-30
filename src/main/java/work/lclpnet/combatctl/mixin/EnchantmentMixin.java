@@ -44,8 +44,8 @@ public class EnchantmentMixin {
     public List<ConditionalEffect<EnchantmentValueEffect>> combatControl$modifySharpnessEffect(
             Enchantment instance, DataComponentType<List<ConditionalEffect<EnchantmentValueEffect>>> type,
             Operation<List<ConditionalEffect<EnchantmentValueEffect>>> original,
-            @Local(argsOnly = true) ServerLevel world,
-            @Local(argsOnly = true) DamageSource damageSource
+            @Local(argsOnly = true, name = "serverLevel") ServerLevel serverLevel,
+            @Local(argsOnly = true, name = "damageSource") DamageSource damageSource
     ) {
         // filter for player user
         if (!(damageSource.getEntity() instanceof ServerPlayer player)) {
@@ -65,7 +65,7 @@ public class EnchantmentMixin {
         }
 
         // filter for sharpness enchantment
-        var registry = world.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        var registry = serverLevel.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         Enchantment self = (Enchantment) (Object) this;
 
         if (registry.getValue(Enchantments.SHARPNESS) != self) {

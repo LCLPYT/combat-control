@@ -26,8 +26,8 @@ public class ProjectileUtilMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private static void combatControl$overrideToleranceMargin(Entity entity, CallbackInfoReturnable<Float> cir) {
-        if (!(entity instanceof Projectile projectile) || !(projectile.getOwner() instanceof ServerPlayer player)) return;
+    private static void combatControl$overrideToleranceMargin(Entity source, CallbackInfoReturnable<Float> cir) {
+        if (!(source instanceof Projectile projectile) || !(projectile.getOwner() instanceof ServerPlayer player)) return;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
 
@@ -44,8 +44,8 @@ public class ProjectileUtilMixin {
                     target = "Lnet/minecraft/world/phys/AABB;clip(Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/phys/Vec3;)Ljava/util/Optional;"
             )
     )
-    private static Optional<Vec3> combatControl$overrideRaycast(AABB instance, Vec3 from, Vec3 to, Operation<Optional<Vec3>> original, @Local(argsOnly = true) Entity entity) {
-        if (!(entity instanceof Projectile projectile) || !(projectile.getOwner() instanceof ServerPlayer player)) {
+    private static Optional<Vec3> combatControl$overrideRaycast(AABB instance, Vec3 from, Vec3 to, Operation<Optional<Vec3>> original, @Local(argsOnly = true, name = "source") Entity source) {
+        if (!(source instanceof Projectile projectile) || !(projectile.getOwner() instanceof ServerPlayer player)) {
             return original.call(instance, from, to);
         }
 

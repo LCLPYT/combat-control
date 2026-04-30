@@ -19,8 +19,8 @@ public class ItemMixin implements ToolInfoCapture {
             method = "<init>",
             at = @At("TAIL")
     )
-    public void combatControl$initToolInfo(Item.Properties settings, CallbackInfo ci) {
-        toolInfo = ((ToolInfoCapture) settings).combatControl$getToolInfo();
+    public void combatControl$initToolInfo(Item.Properties properties, CallbackInfo ci) {
+        toolInfo = ((ToolInfoCapture) properties).combatControl$getToolInfo();
     }
 
     @Override

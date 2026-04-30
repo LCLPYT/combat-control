@@ -26,17 +26,17 @@ public class FishingRodItemMixin {
                     target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/Entity;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
             )
     )
-    public void combatControl$onPlaySound(Level instance, Entity source, double x, double y, double z, SoundEvent sound, SoundSource category, float volume, float pitch, Operation<Void> original, @Local(argsOnly = true) Player user) {
+    public void combatControl$onPlaySound(Level instance, Entity except, double x, double y, double z, SoundEvent sound, SoundSource source, float volume, float pitch, Operation<Void> original, @Local(argsOnly = true, name = "player") Player player) {
 
-        if (instance.isClientSide() || !(user instanceof ServerPlayer player)) {
-            original.call(instance, source, x, y, z, sound, category, volume, pitch);
+        if (instance.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) {
+            original.call(instance, except, x, y, z, sound, source, volume, pitch);
             return;
         }
 
-        PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
+        PlayerConfig config = CombatControl.get(serverPlayer.level().getServer()).playerConfig(serverPlayer);
 
         if (config.isModernFishingRodSounds()) {
-            original.call(instance, source, x, y, z, sound, category, volume, pitch);
+            original.call(instance, except, x, y, z, sound, source, volume, pitch);
             return;
         }
 
@@ -44,8 +44,8 @@ public class FishingRodItemMixin {
         if (sound != SoundEvents.FISHING_BOBBER_THROW) return;
 
         // play low-pitched bow sound, as in the old version
-        pitch = 0.4f / (player.getRandom().nextFloat() * 0.4F + 0.8F);
+        pitch = 0.4f / (serverPlayer.getRandom().nextFloat() * 0.4F + 0.8F);
 
-        instance.playSound(null, x, y, z, SoundEvents.ARROW_SHOOT, category, 0.5f, pitch);
+        instance.playSound(null, x, y, z, SoundEvents.ARROW_SHOOT, source, 0.5f, pitch);
     }
 }

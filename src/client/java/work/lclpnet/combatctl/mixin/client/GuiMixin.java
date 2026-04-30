@@ -4,7 +4,7 @@ import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -29,10 +29,10 @@ public abstract class GuiMixin {
     private static AttackIndicatorStatus attackIndicator = null;
 
     @Inject(
-            method = "renderCrosshair",
+            method = "extractCrosshair",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderCrossHair(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    public void combatControl$beforeRenderCrossHair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
@@ -44,10 +44,10 @@ public abstract class GuiMixin {
     }
 
     @Inject(
-            method = "renderCrosshair",
+            method = "extractCrosshair",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderCrossHair(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    public void combatControl$afterRenderCrossHair(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             minecraft.options.attackIndicator().set(attackIndicator);
@@ -56,10 +56,10 @@ public abstract class GuiMixin {
     }
 
     @Inject(
-            method = "renderItemHotbar",
+            method = "extractItemHotbar",
             at = @At("HEAD")
     )
-    public void combatControl$beforeRenderHotBar(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    public void combatControl$beforeRenderHotBar(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (combatAbilities.attackCooldown) return;
 
         // functionality from GoldenAgeCombat
@@ -71,10 +71,10 @@ public abstract class GuiMixin {
     }
 
     @Inject(
-            method = "renderItemHotbar",
+            method = "extractItemHotbar",
             at = @At("TAIL")
     )
-    public void combatControl$afterRenderHotBar(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+    public void combatControl$afterRenderHotBar(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         // functionality from GoldenAgeCombat
         if (attackIndicator != null) {
             minecraft.options.attackIndicator().set(attackIndicator);
@@ -84,16 +84,16 @@ public abstract class GuiMixin {
 
     // combatControl$modifyRegeneratingHeartIndex is taken from GoldenAgeCombat
     @ModifyVariable(
-            method = "renderHearts",
+            method = "extractHearts",
             at = @At("HEAD"),
-            ordinal = 5,
-            argsOnly = true
+            argsOnly = true,
+            name = "oldHealth"
     )
-    private int combatControl$modifyRegeneratingHeartIndex(int regeneratingHeartIndex) {
+    private int combatControl$modifyRegeneratingHeartIndex(int oldHealth) {
         if (CombatControlClient.get().config().isNoFlashingHearts()) {
             return 0;
         }
 
-        return regeneratingHeartIndex;
+        return oldHealth;
     }
 }
