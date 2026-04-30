@@ -33,7 +33,7 @@ public class GameRendererMixin {
 
         if (this.minecraft.getCameraEntity() instanceof AbstractClientPlayer player) {
             var cccPlayer = (CombatControlClientPlayer) player;
-            float tickDelta = 1f;  // TODO where to get
+            float tickDelta = this.minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(true);
             float rot = Mth.lerp(tickDelta, cccPlayer.combatControl$getPrevCameraPitch(), cccPlayer.combatControl$getCameraPitch());
             poseStack.mulPose(Axis.XP.rotationDegrees(rot));
         }

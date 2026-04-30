@@ -26,7 +26,7 @@ public abstract class GuiMixin {
     private final CombatAbilities combatAbilities = CombatControlClient.get().abilities();
     @Unique
     @Nullable
-    private static AttackIndicatorStatus attackIndicator = null;
+    private AttackIndicatorStatus attackIndicator = null;
 
     @Inject(
             method = "extractCrosshair",
