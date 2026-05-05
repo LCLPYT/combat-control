@@ -88,7 +88,7 @@ dependencies {
     includeImpl(libs.kibu.scheduler.api)
     includeImpl(libs.permission.api)
 
-    def clothConfig = compileOnlyApi(libs.cloth.config) {
+    clientCompileOnly(libs.cloth.config) {
         exclude(group: libs.fabric.api.get().group)
     }
 

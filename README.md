@@ -77,7 +77,7 @@ All features showcased here can be toggled individually in the mod settings.
 
 ## Requirements
 - [Fabric API](https://modrinth.com/mod/fabric-api)
-- [Cloth Config](https://modrinth.com/mod/cloth-config) (client only)
+- [Cloth Config](https://modrinth.com/mod/cloth-config) (client only, to access the config screen)
 - [Mod Menu](https://modrinth.com/mod/modmenu) (client only, to access the config screen)
 
 ## Commands
