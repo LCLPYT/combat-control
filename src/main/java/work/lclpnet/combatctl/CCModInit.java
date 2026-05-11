@@ -35,7 +35,7 @@ public class CCModInit implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		var configManager = loadConfig();
+		var configManager = loadConfig();  // closed in either CCServerInit or CCClientMod
 		_configManager = configManager;
 		StaticCombatControl.get().bind(configManager);
 
