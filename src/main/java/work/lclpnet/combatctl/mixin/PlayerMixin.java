@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.config.PlayerConfig;
+import work.lclpnet.combatctl.hook.SwordBlockDamageCallback;
 import work.lclpnet.combatctl.impl.DynamicItemHandler;
 import work.lclpnet.combatctl.type.ToolInfo;
 
@@ -47,7 +48,7 @@ public abstract class PlayerMixin extends LivingEntity {
             at = @At("HEAD"),
             cancellable = true
     )
-    public void combatControl$getAttackCooldownProgress(float baseTime, CallbackInfoReturnable<Float> cir) {
+    public void combatControl$getAttackCooldownProgress(float a, CallbackInfoReturnable<Float> cir) {
         if (!((Object) this instanceof ServerPlayer player)) return;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
@@ -65,7 +66,7 @@ public abstract class PlayerMixin extends LivingEntity {
                     target = "Lnet/minecraft/world/entity/player/Player;playServerSideSound(Lnet/minecraft/sounds/SoundEvent;)V"
             )
     )
-    public boolean combatControl$playCombatSoundsIfEnabled(Player instance, SoundEvent soundEvent) {
+    public boolean combatControl$playCombatSoundsIfEnabled(Player instance, SoundEvent sound) {
         if (!((Object) this instanceof ServerPlayer player)) return true;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
@@ -81,7 +82,7 @@ public abstract class PlayerMixin extends LivingEntity {
                     target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/Entity;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;)V"
             )
     )
-    public boolean combatControl$playDeflectSoundIfEnabled(Level instance, Entity entity, double d, double e, double f, SoundEvent soundEvent, SoundSource soundSource) {
+    public boolean combatControl$playDeflectSoundIfEnabled(Level instance, Entity except, double x, double y, double z, SoundEvent sound, SoundSource source) {
         if (!((Object) this instanceof ServerPlayer player)) return true;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
@@ -97,7 +98,7 @@ public abstract class PlayerMixin extends LivingEntity {
                     target = "Lnet/minecraft/world/entity/player/Player;playServerSideSound(Lnet/minecraft/sounds/SoundEvent;)V"
             )
     )
-    public boolean combatControl$playSweepAttackSound(Player instance, SoundEvent soundEvent) {
+    public boolean combatControl$playSweepAttackSound(Player instance, SoundEvent sound) {
         if (!((Object) this instanceof ServerPlayer player)) return true;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
@@ -118,15 +119,15 @@ public abstract class PlayerMixin extends LivingEntity {
                     target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"
             )
     )
-    public int combatControl$spawnCombatParticlesIfEnabled(ServerLevel instance, ParticleOptions particle, double x, double y, double z, int count, double deltaX, double deltaY, double deltaZ, double speed, Operation<Integer> original) {
+    public int combatControl$spawnCombatParticlesIfEnabled(ServerLevel instance, ParticleOptions particle, double x, double y, double z, int count, double xDist, double yDist, double zDist, double speed, Operation<Integer> original) {
         if (particle != ParticleTypes.DAMAGE_INDICATOR || !((Object) this instanceof ServerPlayer player)) {
-            return original.call(instance, particle, x, y, z, count, deltaX, deltaY, deltaZ, speed);
+            return original.call(instance, particle, x, y, z, count, xDist, yDist, zDist, speed);
         }
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
 
         if (config.isModernHitParticle()) {
-            return original.call(instance, particle, x, y, z, count, deltaX, deltaY, deltaZ, speed);
+            return original.call(instance, particle, x, y, z, count, xDist, yDist, zDist, speed);
         }
 
         return 0;
@@ -163,8 +164,8 @@ public abstract class PlayerMixin extends LivingEntity {
                     target = "Lnet/minecraft/world/entity/player/Player;isSweepAttack(ZZZ)Z"
             )
     )
-    public boolean combatControl$modifyIsSweepAttack(Player instance, boolean bl, boolean bl2, boolean bl3, Operation<Boolean> original) {
-        boolean originalValue = original.call(instance, bl, bl2, bl3);
+    public boolean combatControl$modifyIsSweepAttack(Player instance, boolean fullStrengthAttack, boolean criticalAttack, boolean knockbackAttack, Operation<Boolean> original) {
+        boolean originalValue = original.call(instance, fullStrengthAttack, criticalAttack, knockbackAttack);
 
         if (!originalValue) {
             return false;
@@ -199,7 +200,7 @@ public abstract class PlayerMixin extends LivingEntity {
             ),
             cancellable = true
     )
-    public void combatControl$onWeakDamage(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> callback) {
+    public void combatControl$onWeakDamage(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Boolean> callback) {
         if (!((Object) this instanceof ServerPlayer player)) return;
 
         PlayerConfig config = CombatControl.get(player.level().getServer()).playerConfig(player);
@@ -208,8 +209,8 @@ public abstract class PlayerMixin extends LivingEntity {
         if (config.isNoWeakAttackKnockBack()
             && (config.isNoFishingRodKnockBack() || !(source.getDirectEntity() instanceof FishingHook))) return;
 
-        if (Math.abs(amount) < 1e-9f && level().getDifficulty() != Difficulty.PEACEFUL) {
-            callback.setReturnValue(super.hurtServer(world, source, amount));
+        if (Math.abs(damage) < 1e-9f && level().getDifficulty() != Difficulty.PEACEFUL) {
+            callback.setReturnValue(super.hurtServer(level, source, damage));
         }
     }
 
@@ -279,20 +280,26 @@ public abstract class PlayerMixin extends LivingEntity {
     private float combatControl$modifySwordBlockingDamage(float dmg, @Local(argsOnly = true, name = "source") DamageSource source) {
         Player self = (Player) (Object) this;
 
+        if (!(self instanceof ServerPlayer player)) {
+            return dmg;
+        }
+
         if (!self.isUsingItem()) {
             return dmg;
         }
 
-        ItemStack stack = self.getUseItem();
+        ItemStack stack = player.getUseItem();
 
         if (stack == null || ToolInfo.of(stack).filter(ToolInfo::isSword).isEmpty()
                 || DynamicItemHandler.getInstance().unhandled(stack, DynamicItemHandler.Property.SWORD_BLOCKING)) {
             return dmg;
         }
 
-        // damage reduction from 1.7.10
         if (!source.is(DamageTypeTags.BYPASSES_ARMOR) && dmg > 0.0F) {
-            return (1.0F + dmg) * 0.5F;
+            // damage reduction from 1.7.10
+            float damage = (1.0F + dmg) * 0.5F;
+
+            return SwordBlockDamageCallback.HOOK.invoker().calculateDamage(player, source, dmg, damage, stack);
         }
 
         return dmg;
