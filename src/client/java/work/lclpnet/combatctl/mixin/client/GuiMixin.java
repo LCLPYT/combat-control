@@ -3,8 +3,8 @@ package work.lclpnet.combatctl.mixin.client;
 import net.minecraft.client.AttackIndicatorStatus;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import work.lclpnet.combatctl.api.CombatControlClient;
 import work.lclpnet.combatctl.network.CombatAbilities;
 
-@Mixin(Gui.class)
+@Mixin(Hud.class)
 public abstract class GuiMixin {
 
     @Shadow @Final private Minecraft minecraft;

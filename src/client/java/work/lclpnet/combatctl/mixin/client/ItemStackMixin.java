@@ -69,7 +69,7 @@ public abstract class ItemStackMixin {
                 }
 
                 TextColor color = component.getStyle().getColor();
-                return color != null && color.serialize().equals(ChatFormatting.GRAY.getName());
+                return color != null && color.equals(TextColor.fromLegacyFormat(ChatFormatting.GRAY));
             });
 
             // add back one single empty line above all attributes

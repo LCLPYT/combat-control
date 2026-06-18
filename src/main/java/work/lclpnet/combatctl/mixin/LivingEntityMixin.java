@@ -14,7 +14,7 @@ import work.lclpnet.combatctl.impl.KnockbackHandler;
 public abstract class LivingEntityMixin {
 
     @WrapOperation(
-            method = "knockback",
+            method = "knockback(DDDLnet/minecraft/world/damagesource/DamageSource;FZ)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(DDD)V"

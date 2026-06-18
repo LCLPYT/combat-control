@@ -28,7 +28,7 @@ public abstract class ItemInHandRendererMixin {
     @Shadow @Final private Minecraft minecraft;
 
     @Inject(
-            method = "renderArmWithItem",
+            method = "submitArmWithItem",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/ItemInHandRenderer;applyItemArmTransform(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/entity/HumanoidArm;F)V",
