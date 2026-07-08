@@ -2,6 +2,7 @@ package work.lclpnet.combatctl.network;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import work.lclpnet.combatctl.config.GlobalConfig;
 import work.lclpnet.combatctl.config.PlayerConfig;
 
 /**
@@ -25,6 +26,8 @@ public class CombatAbilities {
     public boolean disableOldBobbing;
     /** Whether to use the new sharpness bonus damage formula or the classic one. */
     public boolean modernSharpness;
+    /** Whether the server enables larger hitboxes or not. */
+    public boolean largerHitboxes;
 
     public CombatAbilities() {
         attackCooldown = true;
@@ -33,6 +36,7 @@ public class CombatAbilities {
         noReequipWhenUsing = false;
         disableOldBobbing = false;
         modernSharpness = true;
+        largerHitboxes = false;
     }
 
     public CombatAbilities(FriendlyByteBuf buf) {
@@ -42,6 +46,7 @@ public class CombatAbilities {
         noReequipWhenUsing = buf.readBoolean();
         disableOldBobbing = buf.readBoolean();
         modernSharpness = buf.readBoolean();
+        largerHitboxes = buf.readBoolean();
     }
 
     public void write(FriendlyByteBuf buf) {
@@ -51,6 +56,7 @@ public class CombatAbilities {
         buf.writeBoolean(noReequipWhenUsing);
         buf.writeBoolean(disableOldBobbing);
         buf.writeBoolean(modernSharpness);
+        buf.writeBoolean(largerHitboxes);
     }
 
     public void copy(CombatAbilities abilities) {
@@ -60,15 +66,18 @@ public class CombatAbilities {
         this.noReequipWhenUsing = abilities.noReequipWhenUsing;
         this.disableOldBobbing = abilities.disableOldBobbing;
         this.modernSharpness = abilities.modernSharpness;
+        this.largerHitboxes = abilities.largerHitboxes;
     }
 
     /**
-     * Updates the abilities depending on a given {@link PlayerConfig}.
+     * Updates the abilities depending on a given {@link PlayerConfig} and {@link GlobalConfig}.
      * The caller of this method should send an update packet to the associated client, if this method returns true.
+     *
      * @param config The player config.
+     * @param globalConfig The global config.
      * @return True, if there were any changes to the abilities and if they should be sent to the client.
      */
-    public boolean syncFrom(PlayerConfig config) {
+    public boolean syncFrom(PlayerConfig config, GlobalConfig globalConfig) {
         boolean changed = false;
 
         boolean b = config.isAttackCooldown();
@@ -110,6 +119,13 @@ public class CombatAbilities {
 
         if (b != modernSharpness) {
             modernSharpness = b;
+            changed = true;
+        }
+
+        b = globalConfig.isLargerHitboxes();
+
+        if (b != largerHitboxes) {
+            largerHitboxes = b;
             changed = true;
         }
 

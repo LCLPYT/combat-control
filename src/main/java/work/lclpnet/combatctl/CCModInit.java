@@ -15,12 +15,10 @@ import work.lclpnet.combatctl.api.CombatControl;
 import work.lclpnet.combatctl.cmd.CombatCommand;
 import work.lclpnet.combatctl.cmd.ModTranslations;
 import work.lclpnet.combatctl.config.CombatControlConfig;
-import work.lclpnet.combatctl.impl.CombatControlImpl;
-import work.lclpnet.combatctl.impl.CreativeInventoryHandler;
-import work.lclpnet.combatctl.impl.PingHandler;
-import work.lclpnet.combatctl.impl.StaticCombatControl;
+import work.lclpnet.combatctl.impl.*;
 import work.lclpnet.combatctl.network.CombatControlNetworking;
 import work.lclpnet.combatctl.type.CombatControlServer;
+import work.lclpnet.combatctl.type.StaticCombatControlContext;
 import work.lclpnet.kibu.config.ConfigManager;
 
 import java.nio.file.Path;
@@ -37,7 +35,8 @@ public class CCModInit implements ModInitializer {
 	public void onInitialize() {
 		var configManager = loadConfig();  // closed in either CCServerInit or CCClientMod
 		_configManager = configManager;
-		StaticCombatControl.get().bind(configManager);
+
+		StaticCombatControl.get().bind(new GlobalConfigContext(configManager.config()));
 
 		var translations = new ModTranslations(LOGGER);
 		translations.load().join();

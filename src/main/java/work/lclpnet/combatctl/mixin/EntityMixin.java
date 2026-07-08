@@ -1,6 +1,7 @@
 package work.lclpnet.combatctl.mixin;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.BlockAttachedEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,7 +17,12 @@ public class EntityMixin {
             cancellable = true
     )
     public void combatControl$modifyTargetingMargin(CallbackInfoReturnable<Float> cir) {
-        if (!StaticCombatControl.get().globalConfig().isLargerHitboxes()) return;
+        Entity self = (Entity) (Object) this;
+
+        // don't grow hitboxes of item frames, paintings etc.
+        if (self instanceof BlockAttachedEntity) return;
+
+        if (!StaticCombatControl.get().getContext().globalConfig().isLargerHitboxes()) return;
 
         cir.setReturnValue(0.1f);
     }

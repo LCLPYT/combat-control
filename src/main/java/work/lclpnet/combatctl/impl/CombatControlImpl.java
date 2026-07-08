@@ -167,9 +167,10 @@ public class CombatControlImpl implements CombatControl {
 
     private void updateModdedPlayer(ServerPlayer player) {
         PlayerConfig config = playerConfig(player);
+        GlobalConfig globalConfig = globalConfig();
         CombatAbilities abilities = getAbilities(player);
 
-        if (abilities.syncFrom(config)) {
+        if (abilities.syncFrom(config, globalConfig)) {
             var packet = new CombatAbilitiesS2CPacket(abilities);
             ServerPlayNetworking.send(player, packet);
         }
