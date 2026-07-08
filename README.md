@@ -45,9 +45,9 @@ The mod is **only required on the server**, but having the mod installed on your
 - use classic snowball particle on impact
 
 > [!CAUTION]
-> This mod should not be installed while playing on public server that don't allow it.
+> This mod should not be installed while playing on public servers that don't allow it.
 > While this mod does its best to disable all combat-related features when the server doesn't have the mod, it isn't guaranteed that it behaves exactly like vanilla.
-> On some servers with AntiCheat measures, this could even get you banned...
+> On some servers with anti-cheat measures, this could even get you banned...
 
 ## Showcase
 All features showcased here can be toggled individually in the mod settings.
