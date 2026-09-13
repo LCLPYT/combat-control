@@ -77,7 +77,7 @@ public class DynamicItemHandler {
         ToolInfo info = ToolInfo.of(stack).orElse(null);
 
         if (info != null) {
-            adjustAttackDamage(config, info, stack);
+            adjustToolAttackDamage(config, info, stack);
 
             if (info.isSword()) {
                 adjustBlocking(config, stack);
@@ -86,10 +86,67 @@ public class DynamicItemHandler {
                 adjustToolDurabilityDamage(config, stack);
             }
         }
+        
+        if (stack.is(Items.TRIDENT)) {
+            adjustTridentAttackDamage(config, stack);
+        }
 
         if (stack.is(Items.ENCHANTED_GOLDEN_APPLE)) {
             adjustNotchApple(config, stack);
         }
+    }
+
+    private void adjustTridentAttackDamage(PlayerConfig config, ItemStack stack) {
+        if (config.isModernDamageValues()) {
+            resetOriginalAttackDamage(stack);
+            return;
+        }
+
+        setClassicAttackDamage(stack, 5.0);
+    }
+
+    private void adjustToolAttackDamage(PlayerConfig config, ToolInfo info, ItemStack stack) {
+        if (config.isModernDamageValues()) {
+            resetOriginalAttackDamage(stack);
+            return;
+        }
+
+        double newValue = ATTACK_DAMAGE_BONUS_OVERRIDES.getOrDefault(info.type(), Double.NaN);
+
+        if (Double.isNaN(newValue)) return;
+
+        if (info.type() != ToolType.HOE) {
+            newValue += info.material().attackDamageBonus();
+        }
+
+        setClassicAttackDamage(stack, newValue);
+    }
+
+    private void setClassicAttackDamage(ItemStack stack, double newValue) {
+        if (!unhandled(stack, Property.ATTACK_DAMAGE)) return;
+
+        // don't touch attack damage that was modified by something else
+        if (componentChanged(ATTRIBUTE_MODIFIERS, stack, this::attackDamagedChanged)) return;
+
+        var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+
+        Optional<Double> originalDamage = component.modifiers().stream()
+                .filter(entry -> entry.matches(ATTACK_DAMAGE, BASE_ATTACK_DAMAGE_ID))
+                .findAny()
+                .map(ItemAttributeModifiers.Entry::modifier)
+                .map(AttributeModifier::amount);
+
+        stack.set(ATTRIBUTE_MODIFIERS, withBaseAttackDamage(component, Optional.of(newValue)));
+        editState(stack, state -> state.withHandled(Property.ATTACK_DAMAGE).withOriginalDamage(originalDamage));
+    }
+
+    private void resetOriginalAttackDamage(ItemStack stack) {
+        if (unhandled(stack, Property.ATTACK_DAMAGE)) return;
+
+        var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+
+        stack.set(ATTRIBUTE_MODIFIERS, withBaseAttackDamage(component, getState(stack).originalDamage()));
+        editState(stack, state -> state.withoutHandled(Property.ATTACK_DAMAGE).withOriginalDamage(Optional.empty()));
     }
 
     private void adjustBlocking(PlayerConfig config, ItemStack stack) {
@@ -112,41 +169,6 @@ public class DynamicItemHandler {
 
             stack.remove(BLOCKS_ATTACKS);
             unsetHandled(stack, Property.SWORD_BLOCKING);
-        }
-    }
-
-    private void adjustAttackDamage(PlayerConfig config, ToolInfo info, ItemStack stack) {
-        if (!config.isModernDamageValues()) {
-            if (!unhandled(stack, Property.ATTACK_DAMAGE)) return;
-
-            // don't touch attack damage that was modified by something else
-            if (componentChanged(ATTRIBUTE_MODIFIERS, stack, this::attackDamagedChanged)) return;
-
-            double newValue = ATTACK_DAMAGE_BONUS_OVERRIDES.getOrDefault(info.type(), Double.NaN);
-
-            if (Double.isNaN(newValue)) return;
-
-            if (info.type() != ToolType.HOE) {
-                newValue += info.material().attackDamageBonus();
-            }
-
-            var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-
-            Optional<Double> originalDamage = component.modifiers().stream()
-                    .filter(entry -> entry.matches(ATTACK_DAMAGE, BASE_ATTACK_DAMAGE_ID))
-                    .findAny()
-                    .map(ItemAttributeModifiers.Entry::modifier)
-                    .map(AttributeModifier::amount);
-
-            stack.set(ATTRIBUTE_MODIFIERS, withBaseAttackDamage(component, Optional.of(newValue)));
-            editState(stack, state -> state.withHandled(Property.ATTACK_DAMAGE).withOriginalDamage(originalDamage));
-        } else {
-            if (unhandled(stack, Property.ATTACK_DAMAGE)) return;
-
-            var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-
-            stack.set(ATTRIBUTE_MODIFIERS, withBaseAttackDamage(component, getState(stack).originalDamage()));
-            editState(stack, state -> state.withoutHandled(Property.ATTACK_DAMAGE).withOriginalDamage(Optional.empty()));
         }
     }
 
