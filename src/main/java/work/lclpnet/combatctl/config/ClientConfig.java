@@ -32,4 +32,7 @@ public class ClientConfig {
 
     @SerdeComment("Use classic snowball particle")
     private boolean classicSnowballParticle = true;
+
+    @SerdeComment("Use third person sword blocking animation from 1.7.10")
+    private boolean classicBlockAnimation = true;
 }

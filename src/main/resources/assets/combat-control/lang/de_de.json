@@ -93,5 +93,7 @@
   "combat-control.config.title.client.potionGlint": "Verzauberte Tränke",
   "combat-control.config.desc.client.potionGlint": "Fügt den Verzauberungseffekt auf Trank-Items wieder hinzu, wie in der 1.19.3 und davor.",
   "combat-control.config.title.client.classicSnowballParticle": "Klassische Schneeball-Partikel",
-  "combat-control.config.desc.client.classicSnowballParticle": "Nutzt die klassischen Partikel, wenn ein Schneeball einen Block trifft."
+  "combat-control.config.desc.client.classicSnowballParticle": "Nutzt die klassischen Partikel, wenn ein Schneeball einen Block trifft.",
+  "combat-control.config.title.client.classicBlockAnimation": "Klassische Blockieren-Animation",
+  "combat-control.config.desc.client.classicBlockAnimation": "Nutzt die klassische Schwert-Block-Animation aus der 1.7.10."
 }

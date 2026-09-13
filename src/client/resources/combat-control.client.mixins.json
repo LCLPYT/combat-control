@@ -9,9 +9,13 @@
     "CameraMixin",
     "GameRendererMixin",
     "GuiMixin",
+    "HumanoidModelMixin",
     "ItemAttributeModifiers$Display$DefaultMixin",
+    "ItemInHandLayerMixin",
     "ItemInHandRendererMixin",
     "ItemStackMixin",
+    "ItemStackRenderState$LayerRenderStateAccessor",
+    "ItemStackRenderStateAccessor",
     "MinecraftMixin",
     "PlayerMixin",
     "SnowballMixin"

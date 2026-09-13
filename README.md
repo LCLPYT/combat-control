@@ -150,9 +150,12 @@ If you have ModMenu installed on the client, you can also configure all features
 
 ## Acknowledgements
 This mod is heavily inspired by [Golden Age Combat](https://github.com/Fuzss/goldenagecombat) by Fuzss.
-Some methods are literally copied from it and remapped into yarn mappings.
+Some methods were just ported to yarn mappings in the past, but evolved independently since first introduction.
 Code in this project that is originally from Golden Age Combat is annotated with a comment or doc-comment.
-The MPL-2.0 license from Golden Age Combat is respected; this project uses the same license. 
+The MPL-2.0 license from Golden Age Combat is respected; this project uses the same license.
+
+The classic 1.7.10 blocking animation approach was partly ported from [sword-blocking-mechanics](https://github.com/Fuzss/sword-blocking-mechanics) by Fuzss, licensed also under the terms of the MPL-2.0.
+Logic originating from sword-blocking-mechanics is also properly annotated.
 
 The reason why this project exists as a separate mod, is to make the combat configurable for each player, alongside with some other adjustments.
 
