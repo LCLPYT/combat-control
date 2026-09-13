@@ -36,7 +36,8 @@ import static net.minecraft.world.item.Item.BASE_ATTACK_DAMAGE_ID;
 
 public class DynamicItemHandler {
 
-    private static final MapCodec<State> STATE_CODEC = State.CODEC.fieldOf(CCModInit.identifier("state").toString());
+    private static final String STATE_KEY = CCModInit.identifier("state").toString();
+    private static final MapCodec<State> STATE_CODEC = State.CODEC.fieldOf(STATE_KEY);
 
     private static final Map<ToolType, Double> ATTACK_DAMAGE_BONUS_OVERRIDES = ImmutableMap.of(
             ToolType.SWORD, 3.0,
@@ -116,6 +117,9 @@ public class DynamicItemHandler {
 
     private void adjustAttackDamage(PlayerConfig config, ToolInfo info, ItemStack stack) {
         if (!config.isModernDamageValues()) {
+            if (!unhandled(stack, Property.ATTACK_DAMAGE)) return;
+
+            // don't touch attack damage that was modified by something else
             if (componentChanged(ATTRIBUTE_MODIFIERS, stack, this::attackDamagedChanged)) return;
 
             double newValue = ATTACK_DAMAGE_BONUS_OVERRIDES.getOrDefault(info.type(), Double.NaN);
@@ -127,7 +131,6 @@ public class DynamicItemHandler {
             }
 
             var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-            var modifier = new AttributeModifier(BASE_ATTACK_DAMAGE_ID, newValue, ADD_VALUE);
 
             Optional<Double> originalDamage = component.modifiers().stream()
                     .filter(entry -> entry.matches(ATTACK_DAMAGE, BASE_ATTACK_DAMAGE_ID))
@@ -135,20 +138,52 @@ public class DynamicItemHandler {
                     .map(ItemAttributeModifiers.Entry::modifier)
                     .map(AttributeModifier::amount);
 
-            stack.set(ATTRIBUTE_MODIFIERS, component.withModifierAdded(ATTACK_DAMAGE, modifier, MAINHAND));
+            stack.set(ATTRIBUTE_MODIFIERS, withBaseAttackDamage(component, Optional.of(newValue)));
             editState(stack, state -> state.withHandled(Property.ATTACK_DAMAGE).withOriginalDamage(originalDamage));
         } else {
             if (unhandled(stack, Property.ATTACK_DAMAGE)) return;
 
-            getState(stack).originalDamage().ifPresent(originalDamage -> {
-                var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
-                var modifier = new AttributeModifier(BASE_ATTACK_DAMAGE_ID, originalDamage, ADD_VALUE);
+            var component = stack.getOrDefault(ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
 
-                stack.set(ATTRIBUTE_MODIFIERS, component.withModifierAdded(ATTACK_DAMAGE, modifier, MAINHAND));
-            });
-
-            unsetHandled(stack, Property.ATTACK_DAMAGE);
+            stack.set(ATTRIBUTE_MODIFIERS, withBaseAttackDamage(component, getState(stack).originalDamage()));
+            editState(stack, state -> state.withoutHandled(Property.ATTACK_DAMAGE).withOriginalDamage(Optional.empty()));
         }
+    }
+
+    /**
+     * Replaces the base attack damage modifier of an attribute modifiers component, keeping the order of the modifiers.
+     * Preserving the order is important, as components that equal the item default are removed from the component patch.
+     *
+     * @param component The component to modify.
+     * @param amount    The new base attack damage, or empty to remove the modifier.
+     * @return A modified copy of the given component.
+     */
+    private ItemAttributeModifiers withBaseAttackDamage(ItemAttributeModifiers component, Optional<Double> amount) {
+        List<ItemAttributeModifiers.Entry> entries = new ArrayList<>(component.modifiers().size() + 1);
+        boolean replaced = false;
+
+        for (var entry : component.modifiers()) {
+            if (!entry.matches(ATTACK_DAMAGE, BASE_ATTACK_DAMAGE_ID)) {
+                entries.add(entry);
+                continue;
+            }
+
+            replaced = true;
+
+            amount.ifPresent(value -> {
+                var modifier = new AttributeModifier(BASE_ATTACK_DAMAGE_ID, value, ADD_VALUE);
+                entries.add(new ItemAttributeModifiers.Entry(ATTACK_DAMAGE, modifier, entry.slot(), entry.display()));
+            });
+        }
+
+        if (!replaced) {
+            amount.ifPresent(value -> {
+                var modifier = new AttributeModifier(BASE_ATTACK_DAMAGE_ID, value, ADD_VALUE);
+                entries.add(new ItemAttributeModifiers.Entry(ATTACK_DAMAGE, modifier, MAINHAND));
+            });
+        }
+
+        return new ItemAttributeModifiers(List.copyOf(entries));
     }
 
     private void adjustSwordDurabilityDamage(PlayerConfig config, ItemStack stack) {
@@ -264,8 +299,15 @@ public class DynamicItemHandler {
 
     private void setState(ItemStack stack, State state) {
         CustomData customData = stack.getOrDefault(CUSTOM_DATA, CustomData.EMPTY);
+        CompoundTag tag = customData.copyTag();
 
-        STATE_CODEC.codec().encode(state, NbtOps.INSTANCE, customData.copyTag())
+        if (State.DEFAULT.equals(state)) {
+            tag.remove(STATE_KEY);
+            CustomData.set(CUSTOM_DATA, stack, tag);
+            return;
+        }
+
+        STATE_CODEC.codec().encode(state, NbtOps.INSTANCE, tag)
                 .resultOrPartial(error -> CCModInit.LOGGER.error("Failed to encode dynamic item state: {}", error))
                 .ifPresent(nbt -> CustomData.set(CUSTOM_DATA, stack, (CompoundTag) nbt));
     }
