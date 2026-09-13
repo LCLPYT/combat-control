@@ -43,6 +43,8 @@ The mod is **only required on the server**, but having the mod installed on your
 - revert the projectile tolerance margin to a constant 0.3 blocks (from before Minecraft 1.21.6)
 - allow projectile hits for entities that are intersecting with the owning player hitbox (changed in Minecraft 1.12.2)
 - use classic snowball particle on impact
+- decrease trident damage from 9 to 6 when using classic combat
+- use classic third person sword blocking animation from Minecraft 1.7.10 and earlier
 
 > [!CAUTION]
 > This mod should not be installed while playing on public servers that don't allow it.
@@ -55,6 +57,7 @@ All features showcased here can be toggled individually in the mod settings.
 - sword blocking
 
 ![Sword blocking](img/sword-blocking.jpg)
+![Classic third person animation](img/classic-third-person-sword-blocking.webp)
 
 - enchanted potions (the glint effect)
 
