@@ -57,26 +57,26 @@ public class ClassicBlockingRenderer {
         poseStack.translate((leftHand ? 1f : -1f) / 16f, 0.4375f, 0.0625f);
 
         poseStack.translate(leftHand ? -0.035f : 0.05f, leftHand ? 0.045f : 0f, leftHand ? -0.135f : -0.1f);
-        poseStack.mulPose(Axis.YP.rotationDegrees((leftHand ? -1f : 1f) * -50f));
-        poseStack.mulPose(Axis.XP.rotationDegrees(-10f));
-        poseStack.mulPose(Axis.ZP.rotationDegrees((leftHand ? -1f : 1f) * -60f));
+        poseStack.rotateDegrees(Axis.YP, (leftHand ? -1f : 1f) * -50f);
+        poseStack.rotateDegrees(Axis.XP, -10f);
+        poseStack.rotateDegrees(Axis.ZP, (leftHand ? -1f : 1f) * -60f);
 
         poseStack.translate(0f, 0.1875f, 0f);
         // 1.7.10 scaled the y-axis negatively, which is unsupported since 1.16, hence the flipped rotations
         poseStack.scale(0.625f, 0.625f, 0.625f);
-        poseStack.mulPose(Axis.XP.rotationDegrees(180f));
-        poseStack.mulPose(Axis.XN.rotationDegrees(-100f));
-        poseStack.mulPose(Axis.YN.rotationDegrees(leftHand ? 35f : 45f));
+        poseStack.rotateDegrees(Axis.XP, 180f);
+        poseStack.rotateDegrees(Axis.XN, -100f);
+        poseStack.rotateDegrees(Axis.YN, leftHand ? 35f : 45f);
 
         poseStack.translate(0f, -0.3f, 0f);
         poseStack.scale(1.5f, 1.5f, 1.5f);
-        poseStack.mulPose(Axis.YN.rotationDegrees(50f));
-        poseStack.mulPose(Axis.ZP.rotationDegrees(335f));
+        poseStack.rotateDegrees(Axis.YN, 50f);
+        poseStack.rotateDegrees(Axis.ZP, 335f);
         poseStack.translate(-0.9375f, -0.0625f, 0f);
 
         // move the modern centered item model onto the origin of the old flat item quad
         poseStack.translate(0.5f, 0.5f, 0.25f);
-        poseStack.mulPose(Axis.YN.rotationDegrees(180f));
+        poseStack.rotateDegrees(Axis.YN, 180f);
         poseStack.translate(0f, 0f, 0.28125f);
 
         var layer = ((ItemStackRenderStateAccessor) item).combatControl$firstLayer();
@@ -103,7 +103,7 @@ public class ClassicBlockingRenderer {
                 .conjugate();
 
         poseStack.scale(1f / transform.scale().x(), 1f / transform.scale().y(), 1f / transform.scale().z());
-        poseStack.mulPose(rotation);
+        poseStack.rotate(rotation);
         poseStack.translate((leftHand ? -1f : 1f) * -transform.translation().x(),
                 -transform.translation().y(), -transform.translation().z());
     }

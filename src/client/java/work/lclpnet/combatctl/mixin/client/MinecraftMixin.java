@@ -91,7 +91,7 @@ public class MinecraftMixin {
             return;
         }
 
-        this.player.swing(InteractionHand.MAIN_HAND);
+        this.player.swing(InteractionHand.MAIN_HAND, stack.getAttackAnimation(), false);
     }
 
     @ModifyExpressionValue(
